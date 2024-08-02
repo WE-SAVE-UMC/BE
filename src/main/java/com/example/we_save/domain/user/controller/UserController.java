@@ -18,7 +18,9 @@ public class UserController {
     @PostMapping
     public BaseResponseDto<UserResponseDto> registerUser() {
 
-        /** userService의 메서드인 save도 같은 타입(BaseResponseDto<UserResponseDto>)으로 반환 해야됨 */
+        /** userService의 메서드인 save도 같은 타입(BaseResponseDto<UserResponseDto>)으로 반환 해야됨
+         * save 메서드는 BaseResponseDto.onsuccess(DTO, Response.OK); 와 같은 형태로 반환 해주면 된다.
+         * */
         // return userService.save
 
         return null;
