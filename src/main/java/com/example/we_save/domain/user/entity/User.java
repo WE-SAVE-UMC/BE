@@ -1,4 +1,8 @@
 package com.example.we_save.domain.user.entity;
 
-public class User {
+import com.example.we_save.global.util.BaseEntity;
+import jakarta.persistence.Entity;
+
+@Entity
+public class User extends BaseEntity {
 }
