@@ -30,4 +30,9 @@ public enum ResponseCode {
                 .filter(Predicate.not(String::isBlank))
                 .orElse(this.getMessage());
     }
+
+    public String getMessage(Throwable e) {
+        // 결과 예시 - "Validation error - Reason why it isn't valid"
+        return this.getMessage(this.getMessage() + " - " + e.getMessage());
+    }
 }
