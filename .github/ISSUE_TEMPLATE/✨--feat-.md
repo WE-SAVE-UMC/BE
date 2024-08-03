@@ -1,18 +1,18 @@
 ---
-name: "✨ Feature "
+name: "✨ [FEAT]"
 about: Feature 작업 사항을 입력해주세요.
-title: ''
+title: "[FEAT]"
 labels: "✨feature"
 assignees: ''
 
 ---
 
-** Description **
+## Description 
 설명을 작성하세요
 
-** TODO **
+## TODO 
 - [ ] Add task
 - [ ] Add task
 
-** ETC **
+## ETC 
 기타 사항
