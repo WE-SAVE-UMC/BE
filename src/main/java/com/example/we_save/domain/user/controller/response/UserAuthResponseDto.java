@@ -1,0 +1,18 @@
+package com.example.we_save.domain.user.controller.response;
+
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+@Data
+public class UserAuthResponseDto {
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class JoinResultDTO{
+        Long userId;
+        LocalDateTime createAt;
+    }
+}
