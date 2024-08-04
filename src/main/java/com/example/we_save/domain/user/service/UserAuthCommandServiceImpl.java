@@ -26,4 +26,8 @@ public class UserAuthCommandServiceImpl implements UserAuthCommandService {
         return userRepository.save(newUser);
     }
 
+    @Override
+    public Boolean isValidPhoneNumber(String phoneNumber) {
+        return !userRepository.existsByPhoneNum(phoneNumber);
+    }
 }

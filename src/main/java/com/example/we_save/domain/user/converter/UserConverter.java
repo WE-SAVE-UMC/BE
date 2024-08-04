@@ -1,5 +1,6 @@
 package com.example.we_save.domain.user.converter;
 
+import com.example.we_save.apiPayload.ApiResponse;
 import com.example.we_save.domain.user.controller.request.UserAuthRequestDto;
 import com.example.we_save.domain.user.controller.response.UserAuthResponseDto;
 import com.example.we_save.domain.user.entity.NotificationSetting;
@@ -12,13 +13,18 @@ import java.time.LocalDateTime;
 
 public class UserConverter {
 
-    public static UserAuthResponseDto.JoinResultDTO toJoinResultDTO(User user) {
+    public static UserAuthResponseDto.JoinResultDTO toJoinResultDto(User user) {
         return UserAuthResponseDto.JoinResultDTO.builder()
                 .userId(user.getId())
                 .createAt(user.getCreatedAt())
                 .build();
     }
-
+    public static UserAuthResponseDto.ValidResultDto toValidResultDto(Boolean isValid,String message){
+        return UserAuthResponseDto.ValidResultDto.builder()
+                .isValid(isValid)
+                .message(message)
+                .build();
+    }
 
     public static User toUser(UserAuthRequestDto.JoinDto request, NotificationSetting notificationSetting, BCryptPasswordEncoder bCryptPasswordEncoder) {
 

@@ -11,10 +11,8 @@ import com.example.we_save.domain.user.service.UserAuthCommandService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,6 +26,23 @@ public class UserAuthController {
     public ApiResponse<UserAuthResponseDto.JoinResultDTO> join(@RequestBody @Valid UserAuthRequestDto.JoinDto request){
         NotificationSetting notificationSetting = notificationSettingCommandService.createNotificationSetting();
         User user= userAuthCommandService.joinUser(request,notificationSetting);
-        return ApiResponse.onPostSuccess(UserConverter.toJoinResultDTO(user));
+        return ApiResponse.onPostSuccess(UserConverter.toJoinResultDto(user));
+    }
+
+    @GetMapping("/api/auth/check-phone/{number}")
+    public ResponseEntity<ApiResponse<UserAuthResponseDto.ValidResultDto>>isValidPhoneNum(@PathVariable String number){
+        Boolean isValid = userAuthCommandService.isValidPhoneNumber(number);
+
+        if (isValid) {
+            ApiResponse<UserAuthResponseDto.ValidResultDto> response = ApiResponse.onGetSuccess(
+                    UserConverter.toValidResultDto(isValid, "유효한 전화번호 입니다."));
+            return ResponseEntity.ok(response);
+        }
+        else{
+            ApiResponse<UserAuthResponseDto.ValidResultDto> response = ApiResponse.onFailure(
+                    "COMMON409", "409 Conflict", UserConverter.toValidResultDto(isValid, "중복된 전화번호 입니다."));
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+        }
+
     }
 }
