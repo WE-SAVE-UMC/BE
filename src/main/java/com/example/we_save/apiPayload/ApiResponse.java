@@ -23,8 +23,12 @@ public class ApiResponse<T> {
 
     // 성공한 경우 응답 생성
 
-    public static <T> ApiResponse<T> onSuccess(T result){
-        return new ApiResponse<>(true, SuccessStatus._OK.getCode() , SuccessStatus._OK.getMessage(), result);
+    public static <T> ApiResponse<T> onGetSuccess(T result){
+        return new ApiResponse<>(true, SuccessStatus._GET_OK.getCode() , SuccessStatus._GET_OK.getMessage(), result);
+    }
+
+    public static <T> ApiResponse<T> onPostSuccess(T result){
+        return new ApiResponse<>(true, SuccessStatus._POST_OK.getCode() , SuccessStatus._POST_OK.getMessage(), result);
     }
 
     public static <T> ApiResponse<T> of(BaseCode code, T result){
