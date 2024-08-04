@@ -1,4 +1,4 @@
-package com.example.we_save.global.util;
+package com.example.we_save.apiPayload.code;
 
 import jakarta.persistence.*;
 import lombok.Getter;
