@@ -15,4 +15,14 @@ public class UserAuthResponseDto {
         Long userId;
         LocalDateTime createAt;
     }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ValidResultDto{
+        Boolean isValid;
+        String message;
+    }
+
 }
