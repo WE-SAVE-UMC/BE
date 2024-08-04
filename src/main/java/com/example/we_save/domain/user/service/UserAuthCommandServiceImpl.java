@@ -30,4 +30,9 @@ public class UserAuthCommandServiceImpl implements UserAuthCommandService {
     public Boolean isValidPhoneNumber(String phoneNumber) {
         return !userRepository.existsByPhoneNum(phoneNumber);
     }
+
+    @Override
+    public Boolean isValidNickname(String nickname) {
+        return !userRepository.existsByNickname(nickname);
+    }
 }

@@ -43,6 +43,21 @@ public class UserAuthController {
                     "COMMON409", "409 Conflict", UserConverter.toValidResultDto(isValid, "중복된 전화번호 입니다."));
             return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
         }
-
     }
+    @GetMapping("/api/auth/check-nickname/{nickname}")
+    public ResponseEntity<ApiResponse<UserAuthResponseDto.ValidResultDto>>isValidNickame(@PathVariable String nickname){
+        Boolean isValid = userAuthCommandService.isValidNickname(nickname);
+
+        if (isValid) {
+            ApiResponse<UserAuthResponseDto.ValidResultDto> response = ApiResponse.onGetSuccess(
+                    UserConverter.toValidResultDto(isValid, "유효한 닉네임 입니다."));
+            return ResponseEntity.ok(response);
+        }
+        else{
+            ApiResponse<UserAuthResponseDto.ValidResultDto> response = ApiResponse.onFailure(
+                    "COMMON409", "409 Conflict", UserConverter.toValidResultDto(isValid, "중복된 닉네임 입니다."));
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+        }
+    }
+
 }
