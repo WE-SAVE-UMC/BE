@@ -25,4 +25,23 @@ public class SmsController {
 
         return ApiResponse.onGetSuccess(SmsResponseDto.SmsRequestResultDto.builder().verificationCode(verificationCode).build());
     }
+    @PostMapping("/api/sms/check-sms")
+    public ResponseEntity<ApiResponse<SmsResponseDto.SmsValidResultDto>> checkSms(@RequestBody @Valid SmsRequestDto.checkSmsDto request){
+        boolean isValid = verificationCodeService.validateCode(request.getPhoneNum(), request.getVerificationCode());
+
+        if(isValid){
+            ApiResponse<SmsResponseDto.SmsValidResultDto> response= ApiResponse.onGetSuccess(SmsResponseDto.SmsValidResultDto.builder()
+                    .isValid(true)
+                    .message("유효한 인증번호 입니다.")
+                    .build());
+            return ResponseEntity.ok(response);
+        }else{
+            ApiResponse<SmsResponseDto.SmsValidResultDto> response = ApiResponse.onFailure(
+                    "COMMON400", "400 Bad Request",SmsResponseDto.SmsValidResultDto.builder()
+                            .isValid(false)
+                            .message("유효하지 않은 인증번호 입니다.")
+                            .build());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+    }
 }
