@@ -14,7 +14,14 @@ public class UserAuthRequestDto {
 
         @Size(max=20)
         String password;
+    }
 
+    @Getter
+    public static class loginDto{
+        @Size(max= 11)
+        String phoneNum;
 
+        @Size(max=20)
+        String password;
     }
 }

@@ -9,10 +9,13 @@ import com.example.we_save.domain.user.entity.NotificationSetting;
 import com.example.we_save.domain.user.entity.User;
 import com.example.we_save.domain.user.service.NotificationSettingCommandService;
 import com.example.we_save.domain.user.service.UserAuthCommandService;
+import com.example.we_save.jwt.JWTUtil;
+import com.example.we_save.jwt.service.CustomUserDetailsService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,6 +24,7 @@ public class UserAuthController {
 
     private final UserAuthCommandService userAuthCommandService;
     private final NotificationSettingCommandService notificationSettingCommandService;
+    private final JWTUtil jwtUtil;
 
     @PostMapping("/api/auth/users")
     @ResponseStatus(HttpStatus.CREATED)
@@ -28,6 +32,20 @@ public class UserAuthController {
         NotificationSetting notificationSetting = notificationSettingCommandService.createNotificationSetting();
         User user= userAuthCommandService.joinUser(request,notificationSetting);
         return ApiResponse.onPostSuccess(UserConverter.toJoinResultDto(user), SuccessStatus._POST_OK);
+    }
+
+    @PostMapping("/api/auth/login")
+    public ResponseEntity<ApiResponse> login(@RequestBody @Valid UserAuthRequestDto.loginDto request){
+        User user = userAuthCommandService.loginUser(request);
+
+        if (user == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.onFailure("COMMON401","401 Unauthorized, 인증 정보가 잘못되었습니다.",user));
+        }
+        else{
+            String token = jwtUtil.createJwt(request.getPhoneNum(),"USER",24 * 60 * 60 * 1000L);
+            ApiResponse<UserAuthResponseDto.loginResultDto> response = ApiResponse.onPostSuccess(UserConverter.toLoginResultDto(user,token),SuccessStatus._POST_OK);
+            return ResponseEntity.ok(response);
+        }
     }
 
     @GetMapping("/api/auth/check-phone/{number}")

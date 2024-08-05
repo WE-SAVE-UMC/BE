@@ -10,6 +10,8 @@ import com.example.we_save.domain.user.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class UserAuthCommandServiceImpl implements UserAuthCommandService {
     private final UserRepository userRepository;
@@ -18,12 +20,27 @@ public class UserAuthCommandServiceImpl implements UserAuthCommandService {
     public UserAuthCommandServiceImpl(UserRepository userRepository,NotificationSettingRepository notificationSettingRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.userRepository = userRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+
     }
 
     @Override
     public User joinUser(UserAuthRequestDto.JoinDto request,NotificationSetting notificationSetting) {
         User newUser = UserConverter.toUser(request, notificationSetting, bCryptPasswordEncoder);
         return userRepository.save(newUser);
+    }
+
+    @Override
+    public User loginUser(UserAuthRequestDto.loginDto request) {
+        List<User> users  = userRepository.findByPhoneNum(request.getPhoneNum());
+
+        // 사용자 존재 여부 및 비밀번호 검증
+        if (users.size() == 0 || !bCryptPasswordEncoder.matches(request.getPassword(), users.get(0).getPassword())) {
+            return null;
+        }
+        else{
+            //로그인 성공
+            return users.get(0);
+        }
     }
 
     @Override
