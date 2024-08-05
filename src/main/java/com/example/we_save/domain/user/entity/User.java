@@ -1,17 +1,28 @@
 package com.example.we_save.domain.user.entity;
 
-import com.example.we_save.global.util.BaseEntity;
+import com.example.we_save.apiPayload.code.BaseEntity;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@DynamicInsert @DynamicUpdate
-@Table(name = "t_user")
-public class User extends BaseEntity {
+@Setter
+@DynamicInsert
+@DynamicUpdate
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class User  {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(name = "phone_num", nullable = false, length = 11)
     private String phoneNum;
@@ -19,7 +30,7 @@ public class User extends BaseEntity {
     @Column(name = "nickname", nullable = false, length = 16)
     private String nickname;
 
-    @Column(name = "password", length = 20)
+    @Column(name = "password")
     private String password;
 
     @Enumerated(EnumType.STRING)
@@ -36,4 +47,11 @@ public class User extends BaseEntity {
 
     @Column(name = "image_url")
     private String imageUrl;
+
+    @CreatedDate
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    private LocalDateTime updatedAt;
+
 }
