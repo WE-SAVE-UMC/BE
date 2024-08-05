@@ -11,7 +11,7 @@ public class UserAuthResponseDto {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class JoinResultDTO{
+    public static class JoinResultDto{
         Long userId;
         LocalDateTime createAt;
     }

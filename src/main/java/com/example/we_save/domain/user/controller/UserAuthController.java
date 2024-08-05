@@ -23,13 +23,13 @@ public class UserAuthController {
 
     @PostMapping("/api/auth/users")
     @ResponseStatus(HttpStatus.CREATED)
-    public ApiResponse<UserAuthResponseDto.JoinResultDTO> join(@RequestBody @Valid UserAuthRequestDto.JoinDto request){
+    public ApiResponse<UserAuthResponseDto.JoinResultDto> join(@RequestBody @Valid UserAuthRequestDto.JoinDto request){
         NotificationSetting notificationSetting = notificationSettingCommandService.createNotificationSetting();
         User user= userAuthCommandService.joinUser(request,notificationSetting);
         return ApiResponse.onPostSuccess(UserConverter.toJoinResultDto(user));
     }
 
-    @GetMapping("/api/auth/check-phone/{number}")
+    @PostMapping("/api/auth/check-phone/{number}")
     public ResponseEntity<ApiResponse<UserAuthResponseDto.ValidResultDto>>isValidPhoneNum(@PathVariable String number){
         Boolean isValid = userAuthCommandService.isValidPhoneNumber(number);
 
