@@ -1,6 +1,7 @@
 package com.example.we_save.domain.user.controller;
 
 import com.example.we_save.apiPayload.ApiResponse;
+import com.example.we_save.apiPayload.code.status.SuccessStatus;
 import com.example.we_save.domain.user.controller.request.UserAuthRequestDto;
 import com.example.we_save.domain.user.controller.response.UserAuthResponseDto;
 import com.example.we_save.domain.user.converter.UserConverter;
@@ -26,7 +27,7 @@ public class UserAuthController {
     public ApiResponse<UserAuthResponseDto.JoinResultDto> join(@RequestBody @Valid UserAuthRequestDto.JoinDto request){
         NotificationSetting notificationSetting = notificationSettingCommandService.createNotificationSetting();
         User user= userAuthCommandService.joinUser(request,notificationSetting);
-        return ApiResponse.onPostSuccess(UserConverter.toJoinResultDto(user));
+        return ApiResponse.onPostSuccess(UserConverter.toJoinResultDto(user), SuccessStatus._POST_OK);
     }
 
     @GetMapping("/api/auth/check-phone/{number}")
