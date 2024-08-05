@@ -29,7 +29,7 @@ public class UserAuthController {
         return ApiResponse.onPostSuccess(UserConverter.toJoinResultDto(user));
     }
 
-    @PostMapping("/api/auth/check-phone/{number}")
+    @GetMapping("/api/auth/check-phone/{number}")
     public ResponseEntity<ApiResponse<UserAuthResponseDto.ValidResultDto>>isValidPhoneNum(@PathVariable String number){
         Boolean isValid = userAuthCommandService.isValidPhoneNumber(number);
 
