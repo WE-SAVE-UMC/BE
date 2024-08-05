@@ -33,9 +33,9 @@ public class User  {
     @Column(name = "password")
     private String password;
 
-    @Enumerated(EnumType.STRING)
+//    @Enumerated(EnumType.STRING)
     @Column(name = "role")
-    private UserRole role;
+    private String role;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")

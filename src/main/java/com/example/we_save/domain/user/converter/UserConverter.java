@@ -26,13 +26,19 @@ public class UserConverter {
                 .build();
     }
 
-    public static User toUser(UserAuthRequestDto.JoinDto request, NotificationSetting notificationSetting, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    public static UserAuthResponseDto.loginResultDto toLoginResultDto(User user, String token) {
+        return UserAuthResponseDto.loginResultDto.builder()
+                .token(token)
+                .userId(user.getId())
+                .build();
+    }
 
+    public static User toUser(UserAuthRequestDto.JoinDto request, NotificationSetting notificationSetting, BCryptPasswordEncoder bCryptPasswordEncoder) {
         return User.builder()
                 .phoneNum(request.getPhoneNum())
                 .nickname(request.getNickname())
                 .password(bCryptPasswordEncoder.encode(request.getPassword()))
-                .role(UserRole.USER) //default는 USER
+                .role("USER") //default는 USER
                 .status(UserStatus.ACTIVE) //default는 ACTIVE
                 .imageUrl("http://localhost:8080/profile.jpg")
                 .notificationSetting(notificationSetting)

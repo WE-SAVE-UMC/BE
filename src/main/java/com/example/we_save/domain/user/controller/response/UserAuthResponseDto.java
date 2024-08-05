@@ -25,4 +25,13 @@ public class UserAuthResponseDto {
         String message;
     }
 
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class loginResultDto{
+        Long userId;
+        String token;
+    }
+
 }
