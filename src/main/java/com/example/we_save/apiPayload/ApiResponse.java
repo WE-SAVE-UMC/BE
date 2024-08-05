@@ -27,7 +27,7 @@ public class ApiResponse<T> {
         return new ApiResponse<>(true, SuccessStatus._GET_OK.getCode() , SuccessStatus._GET_OK.getMessage(), result);
     }
 
-    public static <T> ApiResponse<T> onPostSuccess(T result){
+    public static <T> ApiResponse<T> onPostSuccess(T result, SuccessStatus PostOk){
         return new ApiResponse<>(true, SuccessStatus._POST_OK.getCode() , SuccessStatus._POST_OK.getMessage(), result);
     }
 
@@ -35,6 +35,13 @@ public class ApiResponse<T> {
             return new ApiResponse<>(true, code.getReasonHttpStatus().getCode() , code.getReasonHttpStatus().getMessage(), result);
     }
 
+    public static <T> ApiResponse<T> onDeleteSuccess(T result){
+        return new ApiResponse<>(true, SuccessStatus._DELETE_OK.getCode() , SuccessStatus._DELETE_OK.getMessage(), result);
+    }
+
+    public static <T> ApiResponse<T> onReportSuccess(T result){
+        return new ApiResponse<>(true, SuccessStatus.REPORT_SUCCESS.getCode(), SuccessStatus.REPORT_SUCCESS.getMessage(), result);
+    }
 
     // 실패한 경우 응답 생성
     public static <T> ApiResponse<T> onFailure(String code, String message, T data){
