@@ -13,8 +13,8 @@ import java.time.LocalDateTime;
 
 public class UserConverter {
 
-    public static UserAuthResponseDto.JoinResultDTO toJoinResultDto(User user) {
-        return UserAuthResponseDto.JoinResultDTO.builder()
+    public static UserAuthResponseDto.JoinResultDto toJoinResultDto(User user) {
+        return UserAuthResponseDto.JoinResultDto.builder()
                 .userId(user.getId())
                 .createAt(user.getCreatedAt())
                 .build();
