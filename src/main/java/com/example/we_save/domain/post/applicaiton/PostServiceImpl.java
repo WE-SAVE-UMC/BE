@@ -10,7 +10,11 @@ import com.example.we_save.domain.post.controller.request.PostRequestDto;
 import com.example.we_save.domain.post.controller.response.PostResponseDto;
 import com.example.we_save.domain.post.controller.response.PostResponseDtoWithComments;
 import com.example.we_save.domain.post.entity.Post;
+import com.example.we_save.domain.post.entity.PostDislike;
+import com.example.we_save.domain.post.entity.PostHeart;
 import com.example.we_save.domain.post.entity.PostReport;
+import com.example.we_save.domain.post.repository.PostDislikeRepository;
+import com.example.we_save.domain.post.repository.PostHeartRepository;
 import com.example.we_save.domain.post.repository.PostReportRepository;
 import com.example.we_save.domain.post.repository.PostRepository;
 import jakarta.transaction.Transactional;
@@ -34,6 +38,12 @@ public class PostServiceImpl implements PostService {
     @Autowired
     private PostReportRepository postReportRepository;
 
+    @Autowired
+    private PostHeartRepository postHeartRepository;
+
+    @Autowired
+    private PostDislikeRepository postDislikeRepository;
+
     private static final int MAX_IMAGE_COUNT = 10;
     private static final int MAX_REPORT_COUNT = 10;
 
@@ -49,8 +59,8 @@ public class PostServiceImpl implements PostService {
         post.setTitle(postRequestDto.getTitle());
         post.setContent(postRequestDto.getContent());
         post.setStatus(postRequestDto.getStatus());
-        post.setX(postRequestDto.getX());
-        post.setY(postRequestDto.getY());
+        post.setLongitude(postRequestDto.getLongitude());
+        post.setLatitude(postRequestDto.getLatitude());
         post.setPostRegionName(postRequestDto.getPostRegionName());
         post.setImages(postRequestDto.getImages());
         post.setReport119(postRequestDto.isReport119());
@@ -88,8 +98,8 @@ public class PostServiceImpl implements PostService {
         post.setTitle(postRequestDto.getTitle());
         post.setContent(postRequestDto.getContent());
         post.setStatus(postRequestDto.getStatus());
-        post.setX(postRequestDto.getX());
-        post.setY(postRequestDto.getY());
+        post.setLongitude(postRequestDto.getLongitude());
+        post.setLatitude(postRequestDto.getLatitude());
         post.setPostRegionName(postRequestDto.getPostRegionName());
         post.setImages(postRequestDto.getImages());
         post.setReport119(postRequestDto.isReport119());
@@ -151,8 +161,8 @@ public class PostServiceImpl implements PostService {
         responseDto.setTitle(post.getTitle());
         responseDto.setContent(post.getContent());
         responseDto.setStatus(post.getStatus());
-        responseDto.setX(post.getX());
-        responseDto.setY(post.getY());
+        responseDto.setLongitude(post.getLongitude());
+        responseDto.setLatitude(post.getLatitude());
         responseDto.setPostRegionName(post.getPostRegionName());
         responseDto.setHearts(post.getHearts());
         responseDto.setDislikes(post.getDislikes());
@@ -188,10 +198,76 @@ public class PostServiceImpl implements PostService {
         if (reportCount >= MAX_REPORT_COUNT) {
             commentRepository.deleteByPostId(postId);
             postRepository.deleteById(postId);
-            return ApiResponse.onDeleteSuccess(null);
+            return ApiResponse.onReportSuccess(null);
         }
 
         return ApiResponse.onReportSuccess(null);
     }
 
+    @Override
+    @Transactional
+    public ApiResponse<Void> toggleHeart(Long postId, Long userId){
+        Optional<Post> optionalPost = postRepository.findById(postId);
+        if (!optionalPost.isPresent()) {
+            return ApiResponse.onFailure(ErrorStatus._ARTICLE_NOT_FOUND.getCode(),ErrorStatus._ARTICLE_NOT_FOUND.getMessage(), null);
+        }
+
+        Post post = optionalPost.get();
+
+        // 이미 허위에요 를 누른 경우
+        if(postDislikeRepository.existsByPostIdAndUserId(postId, userId)){
+            return ApiResponse.onFailure(ErrorStatus._ALREADY_REPORTED.getCode(), "이미 '허위에요'를 누르셨습니다.", null );
+        }
+
+        //이미 확인했어요 를 누른 경우 취소, 확인했어요 등록
+        if(postHeartRepository.existsByPostIdAndUserId(postId, userId)){
+            postHeartRepository.deleteByPostIdAndUserId(postId, userId);
+            post.setHearts(post.getHearts() - 1);
+            postRepository.save(post);
+            return ApiResponse.onCancelSuccess(null);
+        } else {
+            PostHeart heart = new PostHeart();
+            heart.setPostId(postId);
+            heart.setUserId(userId);
+            postHeartRepository.save(heart);
+            post.setHearts(post.getHearts() + 1);
+            postRepository.save(post);
+
+            return ApiResponse.onPostSuccess(null, SuccessStatus._POST_OK);
+        }
+    }
+
+    @Override
+    @Transactional
+    public ApiResponse<Void> toggleDislike(Long postId, Long userId) {
+        Optional<Post> optionalPost = postRepository.findById(postId);
+        if (!optionalPost.isPresent()) {
+            return ApiResponse.onFailure(ErrorStatus._ARTICLE_NOT_FOUND.getCode(), ErrorStatus._ARTICLE_NOT_FOUND.getMessage(), null);
+        }
+        Post post = optionalPost.get();
+
+        // 이미 확인했어요 를 누른 경우
+        if (postHeartRepository.existsByPostIdAndUserId(postId, userId)) {
+            return ApiResponse.onFailure(ErrorStatus._ALREADY_REPORTED.getCode(), "이미 '확인했어요'를 누르셨습니다.", null);
+        }
+
+        // 이미 허위에요 를 누른 경우 취소, 허위에요 등록
+        if (postDislikeRepository.existsByPostIdAndUserId(postId, userId)) {
+            postDislikeRepository.deleteByPostIdAndUserId(postId, userId);
+            post.setDislikes(post.getDislikes() - 1);
+            postRepository.save(post);
+
+            return ApiResponse.onCancelSuccess(null);
+        } else {
+            PostDislike dislike = new PostDislike();
+            dislike.setPostId(postId);
+            dislike.setUserId(userId);
+            postDislikeRepository.save(dislike);
+            post.setDislikes(post.getDislikes() + 1);
+            postRepository.save(post);
+
+            return ApiResponse.onPostSuccess(null, SuccessStatus._POST_OK);
+
+        }
+    }
 }

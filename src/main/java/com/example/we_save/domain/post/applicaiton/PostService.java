@@ -11,4 +11,6 @@ public interface PostService {
     ApiResponse<PostResponseDto> deletePost(Long postId);
     ApiResponse<PostResponseDtoWithComments> getPost(Long postId);
     ApiResponse<Void> reportPost(Long postId, Long userId);
+    ApiResponse<Void> toggleHeart(Long postId, Long userId);
+    ApiResponse<Void> toggleDislike(Long postId, Long userId);
 }
