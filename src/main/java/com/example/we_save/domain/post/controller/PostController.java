@@ -52,4 +52,20 @@ public class PostController {
         ApiResponse<Void> response = postService.reportPost(postId, userId);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/{postId}/heart")
+    public ResponseEntity<ApiResponse<Void>> toggleHeart(
+            @PathVariable("postId") Long postId,
+            @RequestParam("userId") Long userId) {
+        ApiResponse<Void> response = postService.toggleHeart(postId, userId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{postId}/dislike")
+    public ResponseEntity<ApiResponse<Void>> toggleDislike(
+            @PathVariable("postId") Long postId,
+            @RequestParam("userId") Long userId) {
+        ApiResponse<Void> response = postService.toggleDislike(postId, userId);
+        return ResponseEntity.ok(response);
+    }
 }

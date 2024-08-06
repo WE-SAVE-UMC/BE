@@ -9,7 +9,9 @@ import com.example.we_save.domain.comment.entity.Comment;
 import com.example.we_save.domain.comment.entity.CommentReport;
 import com.example.we_save.domain.comment.repository.CommentReportRepository;
 import com.example.we_save.domain.comment.repository.CommentRepository;
+import com.example.we_save.domain.post.entity.Post;
 import com.example.we_save.domain.post.repository.PostRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,6 +36,7 @@ public class CommentServiceImpl implements CommentService {
     private static final int MAX_REPORT_COUNT = 10;
 
     @Override
+    @Transactional
     public ApiResponse<CommentResponseDto> createComment(CommentRequestDto commentRequestDto) {
         if (!postRepository.existsById(commentRequestDto.getPostId())) {
             // 실패 응답 생성
@@ -54,6 +57,11 @@ public class CommentServiceImpl implements CommentService {
 
         Comment savedComment = commentRepository.save(comment);
 
+        Post post = postRepository.findById(commentRequestDto.getPostId()).orElseThrow(() ->
+                new EntityNotFoundException("Post not found"));
+        post.setComments(post.getComments() + 1);
+        postRepository.save(post);
+
         CommentResponseDto responseDto = new CommentResponseDto();
         responseDto.setCommentId(savedComment.getId());
 
@@ -61,6 +69,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional
     public ApiResponse<CommentResponseDto> updateComment(Long commentId, CommentRequestDto commentRequestDto) {
         Optional<Comment> optionalComment = commentRepository.findById(commentId);
 
@@ -96,6 +105,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional
     public ApiResponse<CommentResponseDto> deleteComment(Long commentId) {
         Optional<Comment> optionalComment = commentRepository.findById(commentId);
 
@@ -103,7 +113,13 @@ public class CommentServiceImpl implements CommentService {
             return ApiResponse.onFailure(ErrorStatus._BAD_REQUEST.getCode(), ErrorStatus._BAD_REQUEST.getMessage(), null);
         }
 
+        Comment comment = optionalComment.get();
         commentRepository.delete(optionalComment.get());
+
+        Post post = postRepository.findById(comment.getPostId()).orElseThrow(() ->
+                new EntityNotFoundException("Post not found"));
+        post.setComments(post.getComments() - 1);
+        postRepository.save(post);
 
         CommentResponseDto responseDto = new CommentResponseDto();
         responseDto.setCommentId(commentId);
@@ -133,6 +149,12 @@ public class CommentServiceImpl implements CommentService {
 
         if (reportCount >= MAX_REPORT_COUNT) {
             commentRepository.deleteById(commentId);
+
+            Post post = postRepository.findById(optionalComment.get().getPostId()).orElseThrow(() ->
+                    new EntityNotFoundException("Post not found"));
+            post.setComments(post.getComments() - 1);
+            postRepository.save(post);
+
             return ApiResponse.onReportSuccess(null);
         }
 
