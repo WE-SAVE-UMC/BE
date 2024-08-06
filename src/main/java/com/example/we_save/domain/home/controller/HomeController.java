@@ -21,4 +21,8 @@ public class HomeController {
 
         return ResponseEntity.ok(homeService.showHomePage());
     }
+
+    // TODO: 확인순
+
+    // TODO: 최신순
 }
