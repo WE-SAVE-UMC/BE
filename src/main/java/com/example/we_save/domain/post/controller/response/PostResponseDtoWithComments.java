@@ -1,6 +1,7 @@
 package com.example.we_save.domain.post.controller.response;
 
 import com.example.we_save.domain.comment.controller.response.CommentDto;
+import com.example.we_save.domain.post.entity.PostStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -11,7 +12,7 @@ public class PostResponseDtoWithComments {
     private Long categoryId;
     private String title;
     private String content;
-    private String status;
+    private PostStatus status;
     private double x;
     private double y;
     private String postRegionName;
@@ -56,11 +57,11 @@ public class PostResponseDtoWithComments {
         this.title = title;
     }
 
-    public String getStatus() {
+    public PostStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(PostStatus status) {
         this.status = status;
     }
 
