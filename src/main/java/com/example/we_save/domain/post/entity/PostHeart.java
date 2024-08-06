@@ -1,9 +1,7 @@
-package com.example.we_save.domain.comment.entity;
+package com.example.we_save.domain.post.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -11,17 +9,14 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class CommentReport {
+public class PostHeart {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private Long commentId;
+    private Long postId;
 
     @Column(nullable = false)
     private Long userId;
-
-    @Column(nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
 }

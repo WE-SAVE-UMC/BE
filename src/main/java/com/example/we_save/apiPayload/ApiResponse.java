@@ -43,6 +43,10 @@ public class ApiResponse<T> {
         return new ApiResponse<>(true, SuccessStatus.REPORT_SUCCESS.getCode(), SuccessStatus.REPORT_SUCCESS.getMessage(), result);
     }
 
+    public static <T> ApiResponse<T> onCancelSuccess(T result) {
+        return new ApiResponse<>(true, SuccessStatus.CANCEL_SUCCESS.getCode(), SuccessStatus.CANCEL_SUCCESS.getMessage(), result);
+    }
+
     // 실패한 경우 응답 생성
     public static <T> ApiResponse<T> onFailure(String code, String message, T data){
         return new ApiResponse<>(false, code, message, data);
