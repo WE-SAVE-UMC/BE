@@ -99,8 +99,8 @@ public class PostServiceImpl implements PostService {
         post.setTitle(postRequestDto.getTitle());
         post.setContent(postRequestDto.getContent());
         post.setStatus(PostStatus.COMPLETED);
-        post.setLongitude(postRequestDto.getX());
-        post.setLatitude(postRequestDto.getY());
+        post.setLongitude(postRequestDto.getLongitude());
+        post.setLatitude(postRequestDto.getLatitude());
         post.setPostRegionName(postRequestDto.getPostRegionName());
         post.setImages(postRequestDto.getImages());
         post.setReport119(postRequestDto.isReport119());
