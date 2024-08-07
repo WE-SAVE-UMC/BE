@@ -4,10 +4,7 @@ import com.example.we_save.apiPayload.code.BaseEntity;
 import com.example.we_save.domain.region.entity.EupmyeondongRegion;
 import com.example.we_save.domain.user.entity.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -18,6 +15,8 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@DynamicInsert
+@DynamicUpdate
 @Entity
 public class Post extends BaseEntity {
 
