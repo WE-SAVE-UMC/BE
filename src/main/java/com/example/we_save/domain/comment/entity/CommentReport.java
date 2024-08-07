@@ -1,5 +1,8 @@
 package com.example.we_save.domain.comment.entity;
 
+import com.example.we_save.apiPayload.code.BaseEntity;
+import com.example.we_save.domain.post.entity.Post;
+import com.example.we_save.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,17 +14,13 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class CommentReport {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class CommentReport extends BaseEntity {
 
-    @Column(nullable = false)
-    private Long commentId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id",nullable = false)
+    private User user;
 
-    @Column(nullable = false)
-    private Long userId;
-
-    @Column(nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @ManyToOne
+    @JoinColumn(name = "comment_id", nullable = false)
+    private Comment comment;
 }

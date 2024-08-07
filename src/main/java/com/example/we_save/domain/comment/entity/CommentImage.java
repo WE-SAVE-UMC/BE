@@ -1,4 +1,4 @@
-package com.example.we_save.domain.post.entity;
+package com.example.we_save.domain.comment.entity;
 
 import com.example.we_save.apiPayload.code.BaseEntity;
 import jakarta.persistence.*;
@@ -10,11 +10,11 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class PostImage extends BaseEntity {
+public class CommentImage extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id", nullable = false)
-    private Post post;
+    @JoinColumn(name = "comment_id", nullable = false)
+    private Comment comment;
 
     @Column(nullable = false)
     private String imageUrl;

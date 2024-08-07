@@ -1,16 +1,10 @@
 package com.example.we_save.domain.post.entity;
 
-import jakarta.persistence.*;
-import lombok.Data;
-
-@Data
-@Entity
-public class Category {
-
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Id
-    private long id;
-
-    @Column(nullable = false, length = 10)
-    private String name;
+public enum Category {
+    FIRE,      // 화재
+    EARTHQUAKE, // 지진
+    HEAVY_RAIN, // 폭우
+    HEAVY_SNOW, // 폭설
+    TRAFFIC_ACCIDENT, // 교통사고
+    OTHER     // 기타
 }

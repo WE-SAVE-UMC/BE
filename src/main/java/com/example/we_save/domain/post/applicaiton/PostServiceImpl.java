@@ -5,18 +5,21 @@ import com.example.we_save.apiPayload.code.status.ErrorStatus;
 import com.example.we_save.apiPayload.code.status.SuccessStatus;
 import com.example.we_save.domain.comment.controller.response.CommentDto;
 import com.example.we_save.domain.comment.entity.Comment;
+import com.example.we_save.domain.comment.entity.CommentImage;
 import com.example.we_save.domain.comment.repository.CommentRepository;
 import com.example.we_save.domain.post.controller.request.PostRequestDto;
 import com.example.we_save.domain.post.controller.response.PostResponseDto;
 import com.example.we_save.domain.post.controller.response.PostResponseDtoWithComments;
-import com.example.we_save.domain.post.entity.Post;
-import com.example.we_save.domain.post.entity.PostDislike;
-import com.example.we_save.domain.post.entity.PostHeart;
-import com.example.we_save.domain.post.entity.PostReport;
+import com.example.we_save.domain.post.entity.*;
 import com.example.we_save.domain.post.repository.PostDislikeRepository;
 import com.example.we_save.domain.post.repository.PostHeartRepository;
 import com.example.we_save.domain.post.repository.PostReportRepository;
 import com.example.we_save.domain.post.repository.PostRepository;
+import com.example.we_save.domain.region.entity.EupmyeondongRegion;
+import com.example.we_save.domain.region.repository.EupmyeondongRepository;
+import com.example.we_save.domain.user.entity.User;
+import com.example.we_save.domain.user.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,28 +47,42 @@ public class PostServiceImpl implements PostService {
     @Autowired
     private PostDislikeRepository postDislikeRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     private static final int MAX_IMAGE_COUNT = 10;
     private static final int MAX_REPORT_COUNT = 10;
 
     @Override
+    @Transactional
     public ApiResponse<PostResponseDto> createPost(PostRequestDto postRequestDto) {
         if (postRequestDto.getImages().size() > MAX_IMAGE_COUNT) {
             throw new IllegalArgumentException("최대 10개의 이미지만 첨부할 수 있습니다.");
         }
 
-        Post post = new Post();
-        post.setUserId(postRequestDto.getUserId());
-        post.setCategoryId(postRequestDto.getCategoryId());
-        post.setTitle(postRequestDto.getTitle());
-        post.setContent(postRequestDto.getContent());
-        post.setStatus(postRequestDto.getStatus());
-        post.setLongitude(postRequestDto.getLongitude());
-        post.setLatitude(postRequestDto.getLatitude());
-        post.setPostRegionName(postRequestDto.getPostRegionName());
-        post.setImages(postRequestDto.getImages());
-        post.setReport119(postRequestDto.isReport119());
-        post.setCreatedAt(LocalDateTime.now());
-        post.setUpdatedAt(LocalDateTime.now());
+        User user = userRepository.findById(postRequestDto.getUserId())
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+
+        Post post = Post.builder()
+                .user(user)
+                .category(postRequestDto.getCategory())
+                .title(postRequestDto.getTitle())
+                .content(postRequestDto.getContent())
+                .status(PostStatus.PROCESSING)
+                .longitude(postRequestDto.getLongitude())
+                .latitude(postRequestDto.getLatitude())
+                .postRegionName(postRequestDto.getPostRegionName())
+                .hearts(0)
+                .dislikes(0)
+                .comments(0)
+                .report119(postRequestDto.isReport119())
+                .reportCount(0)
+                .build();
+
+        List<PostImage> postImages = postRequestDto.getImages().stream()
+                .map(imageUrl -> PostImage.builder().imageUrl(imageUrl).post(post).build())
+                .collect(Collectors.toList());
+        post.setImages(postImages);
 
         Post savedPost = postRepository.save(post);
 
@@ -76,6 +93,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional
     public ApiResponse<PostResponseDto> updatePost(Long postId, PostRequestDto postRequestDto) {
         Optional<Post> optionalPost = postRepository.findById(postId);
 
@@ -86,24 +104,19 @@ public class PostServiceImpl implements PostService {
         if (postRequestDto.getImages().size() > MAX_IMAGE_COUNT) {
             throw new IllegalArgumentException("최대 10개의 이미지만 첨부할 수 있습니다.");
         }
-
         Post post = optionalPost.get();
 
-        if (!post.getUserId().equals(postRequestDto.getUserId())) {
-            return ApiResponse.onFailure(ErrorStatus._BAD_REQUEST.getCode(), ErrorStatus._BAD_REQUEST.getMessage(), null);
-        }
-
-        post.setUserId(postRequestDto.getUserId());
-        post.setCategoryId(postRequestDto.getCategoryId());
+        post.setCategory(postRequestDto.getCategory());
         post.setTitle(postRequestDto.getTitle());
         post.setContent(postRequestDto.getContent());
-        post.setStatus(postRequestDto.getStatus());
-        post.setLongitude(postRequestDto.getLongitude());
-        post.setLatitude(postRequestDto.getLatitude());
-        post.setPostRegionName(postRequestDto.getPostRegionName());
-        post.setImages(postRequestDto.getImages());
+        post.setStatus(PostStatus.PROCESSING);
         post.setReport119(postRequestDto.isReport119());
-        post.setUpdatedAt(LocalDateTime.now());
+
+        post.getImages().clear();
+        List<PostImage> postImages = postRequestDto.getImages().stream()
+                .map(imageUrl -> PostImage.builder().imageUrl(imageUrl).post(post).build())
+                .collect(Collectors.toList());
+        post.setImages(postImages);
 
         Post updatedPost = postRepository.save(post);
 
@@ -111,6 +124,7 @@ public class PostServiceImpl implements PostService {
         responseDto.setPostId(updatedPost.getId());
 
         return ApiResponse.onPostSuccess(responseDto, SuccessStatus._POST_OK);
+
     }
 
     @Override
@@ -133,6 +147,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional
     public ApiResponse<PostResponseDtoWithComments> getPost(Long postId){
         Optional<Post> optionalPost = postRepository.findById(postId);
 
@@ -142,35 +157,42 @@ public class PostServiceImpl implements PostService {
 
         Post post = optionalPost.get();
 
+        // 모든 댓글 가져오기
         List<Comment> comments = commentRepository.findByPostId(postId);
+        //댓글을 commentdto 로 변환
         List<CommentDto> commentDtos = comments.stream().map(comment -> {
             CommentDto dto = new CommentDto();
             dto.setId(comment.getId());
-            dto.setUserId(comment.getUserId());
+            dto.setUserId(comment.getUser().getId());
             dto.setContent(comment.getContent());
-            dto.setImages(comment.getImages());
-            dto.setCreatedAt(comment.getCreatedAt());
-            dto.setUpdatedAt(comment.getUpdatedAt());
+            List<String> imageUrls = comment.getImages().stream()
+                    .map(CommentImage::getImageUrl)
+                    .collect(Collectors.toList());
+            dto.setImages(imageUrls);
+            dto.setCreatedAt(comment.getCreateAt());
+            dto.setUpdatedAt(comment.getUpdateAt());
             return dto;
         }).collect(Collectors.toList());
 
-        PostResponseDtoWithComments responseDto = new PostResponseDtoWithComments();
-        responseDto.setId(post.getId());
-        responseDto.setUserId(post.getUserId());
-        responseDto.setCategoryId(post.getCategoryId());
-        responseDto.setTitle(post.getTitle());
-        responseDto.setContent(post.getContent());
-        responseDto.setStatus(post.getStatus());
-        responseDto.setLongitude(post.getLongitude());
-        responseDto.setLatitude(post.getLatitude());
-        responseDto.setPostRegionName(post.getPostRegionName());
-        responseDto.setHearts(post.getHearts());
-        responseDto.setDislikes(post.getDislikes());
-        responseDto.setComments(comments.size());
-        responseDto.setCreatedAt(post.getCreatedAt());
-        responseDto.setUpdatedAt(post.getUpdatedAt());
-        responseDto.setImages(post.getImages());
-        responseDto.setCommentsList(commentDtos);
+        PostResponseDtoWithComments responseDto = PostResponseDtoWithComments.builder()
+                .id(post.getId())
+                .user(post.getUser())
+                .category(post.getCategory())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .longitude(post.getLongitude())
+                .latitude(post.getLatitude())
+                .postRegionName(post.getPostRegionName())
+                .hearts(post.getHearts())
+                .dislikes(post.getDislikes())
+                .comments(comments.size())
+                .createdAt(post.getCreateAt())
+                .updatedAt(post.getUpdateAt())
+                .images(post.getImages().stream()
+                        .map(PostImage::getImageUrl)
+                        .collect(Collectors.toList()))
+                .commentsList(commentDtos)
+                .build();
 
         return ApiResponse.onGetSuccess(responseDto);
     }
