@@ -28,4 +28,12 @@ public class UserAuthRequestDto {
     public static class findUserDto{
         long userId;
     }
+
+    @Getter
+    public static class updateUserDto{
+        @Size(max=16)
+        String nickname;
+
+        String imageUrl;
+    }
 }
