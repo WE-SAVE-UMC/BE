@@ -1,9 +1,11 @@
 package com.example.we_save.domain.post.entity;
 
+import com.example.we_save.apiPayload.code.BaseEntity;
+import com.example.we_save.domain.region.entity.EupmyeondongRegion;
+import com.example.we_save.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -12,17 +14,19 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Post  {
+public class Post extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
-    @Column(nullable = false)
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "region_id")
+    private EupmyeondongRegion region;
 
-    @Column(nullable = false)
-    private Long categoryId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
 
     @Column(nullable = false, length = 100)
     private String title;
@@ -56,10 +60,6 @@ public class Post  {
 
     @Column(nullable = false)
     private boolean report119;
-
-    private LocalDateTime createdAt;
-
-    private LocalDateTime updatedAt;
 
     private int reportCount;
 }
