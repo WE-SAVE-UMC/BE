@@ -20,6 +20,9 @@ public class EupmyeondongRegion extends BaseEntity {
     @Column(nullable = false)
     private String regionName;
 
+    @Column(nullable = false, length = 30)
+    private String regionFullName;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sido_id")
     private SidoRegion sido;
