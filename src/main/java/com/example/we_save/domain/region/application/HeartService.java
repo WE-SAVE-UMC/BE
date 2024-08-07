@@ -8,4 +8,6 @@ import java.util.List;
 public interface HeartService {
 
     ApiResponse<List<HeartRegionResponseDto>> lookupHeartRegion();
+    ApiResponse<Void> insertHeartRegion(long regionId);
+    ApiResponse<Void> deleteHeartRegion(long regionId);
 }

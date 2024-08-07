@@ -25,14 +25,16 @@ public class HeartRegionController {
     }
 
     @Operation(summary = "관심지역 등록")
-    @PostMapping
-    public ResponseEntity<ApiResponse<>> registerHeartRegion() {
+    @PostMapping("/{region-id}")
+    public ResponseEntity<ApiResponse<Void>> registerHeartRegion(@PathVariable("region-id") long regionId) {
 
+        return ResponseEntity.ok(heartService.insertHeartRegion(regionId));
     }
 
     @Operation(summary = "관심지역 해제")
-    @DeleteMapping
-    public ResponseEntity<ApiResponse<>> deleteHeartRegion() {
+    @DeleteMapping("/{region-id}")
+    public ResponseEntity<ApiResponse<Void>> deleteHeartRegion(@PathVariable("region-id") long regionId) {
 
+        return ResponseEntity.ok(heartService.deleteHeartRegion(regionId));
     }
 }
