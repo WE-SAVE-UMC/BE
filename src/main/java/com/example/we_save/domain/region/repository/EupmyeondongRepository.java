@@ -7,6 +7,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface EupmyeondongRepository extends JpaRepository<EupmyeondongRegion, Long> {
-    List<EupmyeondongRegion> findAllByHeartRegionIdIn(List<Long> heartRegionIds);
+    //List<EupmyeondongRegion> findAllByHeartRegionIdIn(List<Long> heartRegionIds);
     Optional<EupmyeondongRegion> findByRegionFullName(String regionName);
 }

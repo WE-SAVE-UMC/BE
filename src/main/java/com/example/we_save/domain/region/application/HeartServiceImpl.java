@@ -37,11 +37,9 @@ public class HeartServiceImpl implements HeartService {
 
         List<HeartRegion> heartRegions = heartRegionRepository.findAllByUser(user);
 
-        List<Long> heartRegionIds = heartRegions.stream()
-                .map(HeartRegion::getId)
+        List<EupmyeondongRegion> eupmyeondongRegions = heartRegions.stream()
+                .map(HeartRegion::getRegion)
                 .collect(Collectors.toList());
-
-        List<EupmyeondongRegion> eupmyeondongRegions = eupmyeondongRepository.findAllByHeartRegionIdIn(heartRegionIds);
 
         List<HeartRegionResponseDto> regionDtos = eupmyeondongRegions.stream()
                 .map(HeartRegionResponseDto::of)
