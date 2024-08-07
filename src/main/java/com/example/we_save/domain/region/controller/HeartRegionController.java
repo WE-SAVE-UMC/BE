@@ -28,7 +28,7 @@ public class HeartRegionController {
 
     @Operation(summary = "관심지역 등록")
     @PostMapping
-    public ResponseEntity<ApiResponse<RegionIdResponseDto>> registerHeartRegion(RegionNameRequestDto regionNameDto) {
+    public ResponseEntity<ApiResponse<RegionIdResponseDto>> registerHeartRegion(@RequestBody RegionNameRequestDto regionNameDto) {
 
         return ResponseEntity.ok(heartService.insertHeartRegion(regionNameDto));
     }
