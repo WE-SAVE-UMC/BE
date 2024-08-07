@@ -1,7 +1,6 @@
 package com.example.we_save.domain.post.entity;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.parameters.P;
 
 @RequiredArgsConstructor
 public enum PostStatus {
