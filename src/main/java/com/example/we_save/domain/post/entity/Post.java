@@ -1,5 +1,8 @@
 package com.example.we_save.domain.post.entity;
 
+import com.example.we_save.apiPayload.code.BaseEntity;
+import com.example.we_save.domain.region.entity.EupmyeondongRegion;
+import com.example.we_save.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,27 +11,27 @@ import lombok.Setter;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
-@Entity
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@DynamicInsert
-@DynamicUpdate
-public class Post  {
+@Entity
+public class Post extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
-    @Column(nullable = false)
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "region_id")
+    private EupmyeondongRegion region;
 
-    @Column(nullable = false)
-    private Long categoryId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
 
     @Column(nullable = false, length = 100)
     private String title;
@@ -36,9 +39,8 @@ public class Post  {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private PostStatus status;
+    private String status;
 
     @Column(nullable = false)
     private double longitude;
@@ -63,10 +65,6 @@ public class Post  {
 
     @Column(nullable = false)
     private boolean report119;
-
-    private LocalDateTime createdAt;
-
-    private LocalDateTime updatedAt;
 
     private int reportCount;
 }

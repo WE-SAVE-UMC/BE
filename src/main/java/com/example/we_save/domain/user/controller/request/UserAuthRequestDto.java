@@ -24,4 +24,8 @@ public class UserAuthRequestDto {
         @Size(max=20)
         String password;
     }
+    @Getter
+    public static class findUserDto{
+        long userId;
+    }
 }

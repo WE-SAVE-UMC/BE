@@ -28,12 +28,22 @@ public class UserConverter {
 
     public static UserAuthResponseDto.loginResultDto toLoginResultDto(User user, String token) {
         return UserAuthResponseDto.loginResultDto.builder()
-                .token(token)
+                .token("Bearer " + token)
                 .userId(user.getId())
                 .build();
     }
 
-    public static User toUser(UserAuthRequestDto.JoinDto request, NotificationSetting notificationSetting, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    public static UserAuthResponseDto.findUserResultDto toUserResultDto(User user) {
+        return UserAuthResponseDto.findUserResultDto.builder()
+                .userId(user.getId())
+                .status(user.getStatus())
+                .imageUrl(user.getImageUrl())
+                .nickname(user.getNickname())
+                .phone_num(user.getPhoneNum())
+                .build();
+    }
+
+    public static User makeUser(UserAuthRequestDto.JoinDto request, NotificationSetting notificationSetting, BCryptPasswordEncoder bCryptPasswordEncoder) {
         return User.builder()
                 .phoneNum(request.getPhoneNum())
                 .nickname(request.getNickname())
