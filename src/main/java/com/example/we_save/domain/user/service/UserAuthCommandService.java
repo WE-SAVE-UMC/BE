@@ -4,10 +4,12 @@ import com.example.we_save.domain.user.controller.request.UserAuthRequestDto;
 import com.example.we_save.domain.user.entity.NotificationSetting;
 import com.example.we_save.domain.user.entity.User;
 
+import java.util.Optional;
+
 public interface UserAuthCommandService {
     public User joinUser(UserAuthRequestDto.JoinDto request, NotificationSetting notificationSetting);
     public User loginUser(UserAuthRequestDto.loginDto request);
     public Boolean isValidPhoneNumber(String phoneNumber);
     public Boolean isValidNickname(String nickname);
-
+    public User findByUserId(long userId);
 }

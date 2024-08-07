@@ -11,6 +11,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserAuthCommandServiceImpl implements UserAuthCommandService {
@@ -25,8 +26,14 @@ public class UserAuthCommandServiceImpl implements UserAuthCommandService {
 
     @Override
     public User joinUser(UserAuthRequestDto.JoinDto request,NotificationSetting notificationSetting) {
-        User newUser = UserConverter.toUser(request, notificationSetting, bCryptPasswordEncoder);
-        return userRepository.save(newUser);
+        List<User> users  = userRepository.findByPhoneNum(request.getPhoneNum());
+
+        // 똑같은 전화번호를 가진 유저가 없다면 회원가입 성공
+        if (users.isEmpty()){
+            User newUser = UserConverter.makeUser(request, notificationSetting, bCryptPasswordEncoder);
+            return userRepository.save(newUser);
+        }
+        return null;
     }
 
     @Override
@@ -34,7 +41,7 @@ public class UserAuthCommandServiceImpl implements UserAuthCommandService {
         List<User> users  = userRepository.findByPhoneNum(request.getPhoneNum());
 
         // 사용자 존재 여부 및 비밀번호 검증
-        if (users.size() == 0 || !bCryptPasswordEncoder.matches(request.getPassword(), users.get(0).getPassword())) {
+        if (users.isEmpty() || !bCryptPasswordEncoder.matches(request.getPassword(), users.get(0).getPassword())) {
             return null;
         }
         else{
@@ -51,5 +58,10 @@ public class UserAuthCommandServiceImpl implements UserAuthCommandService {
     @Override
     public Boolean isValidNickname(String nickname) {
         return !userRepository.existsByNickname(nickname);
+    }
+
+    @Override
+    public User findByUserId(long userId) {
+        return userRepository.findById(userId).orElse(null);
     }
 }
