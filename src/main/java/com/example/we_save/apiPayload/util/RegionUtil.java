@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class RegionNameUtil {
+public class RegionUtil {
 
     private final EupmyeondongRepository eupmyeondongRepository;
     private final SigunguRepository sigunguRepository;
@@ -37,5 +37,13 @@ public class RegionNameUtil {
                 sigunguRegion.getRegionName(),
                 eupmyeondongRegion.getRegionName()
                 ).trim();
+    }
+
+    public long convertRegionNameToRegionId(String regionName) {
+
+        EupmyeondongRegion eupmyeondongRegion = eupmyeondongRepository.findByRegionFullName(regionName)
+                .orElseThrow(() -> new EntityNotFoundException("Region not found"));
+
+        return eupmyeondongRegion.getId();
     }
 }

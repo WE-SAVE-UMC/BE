@@ -2,7 +2,9 @@ package com.example.we_save.domain.region.controller;
 
 import com.example.we_save.apiPayload.ApiResponse;
 import com.example.we_save.domain.region.application.HeartService;
+import com.example.we_save.domain.region.controller.request.RegionNameRequestDto;
 import com.example.we_save.domain.region.controller.response.HeartRegionResponseDto;
+import com.example.we_save.domain.region.controller.response.RegionIdResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,10 +27,10 @@ public class HeartRegionController {
     }
 
     @Operation(summary = "관심지역 등록")
-    @PostMapping("/{region-id}")
-    public ResponseEntity<ApiResponse<Void>> registerHeartRegion(@PathVariable("region-id") long regionId) {
+    @PostMapping
+    public ResponseEntity<ApiResponse<RegionIdResponseDto>> registerHeartRegion(RegionNameRequestDto regionNameDto) {
 
-        return ResponseEntity.ok(heartService.insertHeartRegion(regionId));
+        return ResponseEntity.ok(heartService.insertHeartRegion(regionNameDto));
     }
 
     @Operation(summary = "관심지역 해제")
