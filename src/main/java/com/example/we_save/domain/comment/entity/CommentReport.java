@@ -14,7 +14,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class CommentReport extends BaseEntity {
+public class CommentReport {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id",nullable = false)
@@ -23,4 +27,7 @@ public class CommentReport extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "comment_id", nullable = false)
     private Comment comment;
+
+    @Column(nullable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
 }

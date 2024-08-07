@@ -59,9 +59,9 @@ public class PostServiceImpl implements PostService {
         if (postRequestDto.getImages().size() > MAX_IMAGE_COUNT) {
             throw new IllegalArgumentException("최대 10개의 이미지만 첨부할 수 있습니다.");
         }
-
         User user = userRepository.findById(postRequestDto.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+
 
         Post post = Post.builder()
                 .user(user)
@@ -87,7 +87,7 @@ public class PostServiceImpl implements PostService {
         Post savedPost = postRepository.save(post);
 
         PostResponseDto responseDto = new PostResponseDto();
-        responseDto.setPostId(savedPost.getId());
+        responseDto.setPost(savedPost);
 
         return ApiResponse.onPostSuccess(responseDto, SuccessStatus._POST_OK);
     }
@@ -121,7 +121,7 @@ public class PostServiceImpl implements PostService {
         Post updatedPost = postRepository.save(post);
 
         PostResponseDto responseDto = new PostResponseDto();
-        responseDto.setPostId(updatedPost.getId());
+        responseDto.setPost(updatedPost);
 
         return ApiResponse.onPostSuccess(responseDto, SuccessStatus._POST_OK);
 
@@ -136,12 +136,14 @@ public class PostServiceImpl implements PostService {
             return ApiResponse.onFailure(ErrorStatus._ARTICLE_NOT_FOUND.getCode(), ErrorStatus._ARTICLE_NOT_FOUND.getMessage(), null);
         }
 
+        Post postToDelete = optionalPost.get();
+
         commentRepository.deleteByPostId(postId);
 
-        postRepository.delete(optionalPost.get());
+        postRepository.delete(postToDelete);
 
         PostResponseDto responseDto = new PostResponseDto();
-        responseDto.setPostId(postId);
+        responseDto.setPost(postToDelete);
 
         return ApiResponse.onDeleteSuccess(responseDto);
     }
