@@ -12,8 +12,8 @@ import lombok.*;
 @Entity
 public class PostImage extends BaseEntity {
 
-    @ManyToOne
-    @JoinColumn(name = "post_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
     @Column(nullable = false)

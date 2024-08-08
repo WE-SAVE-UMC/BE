@@ -1,9 +1,13 @@
 package com.example.we_save.domain.comment.entity;
 
+import com.example.we_save.apiPayload.code.BaseEntity;
+import com.example.we_save.domain.post.entity.Post;
+import com.example.we_save.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -12,25 +16,19 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Comment {
+public class Comment extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id",nullable = false)
+    private User user;
 
-    @Column(nullable = false)
-    private Long userId;
-
-    @Column(nullable = false)
-    private Long postId;
+    @ManyToOne
+    @JoinColumn(name = "post_id", nullable = false)
+    private Post post;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @ElementCollection
-    private List<String> images;
-
-    private LocalDateTime createdAt;
-
-    private LocalDateTime updatedAt;
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CommentImage> images = new ArrayList<>();
 }
