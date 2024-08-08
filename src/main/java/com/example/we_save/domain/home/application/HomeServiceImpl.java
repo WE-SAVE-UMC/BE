@@ -66,6 +66,6 @@ public class HomeServiceImpl implements HomeService {
 
         double postLatitude = post.getLatitude();
         double postLongitude = post.getLongitude();
-        return 0;
+        return RegionUtil.calculateDistanceBetweenCoordinates(postLatitude, postLongitude, latitude, longitude);
     }
 }
