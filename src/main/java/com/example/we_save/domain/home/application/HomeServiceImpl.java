@@ -1,6 +1,8 @@
-package com.example.we_save.domain.home.controller.application;
+package com.example.we_save.domain.home.application;
 
 import com.example.we_save.apiPayload.ApiResponse;
+import com.example.we_save.apiPayload.util.RegionUtil;
+import com.example.we_save.domain.home.controller.request.HomeLocationRequestDto;
 import com.example.we_save.domain.home.controller.response.HomeResponseDto;
 import com.example.we_save.domain.post.controller.response.HotPostHomeResponseDto;
 import com.example.we_save.domain.post.controller.response.NearPostHomeResponseDto;
@@ -20,20 +22,18 @@ import java.util.stream.Collectors;
 public class HomeServiceImpl implements HomeService {
 
     private final PostRepository postRepository;
-    // TODO: Category Repository 추가
+    private final RegionUtil regionUtil;
 
     @Override
-    public ApiResponse<HomeResponseDto> showHomePage() {
+    public ApiResponse<HomeResponseDto> showHomePage(HomeLocationRequestDto locationDto) {
 
-        // TODO: User의 현재위치 가져오기
-
-        List<NearPostHomeResponseDto> nearPosts = getNearDisasterPages(10);
+        List<NearPostHomeResponseDto> nearPosts = getNearDisasterPages(locationDto, 10);
         List<HotPostHomeResponseDto> hotPosts = getHotDisasterPages();
 
         return null;
     }
 
-    private List<NearPostHomeResponseDto> getNearDisasterPages(int limit) {
+    private List<NearPostHomeResponseDto> getNearDisasterPages(HomeLocationRequestDto locationDto, int limit) {
 
         // 현재 시간 기준으로 최근 3일간의 게시물 조회
         LocalDateTime startDate = LocalDateTime.now().minusDays(3);
@@ -41,35 +41,31 @@ public class HomeServiceImpl implements HomeService {
         // 페이지 요청 설정
         Pageable pageable = PageRequest.of(0, limit);
 
-        // 1. 최근 게시물 조회
-        List<Post> posts = postRepository.findRecentPosts(startDate, pageable);
+        // 현재 지역 ID 가져오기
+        long regionId = regionUtil.convertRegionNameToRegionId(locationDto.getRegionName());
+        double latitude = locationDto.getLatitude();
+        double longitude = locationDto.getLongitude();
 
-        // 2. 게시물 ID 리스트 추출
-        List<Long> postIDs = posts.stream()
-                .map(Post::getId)
-                .collect(Collectors.toList());
-
-        // TODO: 3. 카테고리들을 한 번의 쿼리로 조회
-
-        // TODO: 4. 카테고리를 Map으로 변환하여 빠르게 조회할 수 있게 함
-
-        double distanceToPost = 1.0;
-        // double distanceToPost = calculateDistanceToPost();
-
+        // 최근 게시물 조회
+        List<Post> posts = postRepository.findRecentPosts(startDate, regionId, pageable);
 
         return posts.stream().map((post) -> {
-            // TODO: categoryName 추가
-            return NearPostHomeResponseDto.of(post, distanceToPost, "temp");
+
+            // 각 게시물 위치와의 거리 가져오기
+            double distanceToPost = calculateDistanceToPost(post, latitude, longitude);
+            return NearPostHomeResponseDto.of(post, regionId, distanceToPost);
         }).collect(Collectors.toList());
     }
 
     private List<HotPostHomeResponseDto> getHotDisasterPages() {
 
+        return null;
     }
 
-    private double calculateDistanceToPost(double latitude, double longitude) {
+    private double calculateDistanceToPost(Post post, double latitude, double longitude) {
 
-        // TODO: 좌표값에 따라 거리 return 해주기
+        double postLatitude = post.getLatitude();
+        double postLongitude = post.getLongitude();
         return 0;
     }
 }
