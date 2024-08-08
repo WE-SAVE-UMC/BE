@@ -30,7 +30,12 @@ public class HomeServiceImpl implements HomeService {
         List<NearPostHomeResponseDto> nearPosts = getNearDisasterPages(locationDto, 10);
         List<HotPostHomeResponseDto> hotPosts = getHotDisasterPages();
 
-        return null;
+        HomeResponseDto homeResponseDto = HomeResponseDto.builder()
+                .postDtos(nearPosts)
+                .hostPostDtos(hotPosts)
+                .build();
+
+        return ApiResponse.onGetSuccess(homeResponseDto);
     }
 
     private List<NearPostHomeResponseDto> getNearDisasterPages(HomeLocationRequestDto locationDto, int limit) {

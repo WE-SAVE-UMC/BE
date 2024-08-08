@@ -29,8 +29,8 @@ public class HotPostHomeResponseDto {
                 // TODO: AreaID
                 .title(post.getTitle())
                 .hearts(post.getHearts())
-                .createAt(post.getCreatedAt())
-                .imageUrl(post.getImages().isEmpty() ?  null : post.getImages().get(0))
+                .createAt(post.getCreateAt())
+                .imageUrl(post.getImages().isEmpty() ?  null : post.getImages().get(0).getImageUrl())
                 .build();
     }
 }
