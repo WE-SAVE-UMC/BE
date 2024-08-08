@@ -71,4 +71,15 @@ public class UserAuthCommandServiceImpl implements UserAuthCommandService {
     public User findByUserId(long userId) {
         return userRepository.findById(userId).orElse(null);
     }
+
+    @Override
+    public User findByUserPhoneNumber(String phoneNumber) {
+        return userRepository.findByPhoneNum(phoneNumber).isEmpty() ? null : userRepository.findByPhoneNum(phoneNumber).get(0);
+    }
+
+    @Override
+    public User updateUserPassword(User user, String newPassword) {
+        user.setPassword(bCryptPasswordEncoder.encode(newPassword));
+        return userRepository.save(user);
+    }
 }

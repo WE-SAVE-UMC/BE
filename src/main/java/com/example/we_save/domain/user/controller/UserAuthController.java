@@ -149,4 +149,16 @@ public class UserAuthController {
         }
     }
 
+    @Operation(summary = "비밀번호 재설정")
+    @PatchMapping("api/auth/users/password")
+    public ResponseEntity<ApiResponse> changePassword(@RequestBody @Valid UserAuthRequestDto.changePasswordDto request){
+        // 사용자 정보 조회
+        User user = userAuthCommandService.findByUserPhoneNumber(request.getPhoneNum());
+        if (user == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.onFailure("COMMON401","해당 전화번호의 회원이 존재하지 않습니다. 회원가입 해주세요. ",null));
+        }
+        User updateUser = userAuthCommandService.updateUserPassword(user, request.getPassword());
+        return ResponseEntity.ok(ApiResponse.onGetSuccess(UserConverter.toUserIdResultDto(updateUser)));
+    }
+
 }

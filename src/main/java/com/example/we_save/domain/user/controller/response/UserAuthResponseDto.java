@@ -46,5 +46,13 @@ public class UserAuthResponseDto {
         String imageUrl;
         UserStatus status;
     }
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class findUserIdResultDto{
+        Long userId;
+    }
+
 
 }
