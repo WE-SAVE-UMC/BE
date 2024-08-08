@@ -7,6 +7,8 @@ import com.example.we_save.domain.user.entity.NotificationSetting;
 import com.example.we_save.domain.user.entity.User;
 import com.example.we_save.domain.user.repository.NotificationSettingRepository;
 import com.example.we_save.domain.user.repository.UserRepository;
+import io.jsonwebtoken.JwtException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -69,6 +71,23 @@ public class UserAuthCommandServiceImpl implements UserAuthCommandService {
 
     @Override
     public User findByUserId(long userId) {
-        return userRepository.findById(userId).orElse(null);
+        return userRepository.findById(userId);
+    }
+    @Override
+    public User getAuthenticatedUserInfo() {
+        long userId;
+        try {
+            String userIdStr = SecurityContextHolder.getContext().getAuthentication().getName();
+            userId = Long.parseLong(userIdStr);
+        } catch (Exception e) {
+            throw new JwtException("토큰 정보에 해당하는 유저가 없음");
+        }
+
+        User user = this.findByUserId(userId);
+
+        if (user == null) {
+            throw new JwtException("토큰 정보에 해당하는 유저가 없음");
+        }
+        return user;
     }
 }
