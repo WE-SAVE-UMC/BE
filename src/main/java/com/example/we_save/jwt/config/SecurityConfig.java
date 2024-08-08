@@ -4,6 +4,7 @@ package com.example.we_save.jwt.config;
 import com.example.we_save.jwt.JWTFilter;
 import com.example.we_save.jwt.JWTUtil;
 import com.example.we_save.jwt.LoginFilter;
+import com.example.we_save.jwt.exception.CustomAuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,6 +28,7 @@ public class SecurityConfig {
         this.authenticationConfiguration = authenticationConfiguration;
         this.jwtUtil = jwtUtil;
     }
+
 
     //AuthenticationManager Bean 등록
     @Bean
@@ -53,13 +55,14 @@ public class SecurityConfig {
         http
                 .httpBasic((auth) -> auth.disable());
 
+        http.
+                exceptionHandling().authenticationEntryPoint(new CustomAuthenticationEntryPoint());
 
         http
                 .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
         //필터 추가 LoginFilter()는 인자를 받음 (AuthenticationManager() 메소드에 authenticationConfiguration 객체를 넣어야 함) 따라서 등록 필요
         http
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtil), UsernamePasswordAuthenticationFilter.class);
-
 
         http
                 .sessionManagement((session) -> session
