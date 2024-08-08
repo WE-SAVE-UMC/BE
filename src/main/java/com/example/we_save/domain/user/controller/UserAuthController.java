@@ -66,52 +66,18 @@ public class UserAuthController {
     @Operation(summary = "로그인 된 회원 정보(마이페이지-프로필 조회)", security = @SecurityRequirement(name="Authorization"))
     @GetMapping("/api/auth/users")
     public ResponseEntity<ApiResponse> getUserInfo(){
-        long userId;
-        try {
-            // 사용자 ID 추출 및 변환
-            String userIdStr = SecurityContextHolder.getContext().getAuthentication().getName();
-            userId = Long.parseLong(userIdStr);
-        } catch (NumberFormatException e) {
-            // ID가 숫자로 변환 불가능할 경우
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.onFailure("COMMON401", "401 Unauthorized, 인증 정보가 잘못되었습니다.(토큰 미입력, 토큰 정보 오류)", null));
-        }
-
-        User user = userAuthCommandService.findByUserId(userId);
-
-        if (user == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.onFailure("COMMON401","401 Unauthorized, 인증 정보가 잘못되었습니다.(토큰 정보 오류)",user));
-        }
-        else{
-            ApiResponse<UserAuthResponseDto.findUserResultDto> response = ApiResponse.onGetSuccess(UserConverter.toUserResultDto(user));
-            return ResponseEntity.ok(response);
-        }
+        User user = userAuthCommandService.getAuthenticatedUserInfo();
+        ApiResponse<UserAuthResponseDto.findUserResultDto> response = ApiResponse.onGetSuccess(UserConverter.toUserResultDto(user));
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "로그인 된 회원 정보 수정(마이페이지-프로필 수정)", security = @SecurityRequirement(name="Authorization"))
     @PutMapping("/api/auth/users")
     public ResponseEntity<ApiResponse> updateUserInfo(@RequestBody @Valid UserAuthRequestDto.updateUserDto request){
-        long userId;
-        try {
-            // 사용자 ID 추출 및 변환
-            String userIdStr = SecurityContextHolder.getContext().getAuthentication().getName();
-            userId = Long.parseLong(userIdStr);
-        } catch (NumberFormatException e) {
-            // ID가 숫자로 변환 불가능할 경우
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.onFailure("COMMON401", "401 Unauthorized, 인증 정보가 잘못되었습니다.(토큰 미입력, 토큰 정보 오류)", null));
-        }
-
-        // 사용자 정보 조회
-        User user = userAuthCommandService.findByUserId(userId);
-
-        if (user == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.onFailure("COMMON401","401 Unauthorized, 인증 정보가 잘못되었습니다.(토큰 정보 오류)",user));
-        }
-
-        else{
-            User updateUser = userAuthCommandService.updateUser(user,request.getNickname(),request.getImageUrl());
-            ApiResponse<UserAuthResponseDto.findUserResultDto> response = ApiResponse.onGetSuccess(UserConverter.toUserResultDto(updateUser));
-            return ResponseEntity.ok(response);
-        }
+        User user = userAuthCommandService.getAuthenticatedUserInfo();
+        User updateUser = userAuthCommandService.updateUser(user,request.getNickname(),request.getImageUrl());
+        ApiResponse<UserAuthResponseDto.findUserResultDto> response = ApiResponse.onGetSuccess(UserConverter.toUserResultDto(updateUser));
+        return ResponseEntity.ok(response);
     }
 
 

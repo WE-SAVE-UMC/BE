@@ -13,5 +13,5 @@ public interface UserAuthCommandService {
     public Boolean isValidNickname(String nickname);
     public User findByUserId(long userId);
     public User updateUser(User user,String newNickname,String imageUrl);
-
+    public User getAuthenticatedUserInfo();
 }
