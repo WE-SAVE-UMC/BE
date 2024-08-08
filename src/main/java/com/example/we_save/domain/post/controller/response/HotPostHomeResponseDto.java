@@ -15,19 +15,25 @@ import java.time.LocalDateTime;
 public class HotPostHomeResponseDto {
 
     private long postId;
-    private long areaId;
     private String title;
-    private double hearts;
+    private String status;
+    private long regionId;
+    private String regionName;
+    private double distance;
+    private int hearts;
     private LocalDateTime createAt;
 
     private String imageUrl;
 
-    public static HotPostHomeResponseDto of(Post post) {
+    public static HotPostHomeResponseDto of(Post post, double distance) {
 
         return HotPostHomeResponseDto.builder()
                 .postId(post.getId())
-                // TODO: AreaID
                 .title(post.getTitle())
+                .status(post.getStatus().getValue())
+                .regionId(post.getRegion().getId())
+                .regionName(post.getPostRegionName())
+                .distance(distance)
                 .hearts(post.getHearts())
                 .createAt(post.getCreateAt())
                 .imageUrl(post.getImages().isEmpty() ?  null : post.getImages().get(0).getImageUrl())

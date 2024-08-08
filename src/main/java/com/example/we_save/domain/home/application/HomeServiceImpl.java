@@ -28,7 +28,7 @@ public class HomeServiceImpl implements HomeService {
     public ApiResponse<HomeResponseDto> showHomePage(HomeLocationRequestDto locationDto) {
 
         List<NearPostHomeResponseDto> nearPosts = getNearDisasterPages(locationDto, 10);
-        List<HotPostHomeResponseDto> hotPosts = getHotDisasterPages();
+        List<HotPostHomeResponseDto> hotPosts = getHotDisasterPages(locationDto, 10);
 
         HomeResponseDto homeResponseDto = HomeResponseDto.builder()
                 .postDtos(nearPosts)
@@ -62,9 +62,22 @@ public class HomeServiceImpl implements HomeService {
         }).collect(Collectors.toList());
     }
 
-    private List<HotPostHomeResponseDto> getHotDisasterPages() {
+    private List<HotPostHomeResponseDto> getHotDisasterPages(HomeLocationRequestDto locationDto, int limit) {
 
-        return null;
+        LocalDateTime startDate = LocalDateTime.now().minusDays(1);
+        Pageable pageable = PageRequest.of(0, limit);
+
+        long regionId = regionUtil.convertRegionNameToRegionId(locationDto.getRegionName());
+        double latitude = locationDto.getLatitude();
+        double longitude = locationDto.getLongitude();
+
+        List<Post> posts = postRepository.findTopPosts(startDate, pageable);
+
+        return posts.stream().map((post) -> {
+
+            double distanceToPost = calculateDistanceToPost(post, latitude, longitude);
+            return HotPostHomeResponseDto.of(post, distanceToPost);
+        }).collect(Collectors.toList());
     }
 
     private double calculateDistanceToPost(Post post, double latitude, double longitude) {

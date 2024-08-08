@@ -16,4 +16,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findRecentPosts(@Param("startDate") LocalDateTime startDate,
                                @Param("regionId") Long regionId,
                                Pageable pageable);
+
+    // 인기순으로 N개의 게시물 조회
+    @Query("SELECT p FROM Post p WHERE p.createAt >= :startDate ORDER BY p.hearts DESC")
+    List<Post> findTopPosts(@Param("startDate") LocalDateTime startDate,
+                               Pageable pageable);
 }
