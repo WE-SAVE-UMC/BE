@@ -1,5 +1,6 @@
 package com.example.we_save.domain.post.entity;
 
+import com.example.we_save.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,9 +15,11 @@ public class PostDislike {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long postId;
+    @ManyToOne
+    @JoinColumn(name = "post_id", nullable = false)
+    private Post post;
 
-    @Column(nullable = false)
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 }

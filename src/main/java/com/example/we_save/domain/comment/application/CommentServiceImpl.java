@@ -8,6 +8,7 @@ import com.example.we_save.domain.comment.controller.response.CommentResponseDto
 import com.example.we_save.domain.comment.entity.Comment;
 import com.example.we_save.domain.comment.entity.CommentImage;
 import com.example.we_save.domain.comment.entity.CommentReport;
+import com.example.we_save.domain.comment.repository.CommentImageRepository;
 import com.example.we_save.domain.comment.repository.CommentReportRepository;
 import com.example.we_save.domain.comment.repository.CommentRepository;
 import com.example.we_save.domain.post.entity.Post;
@@ -35,6 +36,12 @@ public class CommentServiceImpl implements CommentService {
 
     @Autowired
     private CommentReportRepository commentReportRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private CommentImageRepository commentImageRepository;
 
     private static final int MAX_IMAGE_COUNT = 10;
     private static final int MAX_REPORT_COUNT = 10;
@@ -78,10 +85,10 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new EntityNotFoundException("댓글을 찾을 수 없습니다."));
 
-
         Post post = postRepository.findById(commentRequestDto.getPostId())
                 .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
-        User user = User.builder().id(commentRequestDto.getUserId()).build();
+        User user = userRepository.findById(commentRequestDto.getUserId()) // <- 이 부분
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다.")); // <- 이 부분
 
         if (!comment.getPost().equals(post)) {
             return ApiResponse.onFailure(ErrorStatus._BAD_REQUEST.getCode(), ErrorStatus._BAD_REQUEST.getMessage(), null);
@@ -138,9 +145,16 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public ApiResponse<Void> reportComment(Long commentId, Long userId) {
+        Optional<Comment> optionalComment = commentRepository.findById(commentId);
 
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
+        if (!optionalComment.isPresent()) {
+            return ApiResponse.onFailure(ErrorStatus._BAD_REQUEST.getCode(), "잘못된 요청입니다.", null);
+        }
+
+        Comment comment = optionalComment.get();
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
 
         if (commentReportRepository.existsByCommentIdAndUserId(commentId, userId)) {
             return ApiResponse.onFailure(ErrorStatus._ALREADY_REPORTED.getCode(), ErrorStatus._ALREADY_REPORTED.getMessage(), null);
@@ -148,13 +162,20 @@ public class CommentServiceImpl implements CommentService {
 
         CommentReport report = CommentReport.builder()
                 .comment(comment)
-                .user(User.builder().id(userId).build())
+                .user(user)
                 .build();
         commentReportRepository.save(report);
 
         int reportCount = commentReportRepository.countByCommentId(commentId);
 
         if (reportCount >= MAX_REPORT_COUNT) {
+
+            // 관련 comment_report 레코드 삭제
+            commentReportRepository.deleteByCommentId(commentId);
+
+            // 관련 comment_image 레코드 삭제
+            commentImageRepository.deleteByCommentId(commentId);
+
             commentRepository.delete(comment);
 
             Post post = comment.getPost();

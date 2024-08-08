@@ -3,6 +3,7 @@ package com.example.we_save.domain.post.entity;
 import com.example.we_save.apiPayload.code.BaseEntity;
 import com.example.we_save.domain.region.entity.EupmyeondongRegion;
 import com.example.we_save.domain.user.entity.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,6 +20,7 @@ public class Post extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
+    @JsonIgnore
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)

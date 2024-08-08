@@ -18,11 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 public class PostResponseDtoWithComments {
     private Long id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
-
+    private Long userId;
     private Category category;
     private String title;
     private String content;

@@ -62,6 +62,10 @@ public class PostServiceImpl implements PostService {
         User user = userRepository.findById(postRequestDto.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
 
+        if (postRequestDto.getCategory() == null) {
+            throw new IllegalArgumentException("카테고리는 필수 입력 사항입니다.");
+        }
+
 
         Post post = Post.builder()
                 .user(user)
@@ -87,7 +91,7 @@ public class PostServiceImpl implements PostService {
         Post savedPost = postRepository.save(post);
 
         PostResponseDto responseDto = new PostResponseDto();
-        responseDto.setPost(savedPost);
+        responseDto.setPostId(savedPost.getId());
 
         return ApiResponse.onPostSuccess(responseDto, SuccessStatus._POST_OK);
     }
@@ -104,6 +108,7 @@ public class PostServiceImpl implements PostService {
         if (postRequestDto.getImages().size() > MAX_IMAGE_COUNT) {
             throw new IllegalArgumentException("최대 10개의 이미지만 첨부할 수 있습니다.");
         }
+
         Post post = optionalPost.get();
 
         post.setCategory(postRequestDto.getCategory());
@@ -112,20 +117,38 @@ public class PostServiceImpl implements PostService {
         post.setStatus(PostStatus.PROCESSING);
         post.setReport119(postRequestDto.isReport119());
 
-        post.getImages().clear();
-        List<PostImage> postImages = postRequestDto.getImages().stream()
-                .map(imageUrl -> PostImage.builder().imageUrl(imageUrl).post(post).build())
-                .collect(Collectors.toList());
-        post.setImages(postImages);
+        List<String> newImageUrls = postRequestDto.getImages();
+        List<PostImage> existingImages = post.getImages();
+
+        // 새로운 이미지 URL 목록에 맞춰 기존 PostImage 객체의 URL 업데이트
+        for (int i = 0; i < existingImages.size(); i++) {
+            if (i < newImageUrls.size()) {
+                existingImages.get(i).setImageUrl(newImageUrls.get(i));
+            }
+        }
+
+        // 만약 새로운 이미지 URL이 기존 이미지 수보다 많으면, 추가 이미지 생성
+        for (int i = existingImages.size(); i < newImageUrls.size(); i++) {
+            PostImage newImage = PostImage.builder().imageUrl(newImageUrls.get(i)).post(post).build();
+            post.getImages().add(newImage);
+        }
+
+        // 만약 새로운 이미지 URL이 기존 이미지 수보다 적으면, 여분의 이미지를 삭제
+        if (newImageUrls.size() < existingImages.size()) {
+            for (int i = newImageUrls.size(); i < existingImages.size(); i++) {
+                post.getImages().remove(i);
+            }
+        }
 
         Post updatedPost = postRepository.save(post);
 
         PostResponseDto responseDto = new PostResponseDto();
-        responseDto.setPost(updatedPost);
+        responseDto.setPostId(updatedPost.getId());
 
         return ApiResponse.onPostSuccess(responseDto, SuccessStatus._POST_OK);
-
     }
+
+
 
     @Override
     @Transactional
@@ -143,7 +166,7 @@ public class PostServiceImpl implements PostService {
         postRepository.delete(postToDelete);
 
         PostResponseDto responseDto = new PostResponseDto();
-        responseDto.setPost(postToDelete);
+        responseDto.setPostId(postId);
 
         return ApiResponse.onDeleteSuccess(responseDto);
     }
@@ -178,7 +201,7 @@ public class PostServiceImpl implements PostService {
 
         PostResponseDtoWithComments responseDto = PostResponseDtoWithComments.builder()
                 .id(post.getId())
-                .user(post.getUser())
+                .userId(post.getUser().getId())
                 .category(post.getCategory())
                 .title(post.getTitle())
                 .content(post.getContent())
@@ -205,21 +228,30 @@ public class PostServiceImpl implements PostService {
         Optional<Post> optionalPost = postRepository.findById(postId);
 
         if (!optionalPost.isPresent()) {
-            return ApiResponse.onFailure( ErrorStatus._ARTICLE_NOT_FOUND.getCode(), ErrorStatus._ARTICLE_NOT_FOUND.getMessage(), null);
+            return ApiResponse.onFailure(ErrorStatus._BAD_REQUEST.getCode(), "잘못된 요청입니다.", null);
         }
 
+        Post post = optionalPost.get();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+
+        // 이미 해당 사용자가 해당 게시글에 대해 신고했는지 확인
         if (postReportRepository.existsByPostIdAndUserId(postId, userId)) {
             return ApiResponse.onFailure(ErrorStatus._ALREADY_REPORTED.getCode(), ErrorStatus._ALREADY_REPORTED.getMessage(), null);
         }
+        PostReport report = PostReport.builder()
+                .post(post)
+                .user(user)
+                .build();
 
-        PostReport report = new PostReport();
-        report.setPostId(postId);
-        report.setUserId(userId);
         postReportRepository.save(report);
 
         int reportCount = postReportRepository.countByPostId(postId);
 
         if (reportCount >= MAX_REPORT_COUNT) {
+            postDislikeRepository.deleteByPostId(postId);
+            postHeartRepository.deleteByPostId(postId);
+            postReportRepository.deleteByPostId(postId);
             commentRepository.deleteByPostId(postId);
             postRepository.deleteById(postId);
             return ApiResponse.onReportSuccess(null);
@@ -231,29 +263,32 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public ApiResponse<Void> toggleHeart(Long postId, Long userId){
-        Optional<Post> optionalPost = postRepository.findById(postId);
-        if (!optionalPost.isPresent()) {
-            return ApiResponse.onFailure(ErrorStatus._ARTICLE_NOT_FOUND.getCode(),ErrorStatus._ARTICLE_NOT_FOUND.getMessage(), null);
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
+
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+
+        // 이미 "허위에요"를 누른 경우
+        if (postDislikeRepository.existsByPostIdAndUserId(postId, userId)){
+            return ApiResponse.onFailure(ErrorStatus._ALREADY_REPORTED.getCode(), "이미 '허위에요'를 누르셨습니다.", null);
         }
 
-        Post post = optionalPost.get();
-
-        // 이미 허위에요 를 누른 경우
-        if(postDislikeRepository.existsByPostIdAndUserId(postId, userId)){
-            return ApiResponse.onFailure(ErrorStatus._ALREADY_REPORTED.getCode(), "이미 '허위에요'를 누르셨습니다.", null );
-        }
-
-        //이미 확인했어요 를 누른 경우 취소, 확인했어요 등록
-        if(postHeartRepository.existsByPostIdAndUserId(postId, userId)){
+        // 이미 "확인했어요"를 누른 경우, 취소
+        if (postHeartRepository.existsByPostIdAndUserId(postId, userId)) {
             postHeartRepository.deleteByPostIdAndUserId(postId, userId);
             post.setHearts(post.getHearts() - 1);
             postRepository.save(post);
             return ApiResponse.onCancelSuccess(null);
         } else {
-            PostHeart heart = new PostHeart();
-            heart.setPostId(postId);
-            heart.setUserId(userId);
+            PostHeart heart = PostHeart.builder()
+                    .post(post)
+                    .user(user)
+                    .build();
             postHeartRepository.save(heart);
+
             post.setHearts(post.getHearts() + 1);
             postRepository.save(post);
 
@@ -264,34 +299,34 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public ApiResponse<Void> toggleDislike(Long postId, Long userId) {
-        Optional<Post> optionalPost = postRepository.findById(postId);
-        if (!optionalPost.isPresent()) {
-            return ApiResponse.onFailure(ErrorStatus._ARTICLE_NOT_FOUND.getCode(), ErrorStatus._ARTICLE_NOT_FOUND.getMessage(), null);
-        }
-        Post post = optionalPost.get();
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
 
-        // 이미 확인했어요 를 누른 경우
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+
+        // 이미 "확인했어요"를 누른 경우
         if (postHeartRepository.existsByPostIdAndUserId(postId, userId)) {
             return ApiResponse.onFailure(ErrorStatus._ALREADY_REPORTED.getCode(), "이미 '확인했어요'를 누르셨습니다.", null);
         }
 
-        // 이미 허위에요 를 누른 경우 취소, 허위에요 등록
+        // 이미 "허위에요"를 누른 경우, 취소
         if (postDislikeRepository.existsByPostIdAndUserId(postId, userId)) {
             postDislikeRepository.deleteByPostIdAndUserId(postId, userId);
             post.setDislikes(post.getDislikes() - 1);
             postRepository.save(post);
-
             return ApiResponse.onCancelSuccess(null);
         } else {
-            PostDislike dislike = new PostDislike();
-            dislike.setPostId(postId);
-            dislike.setUserId(userId);
+            PostDislike dislike = PostDislike.builder()
+                    .post(post)
+                    .user(user)
+                    .build();
             postDislikeRepository.save(dislike);
+
             post.setDislikes(post.getDislikes() + 1);
             postRepository.save(post);
 
             return ApiResponse.onPostSuccess(null, SuccessStatus._POST_OK);
-
         }
     }
 }

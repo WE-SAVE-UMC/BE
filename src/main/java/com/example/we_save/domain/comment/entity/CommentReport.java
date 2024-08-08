@@ -27,7 +27,4 @@ public class CommentReport {
     @ManyToOne
     @JoinColumn(name = "comment_id", nullable = false)
     private Comment comment;
-
-    @Column(nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
 }
