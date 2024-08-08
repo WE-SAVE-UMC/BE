@@ -15,27 +15,24 @@ import java.time.LocalDateTime;
 public class NearPostHomeResponseDto {
 
     private long postId;
-    private long areaId;
+    private long regionId;
     private double distance;
     private int hearts;
     private LocalDateTime createAt;
 
     private String imageUrl;
 
-    private long categoryId;
     private String categoryName;
 
-    // TODO: 정적메서드 of 구현
-    public static NearPostHomeResponseDto of(Post post, double distance, String categoryName) {
+    public static NearPostHomeResponseDto of(Post post, long regionId, double distance) {
 
         return NearPostHomeResponseDto.builder()
                 .postId(post.getId())
-                // TODO: AreaID
+                .regionId(regionId)
                 .distance(distance)
                 .hearts(post.getHearts())
-                .createAt(post.getCreatedAt())
-                .imageUrl(post.getImages().isEmpty() ?  null : post.getImages().get(0))
-                .categoryId(post.getCategoryId())
-                .categoryName(categoryName).build();
+                .createAt(post.getCreateAt())
+                .imageUrl(post.getImages().isEmpty() ?  null : post.getImages().get(0).getImageUrl())
+                .categoryName(post.getCategory().getValue()).build();
     }
 }
