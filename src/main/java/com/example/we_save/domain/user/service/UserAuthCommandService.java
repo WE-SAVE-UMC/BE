@@ -12,4 +12,6 @@ public interface UserAuthCommandService {
     public Boolean isValidPhoneNumber(String phoneNumber);
     public Boolean isValidNickname(String nickname);
     public User findByUserId(long userId);
+    public User updateUser(User user,String newNickname,String imageUrl);
+
 }

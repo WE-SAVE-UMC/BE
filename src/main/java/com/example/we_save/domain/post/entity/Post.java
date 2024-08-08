@@ -3,11 +3,13 @@ package com.example.we_save.domain.post.entity;
 import com.example.we_save.apiPayload.code.BaseEntity;
 import com.example.we_save.domain.region.entity.EupmyeondongRegion;
 import com.example.we_save.domain.user.entity.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -22,20 +24,21 @@ public class Post extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
+    @JsonIgnore
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "region_id")
     private EupmyeondongRegion region;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Category category;
 
     @Column(nullable = false, length = 100)
     private String title;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(nullable = false,length = 300, columnDefinition = "TEXT")
     private String content;
 
     @Enumerated(EnumType.STRING)
@@ -60,8 +63,8 @@ public class Post extends BaseEntity {
     @Column(nullable = false)
     private int comments;
 
-    @ElementCollection
-    private List<String> images;
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostImage> images= new ArrayList<>();
 
     @Column(nullable = false)
     private boolean report119;

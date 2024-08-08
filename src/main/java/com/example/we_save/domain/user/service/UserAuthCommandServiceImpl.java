@@ -51,6 +51,13 @@ public class UserAuthCommandServiceImpl implements UserAuthCommandService {
     }
 
     @Override
+    public User updateUser(User user, String newNickname, String newImageUrl ) {
+        user.setImageUrl(newNickname);
+        user.setNickname(newImageUrl);
+        return userRepository.save(user);
+    }
+
+    @Override
     public Boolean isValidPhoneNumber(String phoneNumber) {
         return !userRepository.existsByPhoneNum(phoneNumber);
     }
