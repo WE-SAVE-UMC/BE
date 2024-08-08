@@ -41,6 +41,12 @@ public class RegionUtil {
 
     public long convertRegionNameToRegionId(String regionName) {
 
+        // regionName의 세부 주소까지 입력으로 들어올 경우 예외처리
+        String regionParts[] = regionName.split("\\s+");
+        if (regionParts.length > 3) {
+            regionName = regionParts[0] + " " + regionParts[1] + " " + regionParts[2];
+        }
+
         EupmyeondongRegion eupmyeondongRegion = eupmyeondongRepository.findByRegionFullName(regionName)
                 .orElseThrow(() -> new EntityNotFoundException("Region not found"));
 
