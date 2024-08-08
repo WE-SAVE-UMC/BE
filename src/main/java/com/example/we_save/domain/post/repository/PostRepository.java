@@ -12,8 +12,8 @@ import java.util.List;
 public interface PostRepository extends JpaRepository<Post, Long> {
 
     // 생성 시간 기준으로 최근 N개의 게시물 조회
-    @Query("SELECT p FROM Post p WHERE p.createdAt >= :startDate AND p.areaId = :areaId ORDER BY p.createdAt DESC")
+    @Query("SELECT p FROM Post p WHERE p.createAt >= :startDate AND p.region = :regionId ORDER BY p.createAt DESC")
     List<Post> findRecentPosts(@Param("startDate") LocalDateTime startDate,
-                               @Param("areaId") Long areaId,
+                               @Param("regionId") Long regionId,
                                Pageable pageable);
 }
