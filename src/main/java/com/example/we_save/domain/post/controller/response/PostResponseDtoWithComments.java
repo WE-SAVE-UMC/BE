@@ -7,6 +7,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.*;
+import com.example.we_save.domain.post.entity.PostStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,7 +23,7 @@ public class PostResponseDtoWithComments {
     private Category category;
     private String title;
     private String content;
-    private String status;
+    private PostStatus status;
     private double longitude;
     private double latitude;
     private String postRegionName;
