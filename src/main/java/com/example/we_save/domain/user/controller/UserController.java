@@ -6,9 +6,7 @@ import com.example.we_save.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -24,5 +22,19 @@ public class UserController {
     public ResponseEntity<ApiResponse<List<UserPostResponseDto>>> getMyPosts() {
 
         return ResponseEntity.ok(userService.getMyPosts());
+    }
+
+    @Operation(summary = "마이페이지 게시물 상황종료 처리")
+    @PutMapping("/posts/{postId}")
+    public ResponseEntity<ApiResponse<Void>> updatePostCompleted(@PathVariable("postId") long postId) {
+
+        return ResponseEntity.ok(userService.updatePostCompleted(postId));
+    }
+
+    @Operation(summary = "마이페이지 게시물 삭제")
+    @DeleteMapping("/posts/{postId}")
+    public ResponseEntity<ApiResponse<Void>> deletePost(@PathVariable("postId") long postId) {
+
+        return ResponseEntity.ok(userService.deletePost(postId));
     }
 }

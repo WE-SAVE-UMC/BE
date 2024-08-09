@@ -8,4 +8,6 @@ import java.util.List;
 public interface UserService {
 
     ApiResponse<List<UserPostResponseDto>> getMyPosts();
+    ApiResponse<Void> updatePostCompleted(long postId);
+    ApiResponse<Void> deletePost(long postId);
 }
