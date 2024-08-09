@@ -9,21 +9,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/api/posts")
+@RequestMapping("/api")
 public class PostController {
 
     @Autowired
     private PostService postService;
 
-    @PostMapping
+    @PostMapping("/posts")
     public ResponseEntity<ApiResponse<PostResponseDto>> createPost(
             @RequestBody PostRequestDto postRequestDto) {
         ApiResponse<PostResponseDto> responseDto = postService.createPost(postRequestDto);
         return ResponseEntity.ok(responseDto);
     }
 
-    @PutMapping("/{postId}")
+    @PutMapping("/posts/{postId}")
     public ResponseEntity<ApiResponse<PostResponseDto>> updatePost(
             @PathVariable("postId") Long postId,
             @RequestBody PostRequestDto postRequestDto) {
@@ -31,21 +33,21 @@ public class PostController {
         return ResponseEntity.ok(responseDto);
     }
 
-    @DeleteMapping("/{postId}")
+    @DeleteMapping("/posts/{postId}")
     public ResponseEntity<ApiResponse<PostResponseDto>> deletePost(
             @PathVariable("postId") Long postId) {
         ApiResponse<PostResponseDto> responseDto = postService.deletePost(postId);
         return ResponseEntity.ok(responseDto);
     }
 
-    @GetMapping("/{postId}")
+    @GetMapping("/posts/{postId}")
     public ResponseEntity<ApiResponse<PostResponseDtoWithComments>> getPost(
             @PathVariable("postId") Long postId){
         ApiResponse<PostResponseDtoWithComments> responseDto = postService.getPost(postId);
         return ResponseEntity.ok(responseDto);
     }
 
-    @PostMapping("/{postId}/report")
+    @PostMapping("/posts/{postId}/report")
     public ResponseEntity<ApiResponse<Void>> reportPost(
             @PathVariable("postId") Long postId,
             @RequestParam("userId") Long userId) {
@@ -53,7 +55,7 @@ public class PostController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/{postId}/heart")
+    @PostMapping("/posts/{postId}/heart")
     public ResponseEntity<ApiResponse<Void>> toggleHeart(
             @PathVariable("postId") Long postId,
             @RequestParam("userId") Long userId) {
@@ -61,7 +63,7 @@ public class PostController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/{postId}/dislike")
+    @PostMapping("/posts/{postId}/dislike")
     public ResponseEntity<ApiResponse<Void>> toggleDislike(
             @PathVariable("postId") Long postId,
             @RequestParam("userId") Long userId) {

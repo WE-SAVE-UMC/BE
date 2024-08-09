@@ -3,6 +3,7 @@ package com.example.we_save.domain.post.applicaiton;
 import com.example.we_save.apiPayload.ApiResponse;
 import com.example.we_save.apiPayload.code.status.ErrorStatus;
 import com.example.we_save.apiPayload.code.status.SuccessStatus;
+import com.example.we_save.apiPayload.util.RegionUtil;
 import com.example.we_save.domain.comment.controller.response.CommentDto;
 import com.example.we_save.domain.comment.entity.Comment;
 import com.example.we_save.domain.comment.entity.CommentImage;
@@ -11,11 +12,7 @@ import com.example.we_save.domain.post.controller.request.PostRequestDto;
 import com.example.we_save.domain.post.controller.response.PostResponseDto;
 import com.example.we_save.domain.post.controller.response.PostResponseDtoWithComments;
 import com.example.we_save.domain.post.entity.*;
-import com.example.we_save.domain.post.repository.PostDislikeRepository;
-import com.example.we_save.domain.post.repository.PostHeartRepository;
-import com.example.we_save.domain.post.repository.PostReportRepository;
-import com.example.we_save.domain.post.repository.PostRepository;
-import com.example.we_save.domain.region.entity.EupmyeondongRegion;
+import com.example.we_save.domain.post.repository.*;
 import com.example.we_save.domain.region.repository.EupmyeondongRepository;
 import com.example.we_save.domain.user.entity.User;
 import com.example.we_save.domain.user.repository.UserRepository;
@@ -24,7 +21,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -49,6 +45,9 @@ public class PostServiceImpl implements PostService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private PostImageRepository postImageRepository;
 
     private static final int MAX_IMAGE_COUNT = 10;
     private static final int MAX_REPORT_COUNT = 10;
@@ -99,17 +98,12 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public ApiResponse<PostResponseDto> updatePost(Long postId, PostRequestDto postRequestDto) {
-        Optional<Post> optionalPost = postRepository.findById(postId);
-
-        if (!optionalPost.isPresent()) {
-            return ApiResponse.onFailure(ErrorStatus._ARTICLE_NOT_FOUND.getCode(), ErrorStatus._ARTICLE_NOT_FOUND.getMessage(), null);
-        }
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
 
         if (postRequestDto.getImages().size() > MAX_IMAGE_COUNT) {
             throw new IllegalArgumentException("최대 10개의 이미지만 첨부할 수 있습니다.");
         }
-
-        Post post = optionalPost.get();
 
         post.setCategory(postRequestDto.getCategory());
         post.setTitle(postRequestDto.getTitle());
@@ -117,28 +111,32 @@ public class PostServiceImpl implements PostService {
         post.setStatus(PostStatus.PROCESSING);
         post.setReport119(postRequestDto.isReport119());
 
-        List<String> newImageUrls = postRequestDto.getImages();
-        List<PostImage> existingImages = post.getImages();
+        List<String> existingImageUrls = post.getImages().stream()
+                .map(PostImage::getImageUrl)
+                .collect(Collectors.toList());
 
-        // 새로운 이미지 URL 목록에 맞춰 기존 PostImage 객체의 URL 업데이트
-        for (int i = 0; i < existingImages.size(); i++) {
-            if (i < newImageUrls.size()) {
-                existingImages.get(i).setImageUrl(newImageUrls.get(i));
+        List<String> imagesToDelete = existingImageUrls.stream()
+                .filter(url -> postRequestDto.getImages().contains("") || !postRequestDto.getImages().contains(url))
+                .collect(Collectors.toList());
+
+        imagesToDelete.forEach(url -> {
+            PostImage imageToDelete = post.getImages().stream()
+                    .filter(image -> image.getImageUrl().equals(url))
+                    .findFirst()
+                    .orElse(null);
+            if (imageToDelete != null) {
+                post.getImages().remove(imageToDelete);
+                postImageRepository.delete(imageToDelete);
             }
-        }
+        });
 
-        // 만약 새로운 이미지 URL이 기존 이미지 수보다 많으면, 추가 이미지 생성
-        for (int i = existingImages.size(); i < newImageUrls.size(); i++) {
-            PostImage newImage = PostImage.builder().imageUrl(newImageUrls.get(i)).post(post).build();
-            post.getImages().add(newImage);
-        }
+        List<PostImage> updatedImages = postRequestDto.getImages().stream()
+                .filter(imageUrl -> !imageUrl.isEmpty())  // 빈 문자열 이미지는 추가하지 않음
+                .map(imageUrl -> PostImage.builder().imageUrl(imageUrl).post(post).build())
+                .collect(Collectors.toList());
 
-        // 만약 새로운 이미지 URL이 기존 이미지 수보다 적으면, 여분의 이미지를 삭제
-        if (newImageUrls.size() < existingImages.size()) {
-            for (int i = newImageUrls.size(); i < existingImages.size(); i++) {
-                post.getImages().remove(i);
-            }
-        }
+        post.getImages().clear();
+        post.getImages().addAll(updatedImages);
 
         Post updatedPost = postRepository.save(post);
 
@@ -147,7 +145,6 @@ public class PostServiceImpl implements PostService {
 
         return ApiResponse.onPostSuccess(responseDto, SuccessStatus._POST_OK);
     }
-
 
 
     @Override
@@ -162,6 +159,10 @@ public class PostServiceImpl implements PostService {
         Post postToDelete = optionalPost.get();
 
         commentRepository.deleteByPostId(postId);
+
+        postHeartRepository.deleteByPostId(postId);
+
+        postDislikeRepository.deleteByPostId(postId);
 
         postRepository.delete(postToDelete);
 
@@ -184,6 +185,11 @@ public class PostServiceImpl implements PostService {
 
         // 모든 댓글 가져오기
         List<Comment> comments = commentRepository.findByPostId(postId);
+
+        int totalImageCount = comments.stream()
+                .mapToInt(comment -> comment.getImages().size())
+                .sum();
+
         //댓글을 commentdto 로 변환
         List<CommentDto> commentDtos = comments.stream().map(comment -> {
             CommentDto dto = new CommentDto();
@@ -205,12 +211,14 @@ public class PostServiceImpl implements PostService {
                 .category(post.getCategory())
                 .title(post.getTitle())
                 .content(post.getContent())
+                .status(post.getStatus())
                 .longitude(post.getLongitude())
                 .latitude(post.getLatitude())
                 .postRegionName(post.getPostRegionName())
                 .hearts(post.getHearts())
                 .dislikes(post.getDislikes())
                 .comments(comments.size())
+                .imageCount(totalImageCount)
                 .createdAt(post.getCreateAt())
                 .updatedAt(post.getUpdateAt())
                 .images(post.getImages().stream()
