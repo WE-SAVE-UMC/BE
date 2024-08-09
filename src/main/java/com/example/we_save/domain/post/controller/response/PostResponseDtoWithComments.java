@@ -30,6 +30,7 @@ public class PostResponseDtoWithComments {
     private int hearts;
     private int dislikes;
     private int comments;
+    private int imageCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<String> images;

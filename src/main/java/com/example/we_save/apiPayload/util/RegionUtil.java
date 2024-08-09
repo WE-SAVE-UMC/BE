@@ -10,6 +10,8 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+
 @Service
 @RequiredArgsConstructor
 public class RegionUtil {
@@ -38,7 +40,7 @@ public class RegionUtil {
                 sidoRegion.getRegionName(),
                 sigunguRegion.getRegionName(),
                 eupmyeondongRegion.getRegionName()
-                ).trim();
+        ).trim();
     }
 
     public long convertRegionNameToRegionId(String regionName) {
