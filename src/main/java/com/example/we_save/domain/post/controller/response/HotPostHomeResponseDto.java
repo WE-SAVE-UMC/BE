@@ -1,5 +1,6 @@
 package com.example.we_save.domain.post.controller.response;
 
+import com.example.we_save.apiPayload.util.RegionUtil;
 import com.example.we_save.domain.post.entity.Post;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,16 +28,18 @@ public class HotPostHomeResponseDto {
 
     public static HotPostHomeResponseDto of(Post post, double distance) {
 
+        String imageUrl = post.getImages().isEmpty() ? null : post.getImages().get(0).getImageUrl();
+
         return HotPostHomeResponseDto.builder()
                 .postId(post.getId())
                 .title(post.getTitle())
                 .status(post.getStatus().getValue())
                 .regionId(post.getRegion().getId())
-                .regionName(post.getPostRegionName())
+                .regionName(RegionUtil.extractRegionBeforeSecondSpace(post.getPostRegionName()))
                 .distance(distance)
                 .hearts(post.getHearts())
                 .createAt(post.getCreateAt())
-                .imageUrl(post.getImages().isEmpty() ?  null : post.getImages().get(0).getImageUrl())
+                .imageUrl(imageUrl)
                 .build();
     }
 }

@@ -67,4 +67,32 @@ public class RegionUtil {
 
         return EARTH_RADIUS_KM * c;
     }
+
+    public static String extractRegionBeforeSecondSpace(String fullRegionName) {
+
+        String[] parts = fullRegionName.split("\\s+"); // 최대 3개의 부분으로 분리
+        if (parts.length < 2) {
+            throw new IllegalArgumentException();
+        }
+
+        return parts[0] + " " + parts[1];
+    }
+
+    public static String extractRegionAfterSecondSpace(String fullRegionName) {
+
+        String[] parts = fullRegionName.split("\\s+"); // 최대 3개의 부분으로 분리
+        if (parts.length < 2) {
+            throw new IllegalArgumentException();
+        }
+
+        StringBuilder regionName = new StringBuilder();
+        for (int i = 2; i < parts.length; i++) {
+            if (i > 2) {
+                regionName.append(" "); // 각 부분 사이에 공백 추가
+            }
+            regionName.append(parts[i]);
+        }
+
+        return regionName.toString();
+    }
 }
