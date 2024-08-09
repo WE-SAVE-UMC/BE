@@ -11,10 +11,9 @@ import com.example.we_save.domain.region.entity.HeartRegion;
 import com.example.we_save.domain.region.repository.EupmyeondongRepository;
 import com.example.we_save.domain.region.repository.HeartRegionRepository;
 import com.example.we_save.domain.user.entity.User;
-import com.example.we_save.domain.user.repository.UserRepository;
+import com.example.we_save.domain.user.service.UserAuthCommandService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,13 +26,13 @@ public class HeartServiceImpl implements HeartService {
 
     private final HeartRegionRepository heartRegionRepository;
     private final EupmyeondongRepository eupmyeondongRepository;
-    private final UserRepository userRepository;
+    private final UserAuthCommandService userAuthService;
     private final RegionUtil regionUtil;
 
     @Override
     public ApiResponse<List<HeartRegionResponseDto>> lookupHeartRegion() {
 
-        User user = getUserByJWT();
+        User user = userAuthService.getAuthenticatedUserInfo();
 
         List<HeartRegion> heartRegions = heartRegionRepository.findAllByUser(user);
 
@@ -52,7 +51,7 @@ public class HeartServiceImpl implements HeartService {
     @Transactional
     public ApiResponse<RegionIdResponseDto> insertHeartRegion(RegionNameRequestDto regionNameDto) {
 
-        User user = getUserByJWT();
+        User user = userAuthService.getAuthenticatedUserInfo();
 
         long regionId = regionUtil.convertRegionNameToRegionId(regionNameDto.getRegionName());
 
@@ -84,7 +83,7 @@ public class HeartServiceImpl implements HeartService {
     @Override
     public ApiResponse<Void> deleteHeartRegion(long regionId) {
 
-        User user = getUserByJWT();
+        User user = userAuthService.getAuthenticatedUserInfo();
 
         EupmyeondongRegion region = eupmyeondongRepository.findById(regionId)
                 .orElseThrow(() -> new EntityNotFoundException("Region not found"));
@@ -95,15 +94,5 @@ public class HeartServiceImpl implements HeartService {
         heartRegionRepository.delete(heartRegion);
 
         return ApiResponse.onDeleteSuccess(null);
-    }
-
-    private User getUserByJWT() {
-
-        // TODO: JWT 헤더에서 현재 로그인한 User Id 가져오기 -> 함수로 변환
-        String userIdStr = SecurityContextHolder.getContext().getAuthentication().getName();
-        long userId = Long.parseLong(userIdStr);
-
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
     }
 }
