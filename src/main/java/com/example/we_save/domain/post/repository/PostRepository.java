@@ -20,16 +20,19 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     // 인기순으로 N개의 게시물 조회
     @Query("SELECT p FROM Post p WHERE p.createAt >= :startDate ORDER BY p.hearts DESC")
     List<Post> findTopPosts(@Param("startDate") LocalDateTime startDate,
-                               Pageable pageable);
+                            Pageable pageable);
 
     // 인기순으로 N개의 사건 사고 게시물 조회
     @Query("SELECT p FROM Post p WHERE p.createAt >= :startDate AND p.region.id = :regionId ORDER BY p.hearts DESC")
     List<Post> findTopNearPosts(@Param("startDate") LocalDateTime startDate,
-                               @Param("regionId") Long regionId,
-                               Pageable pageable);
+                                @Param("regionId") Long regionId,
+                                Pageable pageable);
 
     // 거리순으로 N개의 사건 사고 게시물 조회
     @Query("SELECT p FROM Post p WHERE p.region.id = :regionId ORDER BY ST_Distance_Sphere(POINT(p.longitude, p.latitude), POINT(:longitude, :latitude))")
     List<Post> findDistanceNearPosts(@Param("regionId") Long regionId,
-            @Param("longitude") double longitude, @Param("latitude") double latitude, Pageable pageable);
+                                     @Param("longitude") double longitude, @Param("latitude") double latitude, Pageable pageable);
+
+    @Query("SELECT p FROM Post p WHERE p.user.id = :userId ORDER BY p.createAt DESC")
+    List<Post> findAllByUser(@Param("userId") Long userId);
 }
