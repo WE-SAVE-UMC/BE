@@ -6,4 +6,8 @@ import com.example.we_save.domain.ads.controller.response.AdsResponseDto;
 
 public interface AdsService {
     ApiResponse<AdsResponseDto> createAds(AdsRequestDto adsRequestDto);
+
+    ApiResponse<AdsResponseDto> updateAds(Long adId, AdsRequestDto adsRequestDto);
+
+    ApiResponse<Void> deleteAds(Long adId);
 }

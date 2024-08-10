@@ -21,4 +21,19 @@ public class AdsController {
         ApiResponse<AdsResponseDto> responseDto = adsService.createAds(adsRequestDto);
         return ResponseEntity.status(201).body(responseDto);
     }
+
+    @PutMapping("/{adId}")
+    public ResponseEntity<ApiResponse<AdsResponseDto>> updateAds(
+            @PathVariable("adId") Long adId,
+            @RequestBody AdsRequestDto adsRequestDto) {
+        ApiResponse<AdsResponseDto> responseDto = adsService.updateAds(adId, adsRequestDto);
+        return ResponseEntity.ok(responseDto);
+    }
+
+    @DeleteMapping("/{adId}")
+    public ResponseEntity<ApiResponse<Void>> deleteAds(
+            @PathVariable("adId") long adId) {
+        ApiResponse<Void> responseDto = adsService.deleteAds(adId);
+        return ResponseEntity.status(204).body(responseDto);
+    }
 }

@@ -11,11 +11,13 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AdsDto {
-    private Long id; // 광고 ID
+    private Long adId; // 광고 ID
     private String question; // 광고 문제 (질문)
     private List<AdsOptionDto> options; // 광고 선택지 리스트
     private LocalDateTime createdAt; // 생성 시간
     private LocalDateTime updatedAt; // 수정 시간
+
+    private Boolean isUpdated; // 광고가 수정되었는지 여부
 
     @Getter
     @Setter
