@@ -23,6 +23,12 @@ public class NotificationServiceImpl implements NotificationService {
     @Autowired
     private NotificationRepository notificationRepository;
 
+    @Autowired
+    private PostRepository postRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
     @Override
     public ApiResponse<NotificationResponseDto> createNotification(Long postId, Long userId) {
         return null;
@@ -59,5 +65,32 @@ public class NotificationServiceImpl implements NotificationService {
                 .collect(Collectors.toList());
 
         return ApiResponse.onGetSuccess(responseDtos);
+    }
+
+    @Override
+    public ApiResponse<NotificationResponseDto> createCommentNotification(Long postId, Long userId, Long commentId, String content) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new EntityNotFoundException("Post not found"));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        Notification notification = new Notification();
+        notification.setPost(post);
+        notification.setUser(user);
+        notification.setCommentId(commentId);
+        notification.setContent(content);
+        notification.setRead(false);
+
+        notificationRepository.save(notification);
+
+        NotificationResponseDto responseDto = new NotificationResponseDto(
+                notification.getId(),
+                notification.getContent(),
+                notification.getCreatedAt(),
+                notification.isRead()
+        );
+
+        return ApiResponse.onGetSuccess(responseDto);
     }
 }

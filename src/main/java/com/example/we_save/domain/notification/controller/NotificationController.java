@@ -43,6 +43,19 @@ public class NotificationController {
     }
     // 확인했어요 버튼 특정 수 이상(신뢰도 높은 사고)
 
+    @PostMapping("/comments/{commentId}")
+    public ResponseEntity<ApiResponse<NotificationResponseDto>> createCommentNotification(
+            @PathVariable("commentId") Long commentId,
+            @RequestBody NotificationRequestDto notificationRequestDto) {
+        ApiResponse<NotificationResponseDto> responseDto = notificationService.createCommentNotification(
+                notificationRequestDto.getPostId(),
+                notificationRequestDto.getUserId(),
+                commentId,
+                notificationRequestDto.getContent());
+        return ResponseEntity.ok(responseDto);
+    }
+    // 댓글 알림 생성
+
 //    @PostMapping("/{notificationId}/confirm")
 //    public ResponseEntity<ApiResponse<Void>> confirmNotification(
 //            @PathVariable("notificationId") Long notificationId,

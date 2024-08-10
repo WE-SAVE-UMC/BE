@@ -16,4 +16,5 @@ public class NotificationDto {
     private Long postId;
     private Long commentId;
     private LocalDateTime createdAt;
+    private String content;
 }

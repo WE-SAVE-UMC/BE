@@ -30,4 +30,10 @@ public class NotificationRequestDto {
     private boolean isRead;
     private int confirmCount;
     private int falseReportCount;
+
+    @NotNull(message = "CommentId must not be empty")
+    private Long commentId;
+
+    @NotEmpty(message = "Content must not be empty")
+    private String content;
 }

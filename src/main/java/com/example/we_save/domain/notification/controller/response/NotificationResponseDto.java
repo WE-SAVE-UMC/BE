@@ -14,14 +14,24 @@ public class NotificationResponseDto {
     private Long postId;
     private Long commentId;
     private String createdAt;
-
-    private String title;  // 알림 제목
-    private boolean isRead;  // 알림 읽음 상태
+    private String title;
+    private boolean isRead;
+    private String content;
 
     public NotificationResponseDto(Long notificationId, String title, LocalDateTime createdAt, boolean isRead) {
         this.notificationId = notificationId;
         this.title = title;
-        this.createdAt = createdAt.toString();  // LocalDateTime을 String으로 변환
+        this.createdAt = createdAt.toString();
+        this.isRead = isRead;
+    }
+
+    public NotificationResponseDto(Long notificationId, Long userId, Long postId, Long commentId, String content, LocalDateTime createdAt, boolean isRead) {
+        this.notificationId = notificationId;
+        this.userId = userId;
+        this.postId = postId;
+        this.commentId = commentId;
+        this.content = content;
+        this.createdAt = createdAt.toString();
         this.isRead = isRead;
     }
 }

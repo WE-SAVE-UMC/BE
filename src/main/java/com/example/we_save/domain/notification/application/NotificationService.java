@@ -24,4 +24,7 @@ public interface NotificationService {
 
     ApiResponse<List<NotificationResponseDto>> getNotificationsByConfirmCount(int confirmCount);
     // 특정 수 이상의 "확인했어요" 받은 알림 조회
+
+    ApiResponse<NotificationResponseDto> createCommentNotification(Long postId, Long userId, Long commentId, String content);
+    // 댓글 알림 생성
 }

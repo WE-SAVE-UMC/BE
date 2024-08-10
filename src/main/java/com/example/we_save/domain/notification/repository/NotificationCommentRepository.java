@@ -1,4 +1,4 @@
-/*package com.example.we_save.domain.notification.repository;
+package com.example.we_save.domain.notification.repository;
 
 import com.example.we_save.domain.notification.entity.NotificationComment;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,4 +10,4 @@ public interface NotificationCommentRepository extends JpaRepository<Notificatio
 
     // 특정 게시물에 대한 알림 댓글의 개수를 세는 메서드
     int countByPostId(Long postId);
-}*/
+}

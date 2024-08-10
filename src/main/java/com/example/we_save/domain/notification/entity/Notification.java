@@ -38,6 +38,12 @@ public class Notification extends BaseEntity {
     @Column(nullable = false)
     private int confirmCount; // "확인했어요" 버튼 개수
 
+    @Column(nullable = true)
+    private Long commentId; // 댓글 ID
+
+    @Column(nullable = true, length = 500)
+    private String content; // 댓글 내용
+
 //    @Column(nullable = false)
 //    private int falseReportCount; // "허위예요" 버튼 개수
 
