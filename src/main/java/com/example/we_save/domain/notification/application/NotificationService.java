@@ -33,4 +33,5 @@ public interface NotificationService {
 
     ApiResponse<List<NotificationResponseDto>> getButtonNotificationsByPost(Long postId, String buttonType);
     // 특정 게시물과 버튼 타입으로 알림 조회
+
 }
