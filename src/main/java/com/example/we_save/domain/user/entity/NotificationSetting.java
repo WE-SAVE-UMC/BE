@@ -22,22 +22,22 @@ public class NotificationSetting {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "nearby_disaster", nullable = false)
+    @Column(nullable = false)
     private boolean isNearbyDisaster;
 
-    @Column(name = "heartregion_disaster", nullable = false)
+    @Column(nullable = false)
     private boolean isHeartRegionDisaster;
 
-    @Column(name = "confirmed", nullable = false)
+    @Column(nullable = false)
     private boolean isConfirmed;
 
-    @Column(name =" flagged_false", nullable = false)
+    @Column(nullable = false)
     private boolean isFlaggedFalse;
 
-    @Column(name = "receive_comment", nullable = false)
+    @Column(nullable = false)
     private boolean isReceiveComment;
 
-    @Column(name = "receive_reply", nullable = false)
+    @Column(nullable = false)
     private boolean isReceiveReply;
 
     @CreatedDate
