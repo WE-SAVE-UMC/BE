@@ -7,5 +7,5 @@ public class CountermeasureResponseDto {
 
     private String title;
     private String mainContent;
-    private String deatailContent;
+    private String detailContent;
 }
