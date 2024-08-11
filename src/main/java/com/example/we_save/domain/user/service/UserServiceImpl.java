@@ -2,9 +2,12 @@ package com.example.we_save.domain.user.service;
 
 import com.example.we_save.apiPayload.ApiResponse;
 import com.example.we_save.apiPayload.code.status.SuccessStatus;
+import com.example.we_save.domain.comment.entity.Comment;
+import com.example.we_save.domain.comment.repository.CommentRepository;
 import com.example.we_save.domain.post.entity.Post;
 import com.example.we_save.domain.post.entity.PostStatus;
 import com.example.we_save.domain.post.repository.PostRepository;
+import com.example.we_save.domain.user.controller.response.UserCommentResponseDto;
 import com.example.we_save.domain.user.controller.response.UserPostResponseDto;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +23,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserAuthCommandService userAuthService;
     private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
 
     @Override
     public ApiResponse<List<UserPostResponseDto>> getMyPosts() {
@@ -58,5 +62,19 @@ public class UserServiceImpl implements UserService {
         postRepository.delete(post);
 
         return ApiResponse.onDeleteSuccess(null);
+    }
+
+    @Override
+    public ApiResponse<List<UserCommentResponseDto>> getMyComments() {
+
+        long userId = userAuthService.getAuthenticatedUserInfo().getId();
+
+        List<Comment> comments = commentRepository.findAllByUserId(userId);
+
+        List<UserCommentResponseDto> userDtos = comments.stream()
+                .map(UserCommentResponseDto::of)
+                .collect(Collectors.toList());
+
+        return ApiResponse.onGetSuccess(userDtos);
     }
 }

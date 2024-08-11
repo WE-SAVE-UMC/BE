@@ -1,6 +1,7 @@
 package com.example.we_save.domain.user.controller;
 
 import com.example.we_save.apiPayload.ApiResponse;
+import com.example.we_save.domain.user.controller.response.UserCommentResponseDto;
 import com.example.we_save.domain.user.controller.response.UserPostResponseDto;
 import com.example.we_save.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,5 +37,12 @@ public class UserController {
     public ResponseEntity<ApiResponse<Void>> deletePost(@PathVariable("postId") long postId) {
 
         return ResponseEntity.ok(userService.deletePost(postId));
+    }
+
+    @Operation(summary = "마이페이지 댓글 조회")
+    @GetMapping("/comments")
+    public ResponseEntity<ApiResponse<List<UserCommentResponseDto>>> getMyComments() {
+
+        return ResponseEntity.ok(userService.getMyComments());
     }
 }

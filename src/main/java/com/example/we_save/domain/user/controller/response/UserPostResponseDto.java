@@ -11,12 +11,12 @@ import java.time.LocalDateTime;
 @Builder
 public class UserPostResponseDto {
 
-    long postId;
-    String title;
-    String status;
-    String regionName;
-    LocalDateTime createAt;
-    String imageUrl;
+    private long postId;
+    private String title;
+    private String status;
+    private String regionName;
+    private LocalDateTime createAt;
+    private String imageUrl;
 
     public static UserPostResponseDto of(Post post) {
 
