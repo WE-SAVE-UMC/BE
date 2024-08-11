@@ -68,7 +68,7 @@ public class HomeServiceImpl implements HomeService {
     @Override
     public ApiResponse<List<CountermeasureResponseDto>> findCountermeasuresByKeyword(String keyword) {
 
-        List<Countermeasure> countermeasures = countermeasureRepository.findAllByTitleContainingOrMainContentContaining(keyword, keyword);
+        List<Countermeasure> countermeasures = countermeasureRepository.findAllByTitleContainingOrMainContentContaining(keyword);
 
         List<CountermeasureResponseDto> countermeasureDtos = countermeasures.stream()
                 .map(CountermeasureResponseDto::of)
