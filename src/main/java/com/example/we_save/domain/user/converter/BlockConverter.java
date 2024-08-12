@@ -5,6 +5,8 @@ import com.example.we_save.domain.user.entity.Block;
 import com.example.we_save.domain.user.entity.User;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class BlockConverter {
     public static Block toMakeBlock(User user, long targetId){
@@ -20,6 +22,19 @@ public class BlockConverter {
                 .userId(block.getUser().getId())
                 .targetId(block.getTargetId())
                 .build();
+    }
+
+    public static BlockResponseDto.BlockUserListResultDto toBlockUserListResultDto(List<User> users){
+        List<BlockResponseDto.BlockUserDto> blockUserDtos = users.stream()
+                .map(user -> BlockResponseDto.BlockUserDto.builder()
+                        .userId(user.getId())
+                        .nickname(user.getNickname())
+                        .profileImage(user.getImageUrl())
+                        .build())
+                .collect(Collectors.toList());
+        return BlockResponseDto.BlockUserListResultDto.builder()
+                        .blockUserList(blockUserDtos)
+                        .build();
     }
 }
 

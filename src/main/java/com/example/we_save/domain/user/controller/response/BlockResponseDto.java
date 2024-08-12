@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 public class BlockResponseDto {
     @Builder
     @Getter
@@ -15,5 +17,23 @@ public class BlockResponseDto {
         Long userId;
         Long targetId;
     }
+
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class BlockUserListResultDto{
+        List<BlockUserDto> blockUserList;
+    }
+    @Getter
+    @Builder
+    public static class BlockUserDto{
+        private Long userId;
+        private String nickname;
+        private String profileImage;
+    }
+
+
 
 }
