@@ -16,7 +16,7 @@ public class BlockConverter {
     }
     public static BlockResponseDto.BlockResultDto toBlockResultDto(Block block){
         return BlockResponseDto.BlockResultDto.builder()
-                .BlockUserId(block.getId())
+                .BlockId(block.getId())
                 .userId(block.getUser().getId())
                 .targetId(block.getTargetId())
                 .build();

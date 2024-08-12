@@ -11,8 +11,9 @@ public class BlockResponseDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class BlockResultDto {
-        Long BlockUserId;
+        Long BlockId;
         Long userId;
         Long targetId;
     }
+
 }
