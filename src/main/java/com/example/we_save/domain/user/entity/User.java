@@ -1,6 +1,5 @@
 package com.example.we_save.domain.user.entity;
 
-import com.example.we_save.apiPayload.code.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
@@ -9,6 +8,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -24,28 +25,28 @@ public class User  {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "phone_num", nullable = false, length = 11)
+    @Column( nullable = false, length = 11)
     private String phoneNum;
 
-    @Column(name = "nickname", nullable = false, length = 16)
+    @Column(nullable = false, length = 16)
     private String nickname;
 
-    @Column(name = "password")
+    @Column(nullable = false)
     private String password;
 
 //    @Enumerated(EnumType.STRING)
-    @Column(name = "role")
+    @Column(nullable = false)
     private String role;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status")
+    @Column(nullable = false)
     private UserStatus status;
 
     @OneToOne
-    @JoinColumn(name = "notificationsetting_id")
+    @JoinColumn(name = "notificationsettingId")
     private NotificationSetting notificationSetting;
 
-    @Column(name = "image_url")
+    @Column(nullable = false)
     private String imageUrl;
 
     @CreatedDate
@@ -53,5 +54,8 @@ public class User  {
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "user")
+    private List<Block> blockUserList  = new ArrayList<>();
 
 }
