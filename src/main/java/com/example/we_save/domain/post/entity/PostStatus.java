@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public enum PostStatus {
 
-    PROCESSING("처리중"), COMPLETED("완료중");
+    PROCESSING("처리중"), COMPLETED("상황 종료");
 
     private final String value;
 

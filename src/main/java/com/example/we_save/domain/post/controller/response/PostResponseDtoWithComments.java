@@ -23,7 +23,6 @@ public class PostResponseDtoWithComments {
     private Category category;
     private String title;
     private String content;
-    private PostStatus status;
     private double longitude;
     private double latitude;
     private String postRegionName;
@@ -35,4 +34,8 @@ public class PostResponseDtoWithComments {
     private LocalDateTime updatedAt;
     private List<String> images;
     private List<CommentDto> commentsList;
+
+    public String getCategory() {
+        return category.getValue();
+    }
 }
