@@ -6,6 +6,7 @@ import com.example.we_save.domain.user.entity.Block;
 import com.example.we_save.domain.user.entity.User;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserService {
 
@@ -13,4 +14,5 @@ public interface UserService {
     ApiResponse<Void> updatePostCompleted(long postId);
     ApiResponse<Void> deletePost(long postId);
     Block addBlock(User user, long targetId);
+    void deleteBlock(User user, long targetId);
 }

@@ -88,4 +88,26 @@ public class UserServiceImpl implements UserService {
         Block block = BlockConverter.toMakeBlock(user,targetId);
         return blockRepository.save(block);
     }
+
+    @Override
+    public void deleteBlock(User user, long targetId) {
+        User targetUser = userRepository.findById(targetId);
+        if (targetUser==null){
+            throw new IllegalArgumentException("존재하지 않는 유저를 차단 해제 할 수 없습니다.");
+        }
+
+        // 자기 자신을 차단해제 하려는 경우
+        if (user.getId() == targetId) {
+            throw new IllegalArgumentException("자기 자신을 차단 해제할 수 없습니다.");
+        }
+        //차단 해제
+        Optional<Block> existBlock = blockRepository.findByUserIdAndTargetId(user.getId(),targetId);
+        if (existBlock.isPresent()) {
+            Block block = existBlock.get();
+            blockRepository.delete(block); //차단 해제
+        }
+        else{
+            throw new IllegalArgumentException("차단되지 않은 유저입니다.");
+        }
+    }
 }
