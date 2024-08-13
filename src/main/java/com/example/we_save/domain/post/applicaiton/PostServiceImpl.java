@@ -8,19 +8,26 @@ import com.example.we_save.domain.comment.controller.response.CommentDto;
 import com.example.we_save.domain.comment.entity.Comment;
 import com.example.we_save.domain.comment.entity.CommentImage;
 import com.example.we_save.domain.comment.repository.CommentRepository;
+import com.example.we_save.domain.post.controller.request.NearbyPostRequestDto;
 import com.example.we_save.domain.post.controller.request.PostRequestDto;
+import com.example.we_save.domain.post.controller.response.NearbyPostResponseDto;
+import com.example.we_save.domain.post.controller.response.PostDto;
 import com.example.we_save.domain.post.controller.response.PostResponseDto;
 import com.example.we_save.domain.post.controller.response.PostResponseDtoWithComments;
 import com.example.we_save.domain.post.entity.*;
 import com.example.we_save.domain.post.repository.*;
+import com.example.we_save.domain.region.entity.EupmyeondongRegion;
 import com.example.we_save.domain.region.repository.EupmyeondongRepository;
 import com.example.we_save.domain.user.entity.User;
 import com.example.we_save.domain.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -49,8 +56,19 @@ public class PostServiceImpl implements PostService {
     @Autowired
     private PostImageRepository postImageRepository;
 
+    @Autowired
+    private RegionUtil regionUtil;
+
+    @Autowired
+    private EupmyeondongRepository eupmyeondongRepository;
+
     private static final int MAX_IMAGE_COUNT = 10;
     private static final int MAX_REPORT_COUNT = 10;
+
+    private final int PAGE_SIZE = 10;
+    private final int RECENT = 0;
+    private final int TOP = 1;
+    private final int DISTANCE = 2;
 
     @Override
     @Transactional
@@ -65,6 +83,10 @@ public class PostServiceImpl implements PostService {
             throw new IllegalArgumentException("카테고리는 필수 입력 사항입니다.");
         }
 
+        long regionId = regionUtil.convertRegionNameToRegionId(postRequestDto.getPostRegionName());
+        EupmyeondongRegion region = eupmyeondongRepository.findById(regionId)
+                .orElseThrow(() -> new EntityNotFoundException("Region not found"));
+
 
         Post post = Post.builder()
                 .user(user)
@@ -75,6 +97,7 @@ public class PostServiceImpl implements PostService {
                 .longitude(postRequestDto.getLongitude())
                 .latitude(postRequestDto.getLatitude())
                 .postRegionName(postRequestDto.getPostRegionName())
+                .region(region)
                 .hearts(0)
                 .dislikes(0)
                 .comments(0)
@@ -83,6 +106,7 @@ public class PostServiceImpl implements PostService {
                 .build();
 
         List<PostImage> postImages = postRequestDto.getImages().stream()
+                .filter(imageUrl -> imageUrl != null && !imageUrl.trim().isEmpty())
                 .map(imageUrl -> PostImage.builder().imageUrl(imageUrl).post(post).build())
                 .collect(Collectors.toList());
         post.setImages(postImages);
@@ -211,7 +235,6 @@ public class PostServiceImpl implements PostService {
                 .category(post.getCategory())
                 .title(post.getTitle())
                 .content(post.getContent())
-                .status(post.getStatus())
                 .longitude(post.getLongitude())
                 .latitude(post.getLatitude())
                 .postRegionName(post.getPostRegionName())
@@ -270,7 +293,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public ApiResponse<Void> toggleHeart(Long postId, Long userId){
+    public ApiResponse<Void> toggleHeart(Long postId, Long userId) {
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
@@ -307,6 +330,7 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public ApiResponse<Void> toggleDislike(Long postId, Long userId) {
+
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
 
@@ -336,5 +360,65 @@ public class PostServiceImpl implements PostService {
 
             return ApiResponse.onPostSuccess(null, SuccessStatus._POST_OK);
         }
+    }
+    @Override
+    @Transactional
+    public ApiResponse<NearbyPostResponseDto> getRecentNearbyPosts(NearbyPostRequestDto nearbyPostRequestDto, int page, boolean excludeCompleted) {
+        return getNearbyPosts(nearbyPostRequestDto, page, RECENT, excludeCompleted);
+    }
+
+    @Override
+    @Transactional
+    public ApiResponse<NearbyPostResponseDto> getTopNearbyPosts(NearbyPostRequestDto nearbyPostRequestDto, int page, boolean excludeCompleted) {
+        return getNearbyPosts(nearbyPostRequestDto, page, TOP, excludeCompleted);
+    }
+
+    @Override
+    @Transactional
+    public ApiResponse<NearbyPostResponseDto> getDistanceNearbyPosts(NearbyPostRequestDto nearbyPostRequestDto, int page, boolean excludeCompleted) {
+        return getNearbyPosts(nearbyPostRequestDto, page, DISTANCE, excludeCompleted);
+    }
+
+    private ApiResponse<NearbyPostResponseDto> getNearbyPosts(NearbyPostRequestDto nearbyPostRequestDto, int page, int type, boolean excludeCompleted) {
+        Pageable pageable = PageRequest.of(page, PAGE_SIZE);
+
+        long regionId = regionUtil.convertRegionNameToRegionId(nearbyPostRequestDto.getRegionName());
+        LocalDateTime startDate = LocalDateTime.now().minusDays(3);
+
+        List<Post> posts;
+
+        if (type == RECENT) {
+            posts = excludeCompleted
+                    ? postRepository.findRecentPostsExcludingCompleted(startDate, regionId, pageable)
+                    : postRepository.findRecentPosts(startDate, regionId, pageable);
+        } else if (type == TOP) {
+            posts = excludeCompleted
+                    ? postRepository.findTopNearPostsExcludingCompleted(startDate, regionId, pageable)
+                    : postRepository.findTopNearPosts(startDate, regionId, pageable);
+        } else if (type == DISTANCE) {
+            posts = excludeCompleted
+                    ? postRepository.findDistanceNearPostsExcludingCompleted(regionId, nearbyPostRequestDto.getLongitude(), nearbyPostRequestDto.getLatitude(), pageable)
+                    : postRepository.findDistanceNearPosts(regionId, nearbyPostRequestDto.getLongitude(), nearbyPostRequestDto.getLatitude(), pageable);
+        } else {
+            throw new IllegalArgumentException("Invalid post type");
+        }
+
+        String userRegionName = RegionUtil.extractEupMyeonDong(nearbyPostRequestDto.getRegionName());
+
+        List<PostDto> postDTOs = posts.stream()
+                .map(post -> {
+                    double distanceToPost = calculateDistanceToPost(post, nearbyPostRequestDto.getLatitude(), nearbyPostRequestDto.getLongitude());
+                    return PostDto.of(post, distanceToPost);
+                })
+                .collect(Collectors.toList());
+
+        NearbyPostResponseDto responseDto = NearbyPostResponseDto.of(userRegionName, postDTOs);
+        return ApiResponse.onGetSuccess(responseDto);
+    }
+
+    private double calculateDistanceToPost(Post post, double latitude, double longitude) {
+        double postLatitude = post.getLatitude();
+        double postLongitude = post.getLongitude();
+        return RegionUtil.calculateDistanceBetweenCoordinates(postLatitude, postLongitude, latitude, longitude);
     }
 }

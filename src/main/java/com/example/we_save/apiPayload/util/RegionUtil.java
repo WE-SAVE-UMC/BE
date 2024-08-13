@@ -97,4 +97,13 @@ public class RegionUtil {
 
         return regionName.toString();
     }
+
+    public static String extractEupMyeonDong(String fullRegionName) {
+        String[] parts = fullRegionName.split("\\s+");
+        if (parts.length < 3) {
+            throw new IllegalArgumentException();
+        }
+        // parts[2]가 읍면동
+        return parts[2];
+    }
 }

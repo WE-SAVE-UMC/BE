@@ -2,14 +2,14 @@ package com.example.we_save.domain.post.controller;
 
 import com.example.we_save.apiPayload.ApiResponse;
 import com.example.we_save.domain.post.applicaiton.PostService;
+import com.example.we_save.domain.post.controller.request.NearbyPostRequestDto;
 import com.example.we_save.domain.post.controller.request.PostRequestDto;
+import com.example.we_save.domain.post.controller.response.NearbyPostResponseDto;
 import com.example.we_save.domain.post.controller.response.PostResponseDto;
 import com.example.we_save.domain.post.controller.response.PostResponseDtoWithComments;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -69,5 +69,29 @@ public class PostController {
             @RequestParam("userId") Long userId) {
         ApiResponse<Void> response = postService.toggleDislike(postId, userId);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/posts/nearby/recent")
+    public ResponseEntity<ApiResponse<NearbyPostResponseDto>> getRecentNearbyPosts(
+            @RequestBody NearbyPostRequestDto nearbyPostRequestDto,
+            @RequestParam("page") int page,
+            @RequestParam("excludeCompleted") boolean excludeCompleted) {
+        return ResponseEntity.ok(postService.getRecentNearbyPosts(nearbyPostRequestDto, page, excludeCompleted));
+    }
+
+    @GetMapping("/posts/nearby/top")
+    public ResponseEntity<ApiResponse<NearbyPostResponseDto>> getTopNearbyPosts(
+            @RequestBody NearbyPostRequestDto nearbyPostRequestDto,
+            @RequestParam("page") int page,
+            @RequestParam("excludeCompleted") boolean excludeCompleted) {
+        return ResponseEntity.ok(postService.getTopNearbyPosts(nearbyPostRequestDto, page, excludeCompleted));
+    }
+
+    @GetMapping("/posts/nearby/distance")
+    public ResponseEntity<ApiResponse<NearbyPostResponseDto>> getDistanceNearbyPosts(
+            @RequestBody NearbyPostRequestDto nearbyPostRequestDto,
+            @RequestParam("page") int page,
+            @RequestParam("excludeCompleted") boolean excludeCompleted) {
+        return ResponseEntity.ok(postService.getDistanceNearbyPosts(nearbyPostRequestDto, page, excludeCompleted));
     }
 }

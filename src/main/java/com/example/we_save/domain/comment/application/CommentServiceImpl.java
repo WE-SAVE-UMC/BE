@@ -20,7 +20,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -49,6 +48,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public ApiResponse<CommentResponseDto> createComment(CommentRequestDto commentRequestDto) {
+
         Post post = postRepository.findById(commentRequestDto.getPostId()).orElseThrow(() ->
                 new EntityNotFoundException("게시글을 찾을 수 없습니다."));
 
@@ -62,8 +62,9 @@ public class CommentServiceImpl implements CommentService {
                 .user(user)
                 .content(commentRequestDto.getContent())
                 .build();
-        List<CommentImage> commentImages = commentRequestDto.getImages().stream().map(imageUrl ->
-                        CommentImage.builder().imageUrl(imageUrl).comment(comment).build())
+        List<CommentImage> commentImages = commentRequestDto.getImages().stream()
+                .filter(imageUrl -> imageUrl != null && !imageUrl.trim().isEmpty())
+                .map(imageUrl -> CommentImage.builder().imageUrl(imageUrl).comment(comment).build())
                 .collect(Collectors.toList());
 
         comment.setImages(commentImages);
@@ -169,6 +170,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public ApiResponse<Void> reportComment(Long commentId, Long userId) {
+
         Optional<Comment> optionalComment = commentRepository.findById(commentId);
 
         if (!optionalComment.isPresent()) {
