@@ -41,10 +41,18 @@ public class UserAuthResponseDto {
     @AllArgsConstructor
     public static class findUserResultDto{
         Long userId;
-        String phone_num;
+        String phoneNum;
         String nickname;
         String imageUrl;
         UserStatus status;
     }
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class findUserIdResultDto{
+        Long userId;
+    }
+
 
 }

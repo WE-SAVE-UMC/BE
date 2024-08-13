@@ -39,9 +39,18 @@ public class UserConverter {
                 .status(user.getStatus())
                 .imageUrl(user.getImageUrl())
                 .nickname(user.getNickname())
-                .phone_num(user.getPhoneNum())
+                .phoneNum(user.getPhoneNum())
                 .build();
     }
+
+    public static UserAuthResponseDto.findUserIdResultDto toUserIdResultDto(User user) {
+        return UserAuthResponseDto.findUserIdResultDto.builder()
+                .userId(user.getId())
+                .build();
+    }
+
+
+
 
     public static User makeUser(UserAuthRequestDto.JoinDto request, NotificationSetting notificationSetting, BCryptPasswordEncoder bCryptPasswordEncoder) {
         return User.builder()

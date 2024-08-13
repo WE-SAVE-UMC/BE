@@ -14,4 +14,6 @@ public interface UserAuthCommandService {
     public User findByUserId(long userId);
     public User updateUser(User user,String newNickname,String imageUrl);
     public User getAuthenticatedUserInfo();
+    public User findByUserPhoneNumber(String phoneNumber);
+    public User updateUserPassword(User user, String newPassword);
 }

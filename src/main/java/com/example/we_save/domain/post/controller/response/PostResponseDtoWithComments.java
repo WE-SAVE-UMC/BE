@@ -23,15 +23,19 @@ public class PostResponseDtoWithComments {
     private Category category;
     private String title;
     private String content;
-    private PostStatus status;
     private double longitude;
     private double latitude;
     private String postRegionName;
     private int hearts;
     private int dislikes;
     private int comments;
+    private int imageCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<String> images;
     private List<CommentDto> commentsList;
+
+    public String getCategory() {
+        return category.getValue();
+    }
 }

@@ -20,7 +20,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -49,6 +48,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public ApiResponse<CommentResponseDto> createComment(CommentRequestDto commentRequestDto) {
+
         Post post = postRepository.findById(commentRequestDto.getPostId()).orElseThrow(() ->
                 new EntityNotFoundException("게시글을 찾을 수 없습니다."));
 
@@ -62,8 +62,9 @@ public class CommentServiceImpl implements CommentService {
                 .user(user)
                 .content(commentRequestDto.getContent())
                 .build();
-        List<CommentImage> commentImages = commentRequestDto.getImages().stream().map(imageUrl ->
-                        CommentImage.builder().imageUrl(imageUrl).comment(comment).build())
+        List<CommentImage> commentImages = commentRequestDto.getImages().stream()
+                .filter(imageUrl -> imageUrl != null && !imageUrl.trim().isEmpty())
+                .map(imageUrl -> CommentImage.builder().imageUrl(imageUrl).comment(comment).build())
                 .collect(Collectors.toList());
 
         comment.setImages(commentImages);
@@ -101,9 +102,32 @@ public class CommentServiceImpl implements CommentService {
         if (commentRequestDto.getImages().size() > MAX_IMAGE_COUNT) {
             throw new IllegalArgumentException("최대 10개의 이미지만 첨부할 수 있습니다.");
         }
+        // 기존 이미지 가져오기
+        List<String> existingImageUrls = comment.getImages().stream()
+                .map(CommentImage::getImageUrl)
+                .collect(Collectors.toList());
+
+        // 빈 문자열로 된 이미지를 제거할 이미지로 간주
+        List<String> imagesToDelete = existingImageUrls.stream()
+                .filter(url -> commentRequestDto.getImages().contains("") || !commentRequestDto.getImages().contains(url))
+                .collect(Collectors.toList());
+
+        // 삭제할 이미지 DB에서 삭제
+        imagesToDelete.forEach(url -> {
+            CommentImage imageToDelete = comment.getImages().stream()
+                    .filter(image -> image.getImageUrl().equals(url))
+                    .findFirst()
+                    .orElse(null);
+            if (imageToDelete != null) {
+                commentImageRepository.delete(imageToDelete);
+            }
+        });
+
+        // 댓글 내용 및 이미지 업데이트
         comment.setContent(commentRequestDto.getContent());
 
         List<CommentImage> updatedImages = commentRequestDto.getImages().stream()
+                .filter(imageUrl -> !imageUrl.isEmpty())  // 빈 문자열 이미지는 추가하지 않음
                 .map(imageUrl -> CommentImage.builder().imageUrl(imageUrl).comment(comment).build())
                 .collect(Collectors.toList());
 
@@ -117,6 +141,7 @@ public class CommentServiceImpl implements CommentService {
 
         return ApiResponse.onPostSuccess(responseDto, SuccessStatus._POST_OK);
     }
+
 
     @Override
     @Transactional
@@ -145,6 +170,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public ApiResponse<Void> reportComment(Long commentId, Long userId) {
+
         Optional<Comment> optionalComment = commentRepository.findById(commentId);
 
         if (!optionalComment.isPresent()) {
@@ -170,10 +196,8 @@ public class CommentServiceImpl implements CommentService {
 
         if (reportCount >= MAX_REPORT_COUNT) {
 
-            // 관련 comment_report 레코드 삭제
             commentReportRepository.deleteByCommentId(commentId);
 
-            // 관련 comment_image 레코드 삭제
             commentImageRepository.deleteByCommentId(commentId);
 
             commentRepository.delete(comment);
