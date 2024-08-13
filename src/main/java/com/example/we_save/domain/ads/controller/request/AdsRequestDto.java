@@ -19,6 +19,7 @@ public class AdsRequestDto {
 
     @NotNull(message = "Options must not be null")
     private List<AdsOptionDto> options;
+
     // 광고 선택지 리스트
 
     @Getter

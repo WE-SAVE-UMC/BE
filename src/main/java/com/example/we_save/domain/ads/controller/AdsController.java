@@ -20,7 +20,7 @@ public class AdsController {
             @RequestBody AdsRequestDto adsRequestDto) {
         ApiResponse<AdsResponseDto> responseDto = adsService.createAds(adsRequestDto);
         return ResponseEntity.status(201).body(responseDto);
-    }
+    } // 광고 생성
 
     @PutMapping("/{adId}")
     public ResponseEntity<ApiResponse<AdsResponseDto>> updateAds(
@@ -28,12 +28,18 @@ public class AdsController {
             @RequestBody AdsRequestDto adsRequestDto) {
         ApiResponse<AdsResponseDto> responseDto = adsService.updateAds(adId, adsRequestDto);
         return ResponseEntity.ok(responseDto);
-    }
+    } // 광고 수정
 
     @DeleteMapping("/{adId}")
     public ResponseEntity<ApiResponse<Void>> deleteAds(
             @PathVariable("adId") long adId) {
         ApiResponse<Void> responseDto = adsService.deleteAds(adId);
         return ResponseEntity.status(204).body(responseDto);
-    }
+    } // 광고 삭제
+
+    @GetMapping("/quiz")
+    public ResponseEntity<ApiResponse<AdsResponseDto>> getRandomAd() {
+        ApiResponse<AdsResponseDto> responseDto = adsService.getRandomAd();
+        return ResponseEntity.ok(responseDto);
+    } // 랜덤 광고 가져오기
 }
