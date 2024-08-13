@@ -1,0 +1,23 @@
+[33m93d1d8b[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32m80-feat-광고-가져오기-응답-제출[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;31morigin/80-feat-광고-가져오기-응답-제출[m[33m)[m HEAD@{0}: checkout: moving from 65-feat-광고-수정-및-삭제 to 80-feat-광고-가져오기-응답-제출
+[33me7e7bac[m[33m ([m[1;32m65-feat-광고-수정-및-삭제[m[33m)[m HEAD@{1}: checkout: moving from 80-feat-광고-가져오기-응답-제출 to 65-feat-광고-수정-및-삭제
+[33m93d1d8b[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32m80-feat-광고-가져오기-응답-제출[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;31morigin/80-feat-광고-가져오기-응답-제출[m[33m)[m HEAD@{2}: checkout: moving from 65-feat-광고-수정-및-삭제 to 80-feat-광고-가져오기-응답-제출
+[33me7e7bac[m[33m ([m[1;32m65-feat-광고-수정-및-삭제[m[33m)[m HEAD@{3}: commit: 0814
+[33m7ac196d[m[33m ([m[1;31morigin/65-feat-광고-수정-및-삭제[m[33m, [m[1;31morigin/65-feat-광고-수정[m[33m, [m[1;32m65-feat-광고-수정[m[33m)[m HEAD@{4}: pull origin 65-feat-광고-수정: Fast-forward
+[33mc0b58d3[m[33m ([m[1;31morigin/61-feat-마이페이지-기본화면-댓글-조회[m[33m)[m HEAD@{5}: checkout: moving from 65-feat-광고-수정 to 65-feat-광고-수정-및-삭제
+[33m7ac196d[m[33m ([m[1;31morigin/65-feat-광고-수정-및-삭제[m[33m, [m[1;31morigin/65-feat-광고-수정[m[33m, [m[1;32m65-feat-광고-수정[m[33m)[m HEAD@{6}: commit: 0810
+[33m63f18f1[m[33m ([m[1;31morigin/63-feat-광고-생성[m[33m, [m[1;32m63-feat-광고-생성[m[33m)[m HEAD@{7}: pull origin 63-feat-광고-생성: Fast-forward
+[33mc0b58d3[m[33m ([m[1;31morigin/61-feat-마이페이지-기본화면-댓글-조회[m[33m)[m HEAD@{8}: checkout: moving from 63-feat-광고-생성 to 65-feat-광고-수정
+[33m63f18f1[m[33m ([m[1;31morigin/63-feat-광고-생성[m[33m, [m[1;32m63-feat-광고-생성[m[33m)[m HEAD@{9}: commit: 0810
+[33mc0b58d3[m[33m ([m[1;31morigin/61-feat-마이페이지-기본화면-댓글-조회[m[33m)[m HEAD@{10}: checkout: moving from 47-feat-버튼-알림-api-구현 to 63-feat-광고-생성
+[33mcad3aeb[m[33m ([m[1;31morigin/47-feat-버튼-알림-api-구현[m[33m, [m[1;32m47-feat-버튼-알림-api-구현[m[33m)[m HEAD@{11}: commit: 0810
+[33m2392d5d[m HEAD@{12}: checkout: moving from 63-feat-광고-생성 to 47-feat-버튼-알림-api-구현
+[33mc0b58d3[m[33m ([m[1;31morigin/61-feat-마이페이지-기본화면-댓글-조회[m[33m)[m HEAD@{13}: checkout: moving from 47-feat-버튼-알림-api-구현 to 63-feat-광고-생성
+[33m2392d5d[m HEAD@{14}: commit (merge): 0810
+[33mc0b58d3[m[33m ([m[1;31morigin/61-feat-마이페이지-기본화면-댓글-조회[m[33m)[m HEAD@{15}: checkout: moving from 45-feat-댓글-알림-api-구현 to 47-feat-버튼-알림-api-구현
+[33m3a86014[m[33m ([m[1;31morigin/45-feat-댓글-알림-api-구현[m[33m, [m[1;32m45-feat-댓글-알림-api-구현[m[33m)[m HEAD@{16}: commit: 0810
+[33m9846395[m[33m ([m[1;31morigin/48-feat-신뢰도-높은-글-알림-api-구현[m[33m, [m[1;32m48-feat-신뢰도-높은-글-알림-api-구현[m[33m)[m HEAD@{17}: pull origin 48-feat-신뢰도-높은-글-알림-api-구현: Fast-forward
+[33mafd40c0[m[33m ([m[1;32mmain[m[33m)[m HEAD@{18}: checkout: moving from 48-feat-신뢰도-높은-글-알림-api-구현 to 45-feat-댓글-알림-api-구현
+[33m9846395[m[33m ([m[1;31morigin/48-feat-신뢰도-높은-글-알림-api-구현[m[33m, [m[1;32m48-feat-신뢰도-높은-글-알림-api-구현[m[33m)[m HEAD@{19}: commit: 0810
+[33mafd40c0[m[33m ([m[1;32mmain[m[33m)[m HEAD@{20}: checkout: moving from 45-feat-댓글-알림-api-구현 to 48-feat-신뢰도-높은-글-알림-api-구현
+[33mafd40c0[m[33m ([m[1;32mmain[m[33m)[m HEAD@{21}: checkout: moving from main to 45-feat-댓글-알림-api-구현
+[33mafd40c0[m[33m ([m[1;32mmain[m[33m)[m HEAD@{22}: clone: from https://github.com/WE-SAVE-UMC/BE.git
