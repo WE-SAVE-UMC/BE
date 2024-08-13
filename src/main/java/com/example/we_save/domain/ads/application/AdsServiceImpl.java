@@ -77,7 +77,7 @@ public class AdsServiceImpl implements AdsService {
                 .orElseThrow(() -> new EntityNotFoundException("광고를 찾을 수 없습니다."));
 
         ads.setQuestion(adsRequestDto.getQuestion());
-        adsOptionRepository.deleteAds(adId);
+        adsOptionRepository.deleteByAdsId(adId);
 
         adsRequestDto.getOptions().forEach(optionDto -> {
             AdsOption option = AdsOption.builder()
