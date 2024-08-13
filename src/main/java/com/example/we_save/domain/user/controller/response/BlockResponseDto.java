@@ -1,5 +1,6 @@
 package com.example.we_save.domain.user.controller.response;
 
+import com.example.we_save.domain.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,7 +19,6 @@ public class BlockResponseDto {
         Long targetId;
     }
 
-
     @Builder
     @Getter
     @NoArgsConstructor
@@ -33,7 +33,4 @@ public class BlockResponseDto {
         private String nickname;
         private String profileImage;
     }
-
-
-
 }

@@ -128,4 +128,13 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("차단되지 않은 유저입니다.");
         }
     }
+
+    @Override
+    public List<User> getMyBlocks(long userId) {
+        return blockRepository.findAllByUserId(userId).stream()
+                .map(block-> userRepository.findById(block.getTargetId()))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+    }
 }

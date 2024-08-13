@@ -91,6 +91,14 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
     }
+    @Operation(summary = "차단 목록", security = @SecurityRequirement(name="Authorization"))
+    @GetMapping("/blocks")
+    public ResponseEntity<ApiResponse<BlockResponseDto.BlockUserListResultDto>> getMyBlocks() {
+        User user = userAuthCommandService.getAuthenticatedUserInfo();
+        List<User> myBlocks = userService.getMyBlocks(user.getId());
+        ApiResponse<BlockResponseDto.BlockUserListResultDto> response = ApiResponse.onGetSuccess(BlockConverter.toBlockUserListResultDto(myBlocks));
+        return ResponseEntity.ok(response);
+    }
 
 
 

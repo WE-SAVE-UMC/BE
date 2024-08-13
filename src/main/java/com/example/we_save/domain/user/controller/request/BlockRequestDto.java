@@ -1,5 +1,6 @@
 package com.example.we_save.domain.user.controller.request;
 
+import lombok.Builder;
 import lombok.Getter;
 
 public class BlockRequestDto {
