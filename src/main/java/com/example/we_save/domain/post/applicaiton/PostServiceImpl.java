@@ -10,10 +10,7 @@ import com.example.we_save.domain.comment.entity.CommentImage;
 import com.example.we_save.domain.comment.repository.CommentRepository;
 import com.example.we_save.domain.post.controller.request.NearbyPostRequestDto;
 import com.example.we_save.domain.post.controller.request.PostRequestDto;
-import com.example.we_save.domain.post.controller.response.NearbyPostResponseDto;
-import com.example.we_save.domain.post.controller.response.PostDto;
-import com.example.we_save.domain.post.controller.response.PostResponseDto;
-import com.example.we_save.domain.post.controller.response.PostResponseDtoWithComments;
+import com.example.we_save.domain.post.controller.response.*;
 import com.example.we_save.domain.post.entity.*;
 import com.example.we_save.domain.post.repository.*;
 import com.example.we_save.domain.region.entity.EupmyeondongRegion;
@@ -420,5 +417,41 @@ public class PostServiceImpl implements PostService {
         double postLatitude = post.getLatitude();
         double postLongitude = post.getLongitude();
         return RegionUtil.calculateDistanceBetweenCoordinates(postLatitude, postLongitude, latitude, longitude);
+    }
+
+    @Override
+    @Transactional
+    public ApiResponse<List<DomesticPostDto>> getRecentDomesticPosts(boolean excludeCompleted) {
+        List<Post> posts;
+
+        if (excludeCompleted) {
+            posts = postRepository.findRecentDomesticPostsExcludingCompleted(PageRequest.of(0, 10));
+        } else {
+            posts = postRepository.findRecentDomesticPosts(PageRequest.of(0, 10));
+        }
+
+        List<DomesticPostDto> postDTOs = posts.stream()
+                .map(DomesticPostDto::of)
+                .collect(Collectors.toList());
+
+        return ApiResponse.onGetSuccess(postDTOs);
+    }
+
+    @Override
+    @Transactional
+    public ApiResponse<List<DomesticPostDto>> getTopDomesticPosts(boolean excludeCompleted) {
+        List<Post> posts;
+
+        if (excludeCompleted) {
+            posts = postRepository.findTopDomesticPostsExcludingCompleted(PageRequest.of(0, 10));
+        } else {
+            posts = postRepository.findTopDomesticPosts(PageRequest.of(0, 10));
+        }
+
+        List<DomesticPostDto> postDTOs = posts.stream()
+                .map(DomesticPostDto::of)
+                .collect(Collectors.toList());
+
+        return ApiResponse.onGetSuccess(postDTOs);
     }
 }

@@ -11,6 +11,22 @@ import java.util.List;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
 
+    // 국내 게시글 최신순 조회 (상황 종료 제외)
+    @Query("SELECT p FROM Post p WHERE p.hearts >= 10 AND p.status != 'COMPLETED' ORDER BY p.createAt DESC")
+    List<Post> findRecentDomesticPostsExcludingCompleted(Pageable pageable);
+
+    // 국내 게시글 최신순 조회 (상황 종료 포함)
+    @Query("SELECT p FROM Post p WHERE p.hearts >= 10 ORDER BY p.createAt DESC")
+    List<Post> findRecentDomesticPosts(Pageable pageable);
+
+    // 국내 게시글 확인순 조회 (상황 종료 제외)
+    @Query("SELECT p FROM Post p WHERE p.hearts >= 10 AND p.status != 'COMPLETED' ORDER BY p.hearts DESC")
+    List<Post> findTopDomesticPostsExcludingCompleted(Pageable pageable);
+
+    // 국내 게시글 확인순 조회 (상황 종료 포함)
+    @Query("SELECT p FROM Post p WHERE p.hearts >= 10 ORDER BY p.hearts DESC")
+    List<Post> findTopDomesticPosts(Pageable pageable);
+
     @Query("SELECT p FROM Post p WHERE p.createAt >= :startDate AND p.region.id = :regionId AND p.status != 'COMPLETED' ORDER BY p.createAt DESC")
     List<Post> findRecentPostsExcludingCompleted(@Param("startDate") LocalDateTime startDate,
                                                  @Param("regionId") Long regionId,
