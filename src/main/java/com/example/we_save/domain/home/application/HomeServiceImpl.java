@@ -2,6 +2,9 @@ package com.example.we_save.domain.home.application;
 
 import com.example.we_save.apiPayload.ApiResponse;
 import com.example.we_save.apiPayload.util.RegionUtil;
+import com.example.we_save.domain.countermeasure.controller.response.CountermeasureResponseDto;
+import com.example.we_save.domain.countermeasure.entity.Countermeasure;
+import com.example.we_save.domain.countermeasure.repository.CountermeasureRepository;
 import com.example.we_save.domain.home.controller.request.HomeLocationRequestDto;
 import com.example.we_save.domain.home.controller.response.HomeResponseDto;
 import com.example.we_save.domain.post.controller.response.HotPostHomeResponseDto;
@@ -23,6 +26,7 @@ public class HomeServiceImpl implements HomeService {
 
     private final PostRepository postRepository;
     private final RegionUtil regionUtil;
+    private final CountermeasureRepository countermeasureRepository;
 
     private final int LIMIT = 10;
     private final int RECENT = 0;
@@ -59,6 +63,18 @@ public class HomeServiceImpl implements HomeService {
     public ApiResponse<List<NearPostHomeResponseDto>> showDistanceNearPosts(HomeLocationRequestDto locationDto) {
 
         return ApiResponse.onGetSuccess(getNearDisasterPages(locationDto, LIMIT, DISTANCE));
+    }
+
+    @Override
+    public ApiResponse<List<CountermeasureResponseDto>> findCountermeasuresByKeyword(String keyword) {
+
+        List<Countermeasure> countermeasures = countermeasureRepository.findAllByTitleContainingOrMainContentContaining(keyword);
+
+        List<CountermeasureResponseDto> countermeasureDtos = countermeasures.stream()
+                .map(CountermeasureResponseDto::of)
+                .collect(Collectors.toList());
+
+        return ApiResponse.onGetSuccess(countermeasureDtos);
     }
 
     private List<NearPostHomeResponseDto> getNearDisasterPages(HomeLocationRequestDto locationDto, int limit, int type) {
