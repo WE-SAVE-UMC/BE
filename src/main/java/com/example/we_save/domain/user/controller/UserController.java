@@ -1,6 +1,7 @@
 package com.example.we_save.domain.user.controller;
 
 import com.example.we_save.apiPayload.ApiResponse;
+import com.example.we_save.domain.user.controller.response.UserCommentResponseDto;
 import com.example.we_save.apiPayload.code.status.SuccessStatus;
 import com.example.we_save.domain.user.controller.request.BlockRequestDto;
 import com.example.we_save.domain.user.controller.response.BlockResponseDto;
@@ -50,6 +51,13 @@ public class UserController {
         return ResponseEntity.ok(userService.deletePost(postId));
     }
 
+    @Operation(summary = "마이페이지 댓글 조회")
+    @GetMapping("/comments")
+    public ResponseEntity<ApiResponse<List<UserCommentResponseDto>>> getMyComments() {
+
+        return ResponseEntity.ok(userService.getMyComments());
+    }
+
     @Operation(summary = "차단 하기",  security = @SecurityRequirement(name="Authorization"))
     @PostMapping("/block")
     public ResponseEntity<ApiResponse> addBlockUser(@RequestBody @Valid BlockRequestDto.BlockDto request) {
@@ -82,6 +90,14 @@ public class UserController {
                     "COMMON400", e.getMessage(),null);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
+    }
+    @Operation(summary = "차단 목록", security = @SecurityRequirement(name="Authorization"))
+    @GetMapping("/blocks")
+    public ResponseEntity<ApiResponse<BlockResponseDto.BlockUserListResultDto>> getMyBlocks() {
+        User user = userAuthCommandService.getAuthenticatedUserInfo();
+        List<User> myBlocks = userService.getMyBlocks(user.getId());
+        ApiResponse<BlockResponseDto.BlockUserListResultDto> response = ApiResponse.onGetSuccess(BlockConverter.toBlockUserListResultDto(myBlocks));
+        return ResponseEntity.ok(response);
     }
 
 

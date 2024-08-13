@@ -2,9 +2,12 @@ package com.example.we_save.domain.user.service;
 
 import com.example.we_save.apiPayload.ApiResponse;
 import com.example.we_save.apiPayload.code.status.SuccessStatus;
+import com.example.we_save.domain.comment.entity.Comment;
+import com.example.we_save.domain.comment.repository.CommentRepository;
 import com.example.we_save.domain.post.entity.Post;
 import com.example.we_save.domain.post.entity.PostStatus;
 import com.example.we_save.domain.post.repository.PostRepository;
+import com.example.we_save.domain.user.controller.response.UserCommentResponseDto;
 import com.example.we_save.domain.user.controller.response.UserPostResponseDto;
 import com.example.we_save.domain.user.converter.BlockConverter;
 import com.example.we_save.domain.user.entity.Block;
@@ -26,6 +29,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserAuthCommandService userAuthService;
     private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
     private final BlockRepository blockRepository;
     private final UserRepository userRepository;
 
@@ -69,6 +73,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public ApiResponse<List<UserCommentResponseDto>> getMyComments() {
+
+        long userId = userAuthService.getAuthenticatedUserInfo().getId();
+
+        List<Comment> comments = commentRepository.findAllByUserId(userId);
+
+        List<UserCommentResponseDto> userDtos = comments.stream()
+                .map(UserCommentResponseDto::of)
+                .collect(Collectors.toList());
+
+        return ApiResponse.onGetSuccess(userDtos);
+    }
+
+    @Override
     public Block addBlock(User user, long targetId) {
         User targetUser = userRepository.findById(targetId);
         if (targetUser==null){
@@ -109,5 +127,14 @@ public class UserServiceImpl implements UserService {
         else{
             throw new IllegalArgumentException("차단되지 않은 유저입니다.");
         }
+    }
+
+    @Override
+    public List<User> getMyBlocks(long userId) {
+        return blockRepository.findAllByUserId(userId).stream()
+                .map(block-> userRepository.findById(block.getTargetId()))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
     }
 }

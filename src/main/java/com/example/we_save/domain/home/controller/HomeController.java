@@ -1,6 +1,7 @@
 package com.example.we_save.domain.home.controller;
 
 import com.example.we_save.apiPayload.ApiResponse;
+import com.example.we_save.domain.countermeasure.controller.response.CountermeasureResponseDto;
 import com.example.we_save.domain.home.application.HomeService;
 import com.example.we_save.domain.home.controller.request.HomeLocationRequestDto;
 import com.example.we_save.domain.home.controller.response.HomeResponseDto;
@@ -8,10 +9,7 @@ import com.example.we_save.domain.post.controller.response.NearPostHomeResponseD
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -48,5 +46,18 @@ public class HomeController {
     ResponseEntity<ApiResponse<List<NearPostHomeResponseDto>>> showDistanceNearPosts(@RequestBody  HomeLocationRequestDto locationDto) {
 
         return ResponseEntity.ok(homeService.showDistanceNearPosts(locationDto));
+    }
+
+    @Operation(summary = "메인페이지 검색")
+    @GetMapping("/search")
+    ResponseEntity<ApiResponse<List<CountermeasureResponseDto>>> searchCountermeasures
+            (@RequestParam(value = "keyword", required = false) String keyword) {
+
+        // 검색어가 없을 경우 실패 응답 반환
+        if (keyword == null || keyword.isEmpty()) {
+            return ResponseEntity.ok(ApiResponse.onFailure("400", "Keyword is missing", null));
+        }
+
+        return ResponseEntity.ok(homeService.findCountermeasuresByKeyword(keyword));
     }
 }
