@@ -24,6 +24,7 @@ public class AdsController {
         return ResponseEntity.status(201).body(responseDto);
     } // 광고 생성
 
+
     @PutMapping("/{adId}")
     public ResponseEntity<ApiResponse<AdsResponseDto>> updateAds(
             @PathVariable("adId") Long adId,
@@ -37,7 +38,7 @@ public class AdsController {
             @PathVariable("adId") long adId) {
         ApiResponse<Void> responseDto = adsService.deleteAds(adId);
         return ResponseEntity.status(204).body(responseDto);
-    } // 광고 삭제
+    }  // 광고 삭제
 
     @GetMapping("/quiz")
     public ResponseEntity<ApiResponse<AdsResponseDto>> getRandomAd() {
