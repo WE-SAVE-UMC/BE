@@ -10,7 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 public class AdsAnswerRequestDto {
 
-    @NotNull(message = "Ad ID must not be null")
+    @NotNull(message = "Ad ID must not be null.")
     private Long adId; // 광고 ID
 
     @NotNull(message = "Selected option ID must not be null")
