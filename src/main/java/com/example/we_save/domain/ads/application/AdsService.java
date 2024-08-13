@@ -16,8 +16,5 @@ public interface AdsService {
 
     ApiResponse<AdsResponseDto> getRandomAd();
 
-    ApiResponse<AdsAnswerResponseDto> submitAnswer(AdsRequestDto answerRequestDto);
-
-    @Transactional
     ApiResponse<AdsAnswerResponseDto> submitAnswer(AdsAnswerRequestDto answerRequestDto);
 }

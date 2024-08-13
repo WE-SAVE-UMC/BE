@@ -2,7 +2,9 @@ package com.example.we_save.domain.ads.controller;
 
 import com.example.we_save.apiPayload.ApiResponse;
 import com.example.we_save.domain.ads.application.AdsService;
+import com.example.we_save.domain.ads.controller.request.AdsAnswerRequestDto;
 import com.example.we_save.domain.ads.controller.request.AdsRequestDto;
+import com.example.we_save.domain.ads.controller.response.AdsAnswerResponseDto;
 import com.example.we_save.domain.ads.controller.response.AdsResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -42,4 +44,11 @@ public class AdsController {
         ApiResponse<AdsResponseDto> responseDto = adsService.getRandomAd();
         return ResponseEntity.ok(responseDto);
     } // 랜덤 광고 가져오기
+
+    @PostMapping("/answer")
+    public ResponseEntity<ApiResponse<AdsAnswerResponseDto>> submitAnswer(
+            @RequestBody AdsAnswerRequestDto adsAnswerRequestDto) {
+        ApiResponse<AdsAnswerResponseDto> responseDto = adsService.submitAnswer(adsAnswerRequestDto);
+        return ResponseEntity.ok(responseDto);
+    } // 광고 응답 제출
 }

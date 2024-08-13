@@ -161,11 +161,6 @@ public class AdsServiceImpl implements AdsService {
     }
 
     @Override
-    public ApiResponse<AdsAnswerResponseDto> submitAnswer(AdsRequestDto answerRequestDto) {
-        return null;
-    }
-
-    @Override
     @Transactional
     public ApiResponse<AdsAnswerResponseDto> submitAnswer(AdsAnswerRequestDto answerRequestDto) {
         Ads ads = adsRepository.findById(answerRequestDto.getAdId())
