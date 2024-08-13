@@ -1,8 +1,6 @@
 package com.example.we_save.domain.post.controller.request;
 
 import com.example.we_save.domain.post.entity.Category;
-import com.example.we_save.domain.user.entity.User;
-import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

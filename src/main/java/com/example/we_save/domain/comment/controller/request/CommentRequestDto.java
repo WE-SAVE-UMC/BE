@@ -1,7 +1,5 @@
 package com.example.we_save.domain.comment.controller.request;
 
-import com.example.we_save.domain.post.entity.Post;
-import com.example.we_save.domain.user.entity.User;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
 

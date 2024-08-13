@@ -23,7 +23,9 @@ public enum ErrorStatus implements BaseErrorCode {
     _ARTICLE_NOT_FOUND(HttpStatus.NOT_FOUND, "ARTICLE4001", "게시글이 없습니다."),
 
     // 이미 신고되었다
-    _ALREADY_REPORTED(HttpStatus.BAD_REQUEST, "REPORT001", "이미 신고한 게시글입니다.");
+    _ALREADY_REPORTED(HttpStatus.BAD_REQUEST, "REPORT001", "이미 신고한 게시글입니다."),
+
+    _DISTANCE_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "LIMIT001","댓글을 작성할 수 있는 범위를 초과했습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

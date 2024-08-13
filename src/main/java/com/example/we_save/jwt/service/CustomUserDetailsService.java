@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -22,11 +22,12 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         //DB에서 조회
-        List<User> users = userRepository.findByPhoneNum(username);
+        Long userId = Long.valueOf(username);
+        Optional<User> user = userRepository.findById(userId);
 
-        if (users.size() !=0 ) {
+        if (user.isPresent()) {
             //UserDetails에 담아서 return하면 AutneticationManager가 검증 함
-            return new CustomUserDetails(users.get(0));
+            return new CustomUserDetails(user.orElse(null));
         }
         return null;
     }

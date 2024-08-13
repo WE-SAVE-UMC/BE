@@ -32,8 +32,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String username = obtainUsername(request);
         String password = obtainPassword(request);
 
-        System.out.println(username);
-
         //스프링 시큐리티에서 username과 password를 검증하기 위해서는 token에 담아야 함
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, password, null);
 
@@ -54,9 +52,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         String role = auth.getAuthority();
 
-        System.out.println("jwt토큰 정보 : username: " + username + " role: " + role);
         String token = jwtUtil.createJwt(username, role, 60*60*3000L); //3시간
-        System.out.println("jwt토큰 발급 : "+ "Bearer " + token);
         response.addHeader("Authorization", "Bearer " + token);
     }
 

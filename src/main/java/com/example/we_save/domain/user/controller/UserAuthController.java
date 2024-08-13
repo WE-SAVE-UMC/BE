@@ -10,20 +10,17 @@ import com.example.we_save.domain.user.entity.User;
 import com.example.we_save.domain.user.service.NotificationSettingCommandService;
 import com.example.we_save.domain.user.service.UserAuthCommandService;
 import com.example.we_save.jwt.JWTUtil;
-import com.example.we_save.jwt.service.CustomUserDetailsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Security;
 
 @RestController
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class UserAuthController {
 
@@ -32,8 +29,7 @@ public class UserAuthController {
     private final JWTUtil jwtUtil;
 
     @Operation(summary = "회원가입")
-    @PostMapping("/api/auth/users")
-    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping("/users")
     public ResponseEntity<ApiResponse<UserAuthResponseDto.JoinResultDto>> join(@RequestBody @Valid UserAuthRequestDto.JoinDto request){
         NotificationSetting notificationSetting = notificationSettingCommandService.createNotificationSetting();
         User user= userAuthCommandService.joinUser(request,notificationSetting);
@@ -43,12 +39,12 @@ public class UserAuthController {
         }
         else{
             ApiResponse<UserAuthResponseDto.JoinResultDto> response = ApiResponse.onPostSuccess(UserConverter.toJoinResultDto(user), SuccessStatus._POST_OK);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
         }
     }
 
     @Operation(summary = "로그인")
-    @PostMapping("/api/auth/login")
+    @PostMapping("/login")
     public ResponseEntity<ApiResponse> login(@RequestBody @Valid UserAuthRequestDto.loginDto request){
         User user = userAuthCommandService.loginUser(request);
 
@@ -64,59 +60,25 @@ public class UserAuthController {
 
 
     @Operation(summary = "로그인 된 회원 정보(마이페이지-프로필 조회)", security = @SecurityRequirement(name="Authorization"))
-    @GetMapping("/api/auth/users")
+    @GetMapping("/users")
     public ResponseEntity<ApiResponse> getUserInfo(){
-        long userId;
-        try {
-            // 사용자 ID 추출 및 변환
-            String userIdStr = SecurityContextHolder.getContext().getAuthentication().getName();
-            userId = Long.parseLong(userIdStr);
-        } catch (NumberFormatException e) {
-            // ID가 숫자로 변환 불가능할 경우
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.onFailure("COMMON401", "401 Unauthorized, 인증 정보가 잘못되었습니다.(토큰 미입력, 토큰 정보 오류)", null));
-        }
-
-        User user = userAuthCommandService.findByUserId(userId);
-
-        if (user == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.onFailure("COMMON401","401 Unauthorized, 인증 정보가 잘못되었습니다.(토큰 정보 오류)",user));
-        }
-        else{
-            ApiResponse<UserAuthResponseDto.findUserResultDto> response = ApiResponse.onGetSuccess(UserConverter.toUserResultDto(user));
-            return ResponseEntity.ok(response);
-        }
+        User user = userAuthCommandService.getAuthenticatedUserInfo();
+        ApiResponse<UserAuthResponseDto.findUserResultDto> response = ApiResponse.onGetSuccess(UserConverter.toUserResultDto(user));
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "로그인 된 회원 정보 수정(마이페이지-프로필 수정)", security = @SecurityRequirement(name="Authorization"))
-    @PutMapping("/api/auth/users")
+    @PutMapping("users")
     public ResponseEntity<ApiResponse> updateUserInfo(@RequestBody @Valid UserAuthRequestDto.updateUserDto request){
-        long userId;
-        try {
-            // 사용자 ID 추출 및 변환
-            String userIdStr = SecurityContextHolder.getContext().getAuthentication().getName();
-            userId = Long.parseLong(userIdStr);
-        } catch (NumberFormatException e) {
-            // ID가 숫자로 변환 불가능할 경우
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.onFailure("COMMON401", "401 Unauthorized, 인증 정보가 잘못되었습니다.(토큰 미입력, 토큰 정보 오류)", null));
-        }
-
-        // 사용자 정보 조회
-        User user = userAuthCommandService.findByUserId(userId);
-
-        if (user == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.onFailure("COMMON401","401 Unauthorized, 인증 정보가 잘못되었습니다.(토큰 정보 오류)",user));
-        }
-
-        else{
-            User updateUser = userAuthCommandService.updateUser(user,request.getNickname(),request.getImageUrl());
-            ApiResponse<UserAuthResponseDto.findUserResultDto> response = ApiResponse.onGetSuccess(UserConverter.toUserResultDto(updateUser));
-            return ResponseEntity.ok(response);
-        }
+        User user = userAuthCommandService.getAuthenticatedUserInfo();
+        User updateUser = userAuthCommandService.updateUser(user,request.getNickname(),request.getImageUrl());
+        ApiResponse<UserAuthResponseDto.findUserResultDto> response = ApiResponse.onGetSuccess(UserConverter.toUserResultDto(updateUser));
+        return ResponseEntity.ok(response);
     }
 
 
     @Operation(summary = "유효한 전화번호 확인")
-    @GetMapping("/api/auth/check-phone/{number}")
+    @GetMapping("/check-phone/{number}")
     public ResponseEntity<ApiResponse<UserAuthResponseDto.ValidResultDto>>isValidPhoneNum(@PathVariable String number){
         Boolean isValid = userAuthCommandService.isValidPhoneNumber(number);
 
@@ -133,7 +95,7 @@ public class UserAuthController {
     }
 
     @Operation(summary = "유효한 닉네임 확인")
-    @GetMapping("/api/auth/check-nickname/{nickname}")
+    @GetMapping("/check-nickname/{nickname}")
     public ResponseEntity<ApiResponse<UserAuthResponseDto.ValidResultDto>>isValidNickame(@PathVariable String nickname){
         Boolean isValid = userAuthCommandService.isValidNickname(nickname);
 

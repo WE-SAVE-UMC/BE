@@ -39,7 +39,7 @@ public class UserConverter {
                 .status(user.getStatus())
                 .imageUrl(user.getImageUrl())
                 .nickname(user.getNickname())
-                .phone_num(user.getPhoneNum())
+                .phoneNum(user.getPhoneNum())
                 .build();
     }
 

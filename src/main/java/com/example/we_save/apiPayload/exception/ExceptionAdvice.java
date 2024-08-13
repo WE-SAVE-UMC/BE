@@ -3,6 +3,9 @@ package com.example.we_save.apiPayload.exception;
 import com.example.we_save.apiPayload.ApiResponse;
 import com.example.we_save.apiPayload.code.ErrorReasonDTO;
 import com.example.we_save.apiPayload.code.status.ErrorStatus;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +24,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 
+import java.security.SignatureException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -64,6 +68,13 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
         });
 
         return handleExceptionInternalArgs(e,HttpHeaders.EMPTY,ErrorStatus.valueOf("_BAD_REQUEST"),request,errors);
+    }
+
+    @ExceptionHandler({ JwtException.class, ExpiredJwtException.class, SignatureException.class, MalformedJwtException.class })
+    public ResponseEntity<ApiResponse> handleJwtException(JwtException ex) {
+        ApiResponse response = ApiResponse.onFailure("COMMON401", "401 Unauthorized, JWT 오류 발생: " + ex.getMessage(), null);
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 
 
