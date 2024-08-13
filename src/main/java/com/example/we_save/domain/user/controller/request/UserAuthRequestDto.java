@@ -36,4 +36,12 @@ public class UserAuthRequestDto {
 
         String imageUrl;
     }
+
+    @Getter
+    public static class changePasswordDto{
+        @Size(max= 11)
+        String phoneNum;
+        @Size(max=20)
+        String password;
+    }
 }
