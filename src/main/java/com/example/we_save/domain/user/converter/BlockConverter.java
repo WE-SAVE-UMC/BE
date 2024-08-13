@@ -23,6 +23,7 @@ public class BlockConverter {
                 .targetId(block.getTargetId())
                 .build();
     }
+
     public static BlockResponseDto.BlockUserListResultDto toBlockUserListResultDto(List<User> users){
         List<BlockResponseDto.BlockUserDto> blockUserDtos = users.stream()
                 .map(user -> BlockResponseDto.BlockUserDto.builder()
@@ -32,7 +33,7 @@ public class BlockConverter {
                         .build())
                 .collect(Collectors.toList());
         return BlockResponseDto.BlockUserListResultDto.builder()
-                        .blockUserListDto(blockUserDtos)
+                        .blockUserList(blockUserDtos)
                         .build();
     }
 }
