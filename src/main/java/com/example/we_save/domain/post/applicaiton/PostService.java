@@ -24,4 +24,8 @@ public interface PostService {
     ApiResponse<List<DomesticPostDto>> getRecentDomesticPosts(boolean excludeCompleted);
     ApiResponse<List<DomesticPostDto>> getTopDomesticPosts(boolean excludeCompleted);
     ApiResponse<Void> changeToPostCompleted(long postId);
+
+    ApiResponse<NearbyPostResponseDto> searchNearbyPosts(String query, String sortBy, NearbyPostRequestDto nearbyPostRequestDto, int page, boolean excludeCompleted);
+
+    ApiResponse<DomesticPostDto> searchDomesticPosts(String query, String sortBy, DomesticPostDto domesticPostDto, int page, boolean excludeCompleted);
 }

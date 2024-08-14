@@ -67,4 +67,47 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Query("SELECT p FROM Post p WHERE p.user.id = :userId ORDER BY p.createAt DESC")
     List<Post> findAllByUser(@Param("userId") Long userId);
+
+    @Query("SELECT p FROM Post p WHERE (p.title LIKE %:query% OR p.content LIKE %:query%) " +
+            "AND p.region.id = :regionId " +
+            "AND (:excludeCompleted = false OR p.status != 'COMPLETED') " +
+            "ORDER BY p.createAt DESC")
+    List<Post> searchPostsByKeywordRecentNearby(@Param("query") String query,
+                                                @Param("regionId") Long regionId,
+                                                @Param("excludeCompleted") boolean excludeCompleted,
+                                                Pageable pageable);
+
+    @Query("SELECT p FROM Post p WHERE (p.title LIKE %:query% OR p.content LIKE %:query%) " +
+            "AND p.region.id = :regionId " +
+            "AND (:excludeCompleted = false OR p.status != 'COMPLETED') " +
+            "ORDER BY p.hearts DESC")
+    List<Post> searchPostsByKeywordTopNearby(@Param("query") String query,
+                                             @Param("regionId") Long regionId,
+                                             @Param("excludeCompleted") boolean excludeCompleted,
+                                             Pageable pageable);
+
+    @Query("SELECT p FROM Post p WHERE (p.title LIKE %:query% OR p.content LIKE %:query%) " +
+            "AND p.region.id = :regionId " +
+            "AND (:excludeCompleted = false OR p.status != 'COMPLETED') " +
+            "ORDER BY ST_Distance_Sphere(POINT(p.longitude, p.latitude), POINT(:longitude, :latitude))")
+    List<Post> searchPostsByKeywordDistance(@Param("query") String query,
+                                            @Param("regionId") Long regionId,
+                                            @Param("excludeCompleted") boolean excludeCompleted,
+                                            @Param("longitude") double longitude,
+                                            @Param("latitude") double latitude,
+                                            Pageable pageable);
+
+    @Query("SELECT p FROM Post p WHERE (p.title LIKE %:query% OR p.content LIKE %:query%) " +
+            "AND (:excludeCompleted = false OR p.status != 'COMPLETED') " +
+            "ORDER BY p.createAt DESC")
+    List<Post> searchPostsByKeywordRecentDomestic(@Param("query") String query,
+                                                  @Param("excludeCompleted") boolean excludeCompleted,
+                                                  Pageable pageable);
+
+    @Query("SELECT p FROM Post p WHERE (p.title LIKE %:query% OR p.content LIKE %:query%) " +
+            "AND (:excludeCompleted = false OR p.status != 'COMPLETED') " +
+            "ORDER BY p.hearts DESC")
+    List<Post> searchPostsByKeywordTopDomestic(@Param("query") String query,
+                                               @Param("excludeCompleted") boolean excludeCompleted,
+                                               Pageable pageable);
 }
