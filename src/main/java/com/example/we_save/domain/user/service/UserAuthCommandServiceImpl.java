@@ -1,6 +1,7 @@
 package com.example.we_save.domain.user.service;
 
 
+import com.example.we_save.apiPayload.util.PasswordUtil;
 import com.example.we_save.domain.user.controller.request.UserAuthRequestDto;
 import com.example.we_save.domain.user.converter.UserConverter;
 import com.example.we_save.domain.user.entity.NotificationSetting;
@@ -30,12 +31,16 @@ public class UserAuthCommandServiceImpl implements UserAuthCommandService {
 
     @Override
     public User joinUser(UserAuthRequestDto.JoinDto request,NotificationSetting notificationSetting) {
-        List<User> users  = userRepository.findByPhoneNum(request.getPhoneNum());
+        if(PasswordUtil.isValidPassword(request.getPassword())){
+            List<User> users  = userRepository.findByPhoneNum(request.getPhoneNum());
 
-        // 똑같은 전화번호를 가진 유저가 없다면 회원가입 성공
-        if (users.isEmpty()){
-            User newUser = UserConverter.makeUser(request, notificationSetting, bCryptPasswordEncoder);
-            return userRepository.save(newUser);
+            // 똑같은 전화번호를 가진 유저가 없다면 회원가입 성공
+            if (users.isEmpty()){
+                User newUser = UserConverter.makeUser(request, notificationSetting, bCryptPasswordEncoder);
+                return userRepository.save(newUser);
+            }
+        }else{
+            throw new IllegalArgumentException("유효하지 않은 비밀번호입니다. 비밀번호는 8~16자 길이여야 하며, 숫자, 영문 대소문자, 그리고 특수문자가 포함되어야 합니다.");
         }
         return null;
     }
@@ -100,7 +105,14 @@ public class UserAuthCommandServiceImpl implements UserAuthCommandService {
 
     @Override
     public User updateUserPassword(User user, String newPassword) {
-        user.setPassword(bCryptPasswordEncoder.encode(newPassword));
-        return userRepository.save(user);
+        if(PasswordUtil.isValidPassword(newPassword)){
+            user.setPassword(bCryptPasswordEncoder.encode(newPassword));
+            return userRepository.save(user);
+        }else{
+            throw new IllegalArgumentException("유효하지 않은 비밀번호입니다. 비밀번호는 8~16자 길이여야 하며, 숫자, 영문 대소문자, 그리고 특수문자가 포함되어야 합니다.");
+        }
     }
+
+
+
 }
