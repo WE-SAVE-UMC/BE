@@ -3,9 +3,12 @@ package com.example.we_save.domain.post.applicaiton;
 import com.example.we_save.apiPayload.ApiResponse;
 import com.example.we_save.domain.post.controller.request.NearbyPostRequestDto;
 import com.example.we_save.domain.post.controller.request.PostRequestDto;
+import com.example.we_save.domain.post.controller.response.DomesticPostDto;
 import com.example.we_save.domain.post.controller.response.NearbyPostResponseDto;
 import com.example.we_save.domain.post.controller.response.PostResponseDto;
 import com.example.we_save.domain.post.controller.response.PostResponseDtoWithComments;
+
+import java.util.List;
 
 public interface PostService {
     ApiResponse<PostResponseDto> createPost(PostRequestDto postRequestDto);
@@ -18,4 +21,6 @@ public interface PostService {
     ApiResponse<NearbyPostResponseDto> getRecentNearbyPosts(NearbyPostRequestDto nearbyPostRequestDto, int page, boolean excludeCompleted);
     ApiResponse<NearbyPostResponseDto> getTopNearbyPosts(NearbyPostRequestDto nearbyPostRequestDto, int page, boolean excludeCompleted);
     ApiResponse<NearbyPostResponseDto> getDistanceNearbyPosts(NearbyPostRequestDto nearbyPostRequestDto, int page, boolean excludeCompleted);
+    ApiResponse<List<DomesticPostDto>> getRecentDomesticPosts(boolean excludeCompleted);
+    ApiResponse<List<DomesticPostDto>> getTopDomesticPosts(boolean excludeCompleted);
 }
