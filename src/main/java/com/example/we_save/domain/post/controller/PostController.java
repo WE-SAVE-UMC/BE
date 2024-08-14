@@ -4,12 +4,16 @@ import com.example.we_save.apiPayload.ApiResponse;
 import com.example.we_save.domain.post.applicaiton.PostService;
 import com.example.we_save.domain.post.controller.request.NearbyPostRequestDto;
 import com.example.we_save.domain.post.controller.request.PostRequestDto;
+import com.example.we_save.domain.post.controller.response.DomesticPostDto;
 import com.example.we_save.domain.post.controller.response.NearbyPostResponseDto;
 import com.example.we_save.domain.post.controller.response.PostResponseDto;
 import com.example.we_save.domain.post.controller.response.PostResponseDtoWithComments;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -42,8 +46,9 @@ public class PostController {
 
     @GetMapping("/posts/{postId}")
     public ResponseEntity<ApiResponse<PostResponseDtoWithComments>> getPost(
-            @PathVariable("postId") Long postId){
-        ApiResponse<PostResponseDtoWithComments> responseDto = postService.getPost(postId);
+            @PathVariable("postId") Long postId,
+            @RequestParam("userId") Long userId){
+        ApiResponse<PostResponseDtoWithComments> responseDto = postService.getPost(postId,userId);
         return ResponseEntity.ok(responseDto);
     }
 
@@ -93,5 +98,26 @@ public class PostController {
             @RequestParam("page") int page,
             @RequestParam("excludeCompleted") boolean excludeCompleted) {
         return ResponseEntity.ok(postService.getDistanceNearbyPosts(nearbyPostRequestDto, page, excludeCompleted));
+    }
+
+    @GetMapping("/posts/domestic/recent")
+    public ResponseEntity<ApiResponse<List<DomesticPostDto>>> getRecentDomesticPosts(
+            @RequestParam(value = "excludeCompleted", required = false, defaultValue = "false") boolean excludeCompleted) {
+        ApiResponse<List<DomesticPostDto>> response = postService.getRecentDomesticPosts(excludeCompleted);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/posts/domestic/top")
+    public ResponseEntity<ApiResponse<List<DomesticPostDto>>> getTopDomesticPosts(
+            @RequestParam(value = "excludeCompleted", required = false, defaultValue = "false") boolean excludeCompleted) {
+        ApiResponse<List<DomesticPostDto>> response = postService.getTopDomesticPosts(excludeCompleted);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "게시물 상황종료 처리")
+    @PutMapping("/posts/status/{postId}")
+    public ResponseEntity<ApiResponse<Void>> changeToPostCompleted(@PathVariable("postId") long postId) {
+
+        return ResponseEntity.ok(postService.changeToPostCompleted(postId));
     }
 }

@@ -29,7 +29,7 @@ public class BlockConverter {
                 .map(user -> BlockResponseDto.BlockUserDto.builder()
                         .userId(user.getId())
                         .nickname(user.getNickname())
-                        .profileImage(user.getImageUrl())
+                        .profileImage(user.getProfileImage())
                         .build())
                 .collect(Collectors.toList());
         return BlockResponseDto.BlockUserListResultDto.builder()

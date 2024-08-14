@@ -3,6 +3,7 @@ package com.example.we_save.domain.comment.application;
 import com.example.we_save.apiPayload.ApiResponse;
 import com.example.we_save.apiPayload.code.status.ErrorStatus;
 import com.example.we_save.apiPayload.code.status.SuccessStatus;
+import com.example.we_save.apiPayload.util.RegionUtil;
 import com.example.we_save.domain.comment.controller.request.CommentRequestDto;
 import com.example.we_save.domain.comment.controller.response.CommentResponseDto;
 import com.example.we_save.domain.comment.entity.Comment;
@@ -21,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,6 +41,9 @@ public class CommentServiceImpl implements CommentService {
 
     @Autowired
     private CommentImageRepository commentImageRepository;
+
+    @Autowired
+    private RegionUtil regionUtil;
 
     private static final int MAX_IMAGE_COUNT = 10;
     private static final int MAX_REPORT_COUNT = 10;
@@ -171,13 +174,8 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     public ApiResponse<Void> reportComment(Long commentId, Long userId) {
 
-        Optional<Comment> optionalComment = commentRepository.findById(commentId);
-
-        if (!optionalComment.isPresent()) {
-            return ApiResponse.onFailure(ErrorStatus._BAD_REQUEST.getCode(), "잘못된 요청입니다.", null);
-        }
-
-        Comment comment = optionalComment.get();
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new EntityNotFoundException("댓글을 찾을 수 없습니다."));
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));

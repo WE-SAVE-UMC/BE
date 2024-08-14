@@ -7,6 +7,7 @@ import com.example.we_save.domain.user.entity.NotificationSetting;
 import com.example.we_save.domain.user.entity.User;
 import com.example.we_save.domain.user.entity.UserRole;
 import com.example.we_save.domain.user.entity.UserStatus;
+import com.example.we_save.image.entity.Image;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDateTime;
@@ -37,7 +38,7 @@ public class UserConverter {
         return UserAuthResponseDto.findUserResultDto.builder()
                 .userId(user.getId())
                 .status(user.getStatus())
-                .imageUrl(user.getImageUrl())
+                .profileImage(user.getProfileImage())
                 .nickname(user.getNickname())
                 .phoneNum(user.getPhoneNum())
                 .build();
@@ -53,13 +54,17 @@ public class UserConverter {
 
 
     public static User makeUser(UserAuthRequestDto.JoinDto request, NotificationSetting notificationSetting, BCryptPasswordEncoder bCryptPasswordEncoder) {
+        Image image = new Image();
+        image.setName("default_profile.jpg");
+        image.setFilePath("/files/user/default_profile.jpg");
+
         return User.builder()
                 .phoneNum(request.getPhoneNum())
                 .nickname(request.getNickname())
                 .password(bCryptPasswordEncoder.encode(request.getPassword()))
                 .role("USER") //default는 USER
                 .status(UserStatus.ACTIVE) //default는 ACTIVE
-                .imageUrl("http://localhost:8080/profile.jpg")
+                .profileImage(image)
                 .notificationSetting(notificationSetting)
                 .createdAt(LocalDateTime.now())
                 .build();

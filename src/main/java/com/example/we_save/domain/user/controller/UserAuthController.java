@@ -9,14 +9,18 @@ import com.example.we_save.domain.user.entity.NotificationSetting;
 import com.example.we_save.domain.user.entity.User;
 import com.example.we_save.domain.user.service.NotificationSettingCommandService;
 import com.example.we_save.domain.user.service.UserAuthCommandService;
+import com.example.we_save.image.entity.Image;
+import com.example.we_save.image.service.ImageService;
 import com.example.we_save.jwt.JWTUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 
 @RestController
@@ -25,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserAuthController {
 
     private final UserAuthCommandService userAuthCommandService;
+    private final ImageService imageService;
     private final NotificationSettingCommandService notificationSettingCommandService;
     private final JWTUtil jwtUtil;
 
@@ -71,14 +76,21 @@ public class UserAuthController {
     }
 
     @Operation(summary = "로그인 된 회원 정보 수정(마이페이지-프로필 수정)", security = @SecurityRequirement(name="Authorization"))
-    @PutMapping("/users")
-    public ResponseEntity<ApiResponse> updateUserInfo(@RequestBody @Valid UserAuthRequestDto.updateUserDto request){
-        User user = userAuthCommandService.getAuthenticatedUserInfo();
-        User updateUser = userAuthCommandService.updateUser(user,request.getNickname(),request.getImageUrl());
-        ApiResponse<UserAuthResponseDto.findUserResultDto> response = ApiResponse.onGetSuccess(UserConverter.toUserResultDto(updateUser));
-        return ResponseEntity.ok(response);
-    }
 
+    @PutMapping(value = "/users")
+    public ResponseEntity<ApiResponse> updateUserInfo(@RequestPart("nickname") String nickname,
+                                                      @RequestPart(value = "profileImage",required = false) MultipartFile profileImage ){
+        User user = userAuthCommandService.getAuthenticatedUserInfo();
+        try {
+            imageService.deleteProfileImage(user.getProfileImage().getId(),user); //파일서버에서 기존 프로필 이미지 삭제
+            Image newProfileImage = imageService.saveProfileImage(profileImage,user); //파일서버에 프로필 이미지 등록
+            User updateUser = userAuthCommandService.updateUser(user, nickname, newProfileImage); //유저 정보 업데이트
+            ApiResponse<UserAuthResponseDto.findUserResultDto> response = ApiResponse.onGetSuccess(UserConverter.toUserResultDto(updateUser));
+            return ResponseEntity.ok(response);
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.onFailure("COMMON400","파일 업로드 오류",null));
+        }
+    }
 
     @Operation(summary = "유효한 전화번호 확인")
     @GetMapping("/check-phone/{number}")

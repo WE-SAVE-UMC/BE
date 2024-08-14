@@ -10,10 +10,7 @@ import com.example.we_save.domain.comment.entity.CommentImage;
 import com.example.we_save.domain.comment.repository.CommentRepository;
 import com.example.we_save.domain.post.controller.request.NearbyPostRequestDto;
 import com.example.we_save.domain.post.controller.request.PostRequestDto;
-import com.example.we_save.domain.post.controller.response.NearbyPostResponseDto;
-import com.example.we_save.domain.post.controller.response.PostDto;
-import com.example.we_save.domain.post.controller.response.PostResponseDto;
-import com.example.we_save.domain.post.controller.response.PostResponseDtoWithComments;
+import com.example.we_save.domain.post.controller.response.*;
 import com.example.we_save.domain.post.entity.*;
 import com.example.we_save.domain.post.repository.*;
 import com.example.we_save.domain.region.entity.EupmyeondongRegion;
@@ -198,7 +195,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public ApiResponse<PostResponseDtoWithComments> getPost(Long postId){
+    public ApiResponse<PostResponseDtoWithComments> getPost(Long postId, Long userId){
         Optional<Post> optionalPost = postRepository.findById(postId);
 
         if (!optionalPost.isPresent()) {
@@ -229,6 +226,13 @@ public class PostServiceImpl implements PostService {
             return dto;
         }).collect(Collectors.toList());
 
+        Boolean userReaction = null;
+        if (postHeartRepository.existsByPostIdAndUserId(postId, userId)) {
+            userReaction = true; // "확인했어요"
+        } else if (postDislikeRepository.existsByPostIdAndUserId(postId, userId)) {
+            userReaction = false; // "허위에요"
+        }
+
         PostResponseDtoWithComments responseDto = PostResponseDtoWithComments.builder()
                 .id(post.getId())
                 .userId(post.getUser().getId())
@@ -238,6 +242,7 @@ public class PostServiceImpl implements PostService {
                 .longitude(post.getLongitude())
                 .latitude(post.getLatitude())
                 .postRegionName(post.getPostRegionName())
+                .userReaction(userReaction)
                 .hearts(post.getHearts())
                 .dislikes(post.getDislikes())
                 .comments(comments.size())
@@ -420,5 +425,55 @@ public class PostServiceImpl implements PostService {
         double postLatitude = post.getLatitude();
         double postLongitude = post.getLongitude();
         return RegionUtil.calculateDistanceBetweenCoordinates(postLatitude, postLongitude, latitude, longitude);
+    }
+
+    @Override
+    @Transactional
+    public ApiResponse<List<DomesticPostDto>> getRecentDomesticPosts(boolean excludeCompleted) {
+        List<Post> posts;
+
+        if (excludeCompleted) {
+            posts = postRepository.findRecentDomesticPostsExcludingCompleted(PageRequest.of(0, 10));
+        } else {
+            posts = postRepository.findRecentDomesticPosts(PageRequest.of(0, 10));
+        }
+
+        List<DomesticPostDto> postDTOs = posts.stream()
+                .map(DomesticPostDto::of)
+                .collect(Collectors.toList());
+
+        return ApiResponse.onGetSuccess(postDTOs);
+    }
+
+    @Override
+    @Transactional
+    public ApiResponse<List<DomesticPostDto>> getTopDomesticPosts(boolean excludeCompleted) {
+        List<Post> posts;
+
+        if (excludeCompleted) {
+            posts = postRepository.findTopDomesticPostsExcludingCompleted(PageRequest.of(0, 10));
+        } else {
+            posts = postRepository.findTopDomesticPosts(PageRequest.of(0, 10));
+        }
+
+        List<DomesticPostDto> postDTOs = posts.stream()
+                .map(DomesticPostDto::of)
+                .collect(Collectors.toList());
+
+        return ApiResponse.onGetSuccess(postDTOs);
+    }
+
+    @Override
+    @Transactional
+    public ApiResponse<Void> changeToPostCompleted(long postId) {
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(EntityNotFoundException::new);
+
+        post.setStatus(PostStatus.COMPLETED);
+
+        postRepository.save(post);
+
+        return ApiResponse.onPostSuccess(null, SuccessStatus._POST_OK);
     }
 }
