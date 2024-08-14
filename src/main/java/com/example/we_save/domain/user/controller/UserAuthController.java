@@ -78,9 +78,9 @@ public class UserAuthController {
                                                       @RequestPart(value = "profileImage",required = false) MultipartFile profileImage ){
         User user = userAuthCommandService.getAuthenticatedUserInfo();
         try {
-            imageService.deleteProfileImage(user.getProfileImage().getId(),user.getId()); //파일서버에서 기존 프로필 이미지 삭제
-            Image profile_image = imageService.saveProfileImage(profileImage,user.getId()); //파일서버에 프로필 이미지 등록
-            User updateUser = userAuthCommandService.updateUser(user, nickname, profile_image); //유저 정보 업데이트
+            imageService.deleteProfileImage(user.getProfileImage().getId(),user); //파일서버에서 기존 프로필 이미지 삭제
+            Image newProfileImage = imageService.saveProfileImage(profileImage,user); //파일서버에 프로필 이미지 등록
+            User updateUser = userAuthCommandService.updateUser(user, nickname, newProfileImage); //유저 정보 업데이트
             ApiResponse<UserAuthResponseDto.findUserResultDto> response = ApiResponse.onGetSuccess(UserConverter.toUserResultDto(updateUser));
             return ResponseEntity.ok(response);
         }catch (Exception e){
