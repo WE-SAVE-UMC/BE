@@ -1,6 +1,7 @@
 package com.example.we_save.domain.user.controller.response;
 
 import com.example.we_save.domain.user.entity.UserStatus;
+import com.example.we_save.image.entity.Image;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -43,7 +44,7 @@ public class UserAuthResponseDto {
         Long userId;
         String phoneNum;
         String nickname;
-        String imageUrl;
+        Image profileImage;
         UserStatus status;
     }
     @Builder

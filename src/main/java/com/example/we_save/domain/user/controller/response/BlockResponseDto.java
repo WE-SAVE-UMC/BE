@@ -1,6 +1,7 @@
 package com.example.we_save.domain.user.controller.response;
 
 import com.example.we_save.domain.user.entity.User;
+import com.example.we_save.image.entity.Image;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -31,6 +32,6 @@ public class BlockResponseDto {
     public static class BlockUserDto{
         private Long userId;
         private String nickname;
-        private String profileImage;
+        private Image profileImage;
     }
 }

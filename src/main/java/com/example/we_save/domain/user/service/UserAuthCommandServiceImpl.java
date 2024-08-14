@@ -7,10 +7,12 @@ import com.example.we_save.domain.user.entity.NotificationSetting;
 import com.example.we_save.domain.user.entity.User;
 import com.example.we_save.domain.user.repository.NotificationSettingRepository;
 import com.example.we_save.domain.user.repository.UserRepository;
+import com.example.we_save.image.entity.Image;
 import io.jsonwebtoken.JwtException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -53,9 +55,9 @@ public class UserAuthCommandServiceImpl implements UserAuthCommandService {
     }
 
     @Override
-    public User updateUser(User user, String newNickname, String newImageUrl ) {
-        user.setImageUrl(newNickname);
-        user.setNickname(newImageUrl);
+    public User updateUser(User user, String newNickname, Image newProfileImage ) {
+        user.setNickname(newNickname);
+        user.setProfileImage(newProfileImage);
         return userRepository.save(user);
     }
 
