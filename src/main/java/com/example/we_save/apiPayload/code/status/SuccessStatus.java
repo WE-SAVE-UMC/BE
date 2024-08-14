@@ -19,8 +19,6 @@ public enum SuccessStatus implements BaseCode {
     // 신고 관련 응답
     REPORT_SUCCESS(HttpStatus.OK, "REPORT200", "신고되었습니다.");
 
-
-
     private final HttpStatus httpStatus;
     private final String code;
     private final String message;

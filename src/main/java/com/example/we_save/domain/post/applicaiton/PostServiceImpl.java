@@ -195,7 +195,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public ApiResponse<PostResponseDtoWithComments> getPost(Long postId){
+    public ApiResponse<PostResponseDtoWithComments> getPost(Long postId, Long userId){
         Optional<Post> optionalPost = postRepository.findById(postId);
 
         if (!optionalPost.isPresent()) {
@@ -226,6 +226,13 @@ public class PostServiceImpl implements PostService {
             return dto;
         }).collect(Collectors.toList());
 
+        Boolean userReaction = null;
+        if (postHeartRepository.existsByPostIdAndUserId(postId, userId)) {
+            userReaction = true; // "확인했어요"
+        } else if (postDislikeRepository.existsByPostIdAndUserId(postId, userId)) {
+            userReaction = false; // "허위에요"
+        }
+
         PostResponseDtoWithComments responseDto = PostResponseDtoWithComments.builder()
                 .id(post.getId())
                 .userId(post.getUser().getId())
@@ -235,6 +242,7 @@ public class PostServiceImpl implements PostService {
                 .longitude(post.getLongitude())
                 .latitude(post.getLatitude())
                 .postRegionName(post.getPostRegionName())
+                .userReaction(userReaction)
                 .hearts(post.getHearts())
                 .dislikes(post.getDislikes())
                 .comments(comments.size())
@@ -453,5 +461,19 @@ public class PostServiceImpl implements PostService {
                 .collect(Collectors.toList());
 
         return ApiResponse.onGetSuccess(postDTOs);
+    }
+
+    @Override
+    @Transactional
+    public ApiResponse<Void> changeToPostCompleted(long postId) {
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(EntityNotFoundException::new);
+
+        post.setStatus(PostStatus.COMPLETED);
+
+        postRepository.save(post);
+
+        return ApiResponse.onPostSuccess(null, SuccessStatus._POST_OK);
     }
 }

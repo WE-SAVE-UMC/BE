@@ -14,7 +14,7 @@ public interface PostService {
     ApiResponse<PostResponseDto> createPost(PostRequestDto postRequestDto);
     ApiResponse<PostResponseDto> updatePost(Long postId, PostRequestDto postRequestDto);
     ApiResponse<PostResponseDto> deletePost(Long postId);
-    ApiResponse<PostResponseDtoWithComments> getPost(Long postId);
+    ApiResponse<PostResponseDtoWithComments> getPost(Long postId, Long userId);
     ApiResponse<Void> reportPost(Long postId, Long userId);
     ApiResponse<Void> toggleHeart(Long postId, Long userId);
     ApiResponse<Void> toggleDislike(Long postId, Long userId);
@@ -23,4 +23,5 @@ public interface PostService {
     ApiResponse<NearbyPostResponseDto> getDistanceNearbyPosts(NearbyPostRequestDto nearbyPostRequestDto, int page, boolean excludeCompleted);
     ApiResponse<List<DomesticPostDto>> getRecentDomesticPosts(boolean excludeCompleted);
     ApiResponse<List<DomesticPostDto>> getTopDomesticPosts(boolean excludeCompleted);
+    ApiResponse<Void> changeToPostCompleted(long postId);
 }
