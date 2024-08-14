@@ -21,28 +21,28 @@ public class HomeController {
     private final HomeService homeService;
 
     @Operation(summary = "메인페이지 게시글 조회")
-    @GetMapping
+    @PostMapping
     ResponseEntity<ApiResponse<HomeResponseDto>> showHomePage(@RequestBody HomeLocationRequestDto locationDto) {
 
         return ResponseEntity.ok(homeService.showHomePage(locationDto));
     }
 
     @Operation(summary = "메인페이지 내 근처 사건사고 확인순")
-    @GetMapping("/sort/top")
+    @PostMapping("/sort/top")
     ResponseEntity<ApiResponse<List<NearPostHomeResponseDto>>> showTopNearPosts(@RequestBody HomeLocationRequestDto locationDto) {
 
         return ResponseEntity.ok(homeService.showTopNearPosts(locationDto));
     }
 
     @Operation(summary = "메인페이지 내 근처 사건사고 최신순")
-    @GetMapping("/sort/recent")
+    @PostMapping("/sort/recent")
     ResponseEntity<ApiResponse<List<NearPostHomeResponseDto>>> showRecentNearPosts(@RequestBody  HomeLocationRequestDto locationDto) {
 
         return ResponseEntity.ok(homeService.showRecentNearPosts(locationDto));
     }
 
     @Operation(summary = "메인페이지 내 근처 사건사고 거리순")
-    @GetMapping("/sort/distance")
+    @PostMapping("/sort/distance")
     ResponseEntity<ApiResponse<List<NearPostHomeResponseDto>>> showDistanceNearPosts(@RequestBody  HomeLocationRequestDto locationDto) {
 
         return ResponseEntity.ok(homeService.showDistanceNearPosts(locationDto));
