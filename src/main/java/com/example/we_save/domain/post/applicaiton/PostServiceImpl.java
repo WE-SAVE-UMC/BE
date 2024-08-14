@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -105,19 +106,10 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Post updatePostImages(List<PostImage> images, Post post){
-        post.setImages(images);
-        return postRepository.save(post);
-    }
-
-
-
-    @Override
     @Transactional
-    public ApiResponse<PostResponseDto> updatePost(Long postId, PostRequestDto postRequestDto) {
+    public Post updatePost(Long postId, PostRequestDto postRequestDto) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
-
 
         post.setCategory(postRequestDto.getCategory());
         post.setTitle(postRequestDto.getTitle());
@@ -125,13 +117,9 @@ public class PostServiceImpl implements PostService {
         post.setStatus(PostStatus.PROCESSING);
         post.setReport119(postRequestDto.isReport119());
 
+        postImageRepository.deleteByPostId(postId); //기존 게시글 이미지 삭제
 
-        Post updatedPost = postRepository.save(post);
-
-        PostResponseDto responseDto = new PostResponseDto();
-        responseDto.setPostId(updatedPost.getId());
-
-        return ApiResponse.onPostSuccess(responseDto, SuccessStatus._POST_OK);
+        return postRepository.save(post);
     }
 
 

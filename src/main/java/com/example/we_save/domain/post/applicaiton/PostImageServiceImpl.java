@@ -19,12 +19,19 @@ public class PostImageServiceImpl implements PostImageService {
 
     private final PostImageRepository postImageRepository;
 
+    private static final int MAX_IMAGE_COUNT = 10;
+
     public PostImageServiceImpl(PostImageRepository postImageRepository) {
         this.postImageRepository = postImageRepository;
     }
 
     @Override
     public void savePostImages(List<MultipartFile> files, Post post) throws IOException {
+
+        if (files.size() > MAX_IMAGE_COUNT) {
+            throw new IllegalArgumentException("최대 10개의 이미지만 첨부할 수 있습니다.");
+        }
+
         //실제 파일 서버 경로
         String projectPath = "/home/upload/post/"+post.getId();
 
@@ -35,7 +42,6 @@ public class PostImageServiceImpl implements PostImageService {
             Files.createDirectories(directoryPath);
         }
 
-        // Save each file
         for (MultipartFile file : files) {
             UUID uuid = UUID.randomUUID();
             String fileName = uuid + "_" + file.getOriginalFilename();
@@ -50,11 +56,6 @@ public class PostImageServiceImpl implements PostImageService {
         }
     }
 
-    //게시글 수정시 파일 서버에 저장된 게시글 이미지를 삭제
-    @Override
-    public void deletePostImage(long imageId, Post post) throws IOException {
-
-    }
 
     // 게시글 삭제 시 해당 게시글의 모든 이미지를 저장한 폴더를 삭제
     @Override

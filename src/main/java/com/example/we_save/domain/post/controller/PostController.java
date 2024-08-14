@@ -40,12 +40,15 @@ public class PostController {
             @RequestPart PostRequestDto postRequestDto,
             @RequestPart("images") List<MultipartFile> files) {
 
-        Post savePost = postService.createPost(postRequestDto);
+        Post savePost = postService.createPost(postRequestDto); //게시글 정보 등록
 
         try {
-            postImageService.savePostImages(files, savePost);
+            postImageService.savePostImages(files, savePost); //게시글 사진 등록
             return ResponseEntity.ok(ApiResponse.onPostSuccess(PostResponseDto.builder().postId(savePost.getId()).build(), SuccessStatus._POST_OK));
-        }catch (Exception e){
+        }catch (IllegalArgumentException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.onFailure("COMMON400", e.getMessage(), null));
+        }
+        catch (Exception e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.onFailure("COMMON400","파일 업로드 오류",null));
         }
 
@@ -54,9 +57,20 @@ public class PostController {
     @PutMapping("/posts/{postId}")
     public ResponseEntity<ApiResponse<PostResponseDto>> updatePost(
             @PathVariable("postId") Long postId,
-            @RequestBody PostRequestDto postRequestDto) {
-        ApiResponse<PostResponseDto> responseDto = postService.updatePost(postId, postRequestDto);
-        return ResponseEntity.ok(responseDto);
+            @RequestPart PostRequestDto postRequestDto,
+            @RequestPart("images") List<MultipartFile> files) {
+        Post updatePost = postService.updatePost(postId, postRequestDto);//게시글 정보 수정, 게시글 이미지 DB정보 삭제
+
+        try {
+            postImageService.deletePostAllImage(postId); //서버에 있는 기존 게시글 이미지 삭제
+            postImageService.savePostImages(files, updatePost); //서버에 새로 이미지 등록
+            return ResponseEntity.ok(ApiResponse.onGetSuccess(PostResponseDto.builder().postId(updatePost.getId()).build()));
+        }catch (IllegalArgumentException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.onFailure("COMMON400", e.getMessage(), null));
+        }
+        catch (Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.onFailure("COMMON400","파일 업로드 오류",null));
+        }
     }
 
     @DeleteMapping("/posts/{postId}")

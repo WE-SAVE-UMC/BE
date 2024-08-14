@@ -15,8 +15,7 @@ import java.util.List;
 
 public interface PostService {
     Post createPost(PostRequestDto postRequestDto);
-    Post updatePostImages(List<PostImage> images, Post post);
-    ApiResponse<PostResponseDto> updatePost(Long postId, PostRequestDto postRequestDto);
+    Post updatePost(Long postId, PostRequestDto postRequestDto);
     ApiResponse<PostResponseDto> deletePost(Long postId);
     ApiResponse<PostResponseDtoWithComments> getPost(Long postId, Long userId);
     ApiResponse<Void> reportPost(Long postId, Long userId);
