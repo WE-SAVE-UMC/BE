@@ -12,9 +12,11 @@ import com.example.we_save.domain.post.controller.response.PostResponseDto;
 import com.example.we_save.domain.post.controller.response.PostResponseDtoWithComments;
 import com.example.we_save.domain.post.entity.Post;
 import com.example.we_save.domain.post.entity.PostImage;
+import com.example.we_save.domain.user.service.UserService;
 import com.example.we_save.image.entity.Image;
 import com.example.we_save.image.service.ImageService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +28,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 public class PostController {
-
+    @Autowired
+    private UserService userService;
     @Autowired
     private PostService postService;
     @Autowired

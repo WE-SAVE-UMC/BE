@@ -172,6 +172,13 @@ public class PostServiceImpl implements PostService {
         }
 
         Post post = optionalPost.get();
+        //게시글의 사진 가져오기
+        List<PostImage> postImageList = postImageRepository.findByPostId(postId);
+
+        List<String> postImageUrls =postImageList.stream()
+                .map(PostImage::getFilePath)
+                .collect(Collectors.toList());
+
 
         // 모든 댓글 가져오기
         List<Comment> comments = commentRepository.findByPostId(postId);
@@ -215,6 +222,7 @@ public class PostServiceImpl implements PostService {
                 .hearts(post.getHearts())
                 .dislikes(post.getDislikes())
                 .comments(comments.size())
+                .images(postImageUrls)
                 .imageCount(totalImageCount)
                 .createdAt(post.getCreateAt())
                 .updatedAt(post.getUpdateAt())

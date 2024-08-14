@@ -78,7 +78,6 @@ public class UserAuthController {
     }
 
     @Operation(summary = "로그인 된 회원 정보 수정(마이페이지-프로필 수정)", security = @SecurityRequirement(name="Authorization"))
-
     @PutMapping(value = "/users")
     public ResponseEntity<ApiResponse> updateUserInfo(@RequestPart("nickname") String nickname,
                                                       @RequestPart(value = "profileImage",required = false) MultipartFile profileImage ){
