@@ -46,5 +46,17 @@ public class ImageServiceImpl implements ImageService {
 
         return imageRepository.save(image);
     }
+    @Override
+    public void deleteProfileImage(long userId) throws IOException {
+        String projectPath = "/home/upload/user/" + userId;
+        Path directoryPath = Paths.get(projectPath);
 
+        if (Files.exists(directoryPath)) {
+            Files.walk(directoryPath)
+                    .map(Path::toFile)
+                    .forEach(File::delete);
+
+            Files.deleteIfExists(directoryPath);
+        }
+    }
 }
