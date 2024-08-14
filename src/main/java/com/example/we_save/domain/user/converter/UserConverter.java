@@ -37,7 +37,7 @@ public class UserConverter {
         return UserAuthResponseDto.findUserResultDto.builder()
                 .userId(user.getId())
                 .status(user.getStatus())
-                .profileImage(user.getProfileImage())
+                .imageUrl(user.getProfileImage().getFilePath())
                 .nickname(user.getNickname())
                 .phoneNum(user.getPhoneNum())
                 .build();
