@@ -17,6 +17,7 @@ import com.example.we_save.domain.region.entity.EupmyeondongRegion;
 import com.example.we_save.domain.region.repository.EupmyeondongRepository;
 import com.example.we_save.domain.user.entity.User;
 import com.example.we_save.domain.user.repository.UserRepository;
+import com.example.we_save.image.entity.Image;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,10 +70,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public ApiResponse<PostResponseDto> createPost(PostRequestDto postRequestDto) {
-        if (postRequestDto.getImages().size() > MAX_IMAGE_COUNT) {
-            throw new IllegalArgumentException("최대 10개의 이미지만 첨부할 수 있습니다.");
-        }
+    public Post createPost(PostRequestDto postRequestDto) {
         User user = userRepository.findById(postRequestDto.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
 
@@ -102,19 +100,17 @@ public class PostServiceImpl implements PostService {
                 .reportCount(0)
                 .build();
 
-        List<PostImage> postImages = postRequestDto.getImages().stream()
-                .filter(imageUrl -> imageUrl != null && !imageUrl.trim().isEmpty())
-                .map(imageUrl -> PostImage.builder().imageUrl(imageUrl).post(post).build())
-                .collect(Collectors.toList());
-        post.setImages(postImages);
 
-        Post savedPost = postRepository.save(post);
-
-        PostResponseDto responseDto = new PostResponseDto();
-        responseDto.setPostId(savedPost.getId());
-
-        return ApiResponse.onPostSuccess(responseDto, SuccessStatus._POST_OK);
+        return postRepository.save(post);
     }
+
+    @Override
+    public Post updatePostImages(List<PostImage> images, Post post){
+        post.setImages(images);
+        return postRepository.save(post);
+    }
+
+
 
     @Override
     @Transactional
@@ -122,9 +118,6 @@ public class PostServiceImpl implements PostService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
 
-        if (postRequestDto.getImages().size() > MAX_IMAGE_COUNT) {
-            throw new IllegalArgumentException("최대 10개의 이미지만 첨부할 수 있습니다.");
-        }
 
         post.setCategory(postRequestDto.getCategory());
         post.setTitle(postRequestDto.getTitle());
@@ -132,32 +125,6 @@ public class PostServiceImpl implements PostService {
         post.setStatus(PostStatus.PROCESSING);
         post.setReport119(postRequestDto.isReport119());
 
-        List<String> existingImageUrls = post.getImages().stream()
-                .map(PostImage::getImageUrl)
-                .collect(Collectors.toList());
-
-        List<String> imagesToDelete = existingImageUrls.stream()
-                .filter(url -> postRequestDto.getImages().contains("") || !postRequestDto.getImages().contains(url))
-                .collect(Collectors.toList());
-
-        imagesToDelete.forEach(url -> {
-            PostImage imageToDelete = post.getImages().stream()
-                    .filter(image -> image.getImageUrl().equals(url))
-                    .findFirst()
-                    .orElse(null);
-            if (imageToDelete != null) {
-                post.getImages().remove(imageToDelete);
-                postImageRepository.delete(imageToDelete);
-            }
-        });
-
-        List<PostImage> updatedImages = postRequestDto.getImages().stream()
-                .filter(imageUrl -> !imageUrl.isEmpty())  // 빈 문자열 이미지는 추가하지 않음
-                .map(imageUrl -> PostImage.builder().imageUrl(imageUrl).post(post).build())
-                .collect(Collectors.toList());
-
-        post.getImages().clear();
-        post.getImages().addAll(updatedImages);
 
         Post updatedPost = postRepository.save(post);
 
@@ -249,9 +216,6 @@ public class PostServiceImpl implements PostService {
                 .imageCount(totalImageCount)
                 .createdAt(post.getCreateAt())
                 .updatedAt(post.getUpdateAt())
-                .images(post.getImages().stream()
-                        .map(PostImage::getImageUrl)
-                        .collect(Collectors.toList()))
                 .commentsList(commentDtos)
                 .build();
 

@@ -28,7 +28,7 @@ public class NearPostHomeResponseDto {
 
     public static NearPostHomeResponseDto of(Post post, long regionId, double distance) {
 
-        String imageUrl = post.getImages().isEmpty() ? null : post.getImages().get(0).getImageUrl();
+        String imageUrl = post.getImages().isEmpty() ? null : post.getImages().get(0).getFilePath();
 
         return NearPostHomeResponseDto.builder()
                 .postId(post.getId())

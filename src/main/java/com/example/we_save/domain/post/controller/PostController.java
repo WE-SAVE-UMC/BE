@@ -1,6 +1,8 @@
 package com.example.we_save.domain.post.controller;
 
 import com.example.we_save.apiPayload.ApiResponse;
+import com.example.we_save.apiPayload.code.status.SuccessStatus;
+import com.example.we_save.domain.post.applicaiton.PostImageService;
 import com.example.we_save.domain.post.applicaiton.PostService;
 import com.example.we_save.domain.post.controller.request.NearbyPostRequestDto;
 import com.example.we_save.domain.post.controller.request.PostRequestDto;
@@ -8,10 +10,16 @@ import com.example.we_save.domain.post.controller.response.DomesticPostDto;
 import com.example.we_save.domain.post.controller.response.NearbyPostResponseDto;
 import com.example.we_save.domain.post.controller.response.PostResponseDto;
 import com.example.we_save.domain.post.controller.response.PostResponseDtoWithComments;
+import com.example.we_save.domain.post.entity.Post;
+import com.example.we_save.domain.post.entity.PostImage;
+import com.example.we_save.image.entity.Image;
+import com.example.we_save.image.service.ImageService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -21,12 +29,23 @@ public class PostController {
 
     @Autowired
     private PostService postService;
+    @Autowired
+    private PostImageService postImageService;
 
     @PostMapping("/posts")
     public ResponseEntity<ApiResponse<PostResponseDto>> createPost(
-            @RequestBody PostRequestDto postRequestDto) {
-        ApiResponse<PostResponseDto> responseDto = postService.createPost(postRequestDto);
-        return ResponseEntity.ok(responseDto);
+            @RequestPart PostRequestDto postRequestDto,
+            @RequestPart("images") List<MultipartFile> files) {
+
+        Post savePost = postService.createPost(postRequestDto);
+
+        try {
+            postImageService.savePostImages(files, savePost);
+            return ResponseEntity.ok(ApiResponse.onPostSuccess(PostResponseDto.builder().postId(savePost.getId()).build(), SuccessStatus._POST_OK));
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.onFailure("COMMON400","파일 업로드 오류",null));
+        }
+
     }
 
     @PutMapping("/posts/{postId}")

@@ -44,7 +44,7 @@ public class UserAuthResponseDto {
         Long userId;
         String phoneNum;
         String nickname;
-        Image profileImage;
+        String imageUrl;
         UserStatus status;
     }
     @Builder
