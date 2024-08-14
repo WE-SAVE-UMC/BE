@@ -9,9 +9,7 @@ import java.io.IOException;
 import java.util.List;
 
 public interface ImageService {
+    public Image saveDefaultProfileImage();
     public Image saveProfileImage(MultipartFile file, User user) throws IOException;
     public void deleteProfileImage(long imageId,User user) throws IOException ;
-    public List<Image> savePostImages(List<MultipartFile> files, Post post) throws IOException;
-    public void deletePostImage(long imageId,Post post) throws IOException;
-    public void deletePostAllImage(Post post) throws IOException;
 }

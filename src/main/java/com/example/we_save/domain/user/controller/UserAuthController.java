@@ -38,11 +38,13 @@ public class UserAuthController {
     public ResponseEntity<ApiResponse<UserAuthResponseDto.JoinResultDto>> join(@RequestBody @Valid UserAuthRequestDto.JoinDto request){
         NotificationSetting notificationSetting = notificationSettingCommandService.createNotificationSetting();
         try {
-            User user = userAuthCommandService.joinUser(request, notificationSetting);
+            Image newProfileImage = imageService.saveDefaultProfileImage(); //파일서버에 프로필 이미지 등록
+            User user = userAuthCommandService.joinUser(request, notificationSetting,newProfileImage);
 
             if (user == null) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.onFailure("COMMON409", "이미 회원가입이 된 회원입니다.", null));
             } else {
+
                 ApiResponse<UserAuthResponseDto.JoinResultDto> response = ApiResponse.onPostSuccess(UserConverter.toJoinResultDto(user), SuccessStatus._POST_OK);
                 return ResponseEntity.status(HttpStatus.CREATED).body(response);
             }

@@ -1,9 +1,7 @@
 package com.example.we_save.image.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.example.we_save.domain.post.entity.Post;
+import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -23,4 +21,5 @@ public class Image {
 
     private String name;
     private String filePath;
+
 }
