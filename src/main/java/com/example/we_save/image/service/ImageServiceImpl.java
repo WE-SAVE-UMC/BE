@@ -40,6 +40,9 @@ public class ImageServiceImpl implements ImageService {
 
         String projectPath = "/home/upload/user/"+user.getId();
 
+        //로컬 서버 경로
+        //String projectPath = System.getProperty("user.dir") + "/media/"+user.getId();
+
         UUID uuid = UUID.randomUUID();
 
         String fileName = uuid+"_"+file.getOriginalFilename();
@@ -65,6 +68,10 @@ public class ImageServiceImpl implements ImageService {
         userRepository.save(user); // Save the updated user
 
         String projectPath = "/home/upload/user/" + user.getId();
+
+        //로컬 서버 경로
+        //String projectPath = System.getProperty("user.dir") + "/media/"+user.getId();
+
         Path directoryPath = Paths.get(projectPath);
 
         if (Files.exists(directoryPath)) {
