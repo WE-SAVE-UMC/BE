@@ -22,8 +22,9 @@ public class ImageServiceImpl implements ImageService {
     private final UserRepository userRepository;
 
 
-    public ImageServiceImpl(ImageRepository imageRepository) {
+    public ImageServiceImpl(ImageRepository imageRepository, UserRepository userRepository) {
         this.imageRepository = imageRepository;
+        this.userRepository = userRepository;
     }
     @Override
     public Image saveProfileImage(MultipartFile file,User user) throws IOException {
