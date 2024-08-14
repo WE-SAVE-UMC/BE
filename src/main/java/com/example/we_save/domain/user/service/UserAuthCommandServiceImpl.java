@@ -30,13 +30,13 @@ public class UserAuthCommandServiceImpl implements UserAuthCommandService {
     }
 
     @Override
-    public User joinUser(UserAuthRequestDto.JoinDto request,NotificationSetting notificationSetting) {
+    public User joinUser(UserAuthRequestDto.JoinDto request,NotificationSetting notificationSetting,Image image) {
         if(PasswordUtil.isValidPassword(request.getPassword())){
             List<User> users  = userRepository.findByPhoneNum(request.getPhoneNum());
 
             // 똑같은 전화번호를 가진 유저가 없다면 회원가입 성공
             if (users.isEmpty()){
-                User newUser = UserConverter.makeUser(request, notificationSetting, bCryptPasswordEncoder);
+                User newUser = UserConverter.makeUser(request, notificationSetting, bCryptPasswordEncoder,image);
                 return userRepository.save(newUser);
             }
         }else{

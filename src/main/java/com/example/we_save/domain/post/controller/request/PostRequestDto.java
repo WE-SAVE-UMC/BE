@@ -36,7 +36,6 @@ public class PostRequestDto {
     @NotEmpty(message = "Post region name must not be empty")
     private String postRegionName;
 
-    private List<String> images;
     private boolean report119;
 
 }

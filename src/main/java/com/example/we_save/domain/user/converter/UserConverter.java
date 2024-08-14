@@ -1,11 +1,10 @@
 package com.example.we_save.domain.user.converter;
 
-import com.example.we_save.apiPayload.ApiResponse;
+
 import com.example.we_save.domain.user.controller.request.UserAuthRequestDto;
 import com.example.we_save.domain.user.controller.response.UserAuthResponseDto;
 import com.example.we_save.domain.user.entity.NotificationSetting;
 import com.example.we_save.domain.user.entity.User;
-import com.example.we_save.domain.user.entity.UserRole;
 import com.example.we_save.domain.user.entity.UserStatus;
 import com.example.we_save.image.entity.Image;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -38,7 +37,7 @@ public class UserConverter {
         return UserAuthResponseDto.findUserResultDto.builder()
                 .userId(user.getId())
                 .status(user.getStatus())
-                .profileImage(user.getProfileImage())
+                .imageUrl(user.getProfileImage().getFilePath())
                 .nickname(user.getNickname())
                 .phoneNum(user.getPhoneNum())
                 .build();
@@ -53,11 +52,7 @@ public class UserConverter {
 
 
 
-    public static User makeUser(UserAuthRequestDto.JoinDto request, NotificationSetting notificationSetting, BCryptPasswordEncoder bCryptPasswordEncoder) {
-        Image image = new Image();
-        image.setName("default_profile.jpg");
-        image.setFilePath("/files/user/default_profile.jpg");
-
+    public static User makeUser(UserAuthRequestDto.JoinDto request, NotificationSetting notificationSetting, BCryptPasswordEncoder bCryptPasswordEncoder, Image image) {
         return User.builder()
                 .phoneNum(request.getPhoneNum())
                 .nickname(request.getNickname())

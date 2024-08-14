@@ -1,11 +1,9 @@
 package com.example.we_save.image.service;
 
-import com.example.we_save.domain.post.entity.Post;
 import com.example.we_save.domain.user.entity.User;
 import com.example.we_save.domain.user.repository.UserRepository;
 import com.example.we_save.image.entity.Image;
 import com.example.we_save.image.repository.ImageRepository;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,8 +12,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -29,10 +25,23 @@ public class ImageServiceImpl implements ImageService {
         this.imageRepository = imageRepository;
         this.userRepository = userRepository;
     }
+
+    @Override
+    public Image saveDefaultProfileImage() {
+        Image image = new Image();
+        image.setName("default_profile.jpg");
+        image.setFilePath("/files/user/default_profile.jpg");
+
+        return imageRepository.save(image);
+    }
+
     @Override
     public Image saveProfileImage(MultipartFile file,User user) throws IOException {
 
         String projectPath = "/home/upload/user/"+user.getId();
+
+        //로컬 서버 경로
+        //String projectPath = System.getProperty("user.dir") + "/media/"+user.getId();
 
         UUID uuid = UUID.randomUUID();
 
@@ -59,6 +68,10 @@ public class ImageServiceImpl implements ImageService {
         userRepository.save(user); // Save the updated user
 
         String projectPath = "/home/upload/user/" + user.getId();
+
+        //로컬 서버 경로
+        //String projectPath = System.getProperty("user.dir") + "/media/"+user.getId();
+
         Path directoryPath = Paths.get(projectPath);
 
         if (Files.exists(directoryPath)) {
@@ -75,40 +88,4 @@ public class ImageServiceImpl implements ImageService {
         }
     }
 
-    @Override
-    public List<Image> savePostImages(List<MultipartFile> files, Post post) throws IOException {
-        String projectPath = "/home/upload/post/"+post.getId();
-        Path directoryPath = Paths.get(projectPath);
-        if (Files.notExists(directoryPath)) {
-            Files.createDirectories(directoryPath);
-        }
-        List<Image> savedImages = new ArrayList<>();
-
-        // Save each file
-        for (MultipartFile file : files) {
-            UUID uuid = UUID.randomUUID();
-            String fileName = uuid + "_" + file.getOriginalFilename();
-            File saveFile = new File(projectPath, fileName);
-            file.transferTo(saveFile);
-
-            Image image = new Image();
-            image.setName(fileName);
-            image.setFilePath("/files/post/" + post.getId() + fileName);
-            image = imageRepository.save(image);
-
-            savedImages.add(image);
-        }
-
-        return savedImages;
-    }
-
-    @Override
-    public void deletePostImage(long imageId, Post post) throws IOException {
-
-    }
-
-    @Override
-    public void deletePostAllImage(Post post) throws IOException {
-
-    }
 }

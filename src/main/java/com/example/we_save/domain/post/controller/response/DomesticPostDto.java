@@ -31,7 +31,7 @@ public class DomesticPostDto {
                 .postRegionName(RegionUtil.extractRegionAfterSecondSpace(post.getPostRegionName()))
                 .hearts(post.getHearts())
                 .dislikes(post.getDislikes())
-                .image(post.getImages().isEmpty() ? null : post.getImages().get(0).getImageUrl())
+                .image(post.getImages().isEmpty() ? null : post.getImages().get(0).getFilePath())
                 .imageCount(post.getImages().size())
                 .createdAt(post.getCreateAt().toString())
                 .build();

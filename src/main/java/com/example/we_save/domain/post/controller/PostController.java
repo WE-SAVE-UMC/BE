@@ -1,6 +1,8 @@
 package com.example.we_save.domain.post.controller;
 
 import com.example.we_save.apiPayload.ApiResponse;
+import com.example.we_save.apiPayload.code.status.SuccessStatus;
+import com.example.we_save.domain.post.applicaiton.PostImageService;
 import com.example.we_save.domain.post.applicaiton.PostService;
 import com.example.we_save.domain.post.controller.request.NearbyPostRequestDto;
 import com.example.we_save.domain.post.controller.request.PostRequestDto;
@@ -8,40 +10,79 @@ import com.example.we_save.domain.post.controller.response.DomesticPostDto;
 import com.example.we_save.domain.post.controller.response.NearbyPostResponseDto;
 import com.example.we_save.domain.post.controller.response.PostResponseDto;
 import com.example.we_save.domain.post.controller.response.PostResponseDtoWithComments;
+import com.example.we_save.domain.post.entity.Post;
+import com.example.we_save.domain.post.entity.PostImage;
+import com.example.we_save.domain.user.service.UserService;
+import com.example.we_save.image.entity.Image;
+import com.example.we_save.image.service.ImageService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api")
 public class PostController {
-
+    @Autowired
+    private UserService userService;
     @Autowired
     private PostService postService;
+    @Autowired
+    private PostImageService postImageService;
 
     @PostMapping("/posts")
     public ResponseEntity<ApiResponse<PostResponseDto>> createPost(
-            @RequestBody PostRequestDto postRequestDto) {
-        ApiResponse<PostResponseDto> responseDto = postService.createPost(postRequestDto);
-        return ResponseEntity.ok(responseDto);
+            @RequestPart PostRequestDto postRequestDto,
+            @RequestPart("images") List<MultipartFile> files) {
+
+        Post savePost = postService.createPost(postRequestDto); //게시글 정보 등록
+
+        try {
+            postImageService.savePostImages(files, savePost); //게시글 사진 등록
+            return ResponseEntity.ok(ApiResponse.onPostSuccess(PostResponseDto.builder().postId(savePost.getId()).build(), SuccessStatus._POST_OK));
+        }catch (IllegalArgumentException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.onFailure("COMMON400", e.getMessage(), null));
+        }
+        catch (Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.onFailure("COMMON400","파일 업로드 오류",null));
+        }
+
     }
 
     @PutMapping("/posts/{postId}")
     public ResponseEntity<ApiResponse<PostResponseDto>> updatePost(
             @PathVariable("postId") Long postId,
-            @RequestBody PostRequestDto postRequestDto) {
-        ApiResponse<PostResponseDto> responseDto = postService.updatePost(postId, postRequestDto);
-        return ResponseEntity.ok(responseDto);
+            @RequestPart PostRequestDto postRequestDto,
+            @RequestPart("images") List<MultipartFile> files) {
+        Post updatePost = postService.updatePost(postId, postRequestDto);//게시글 정보 수정, 게시글 이미지 DB정보 삭제
+
+        try {
+            postImageService.deletePostAllImage(postId); //서버에 있는 기존 게시글 이미지 삭제
+            postImageService.savePostImages(files, updatePost); //서버에 새로 이미지 등록
+            return ResponseEntity.ok(ApiResponse.onGetSuccess(PostResponseDto.builder().postId(updatePost.getId()).build()));
+        }catch (IllegalArgumentException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.onFailure("COMMON400", e.getMessage(), null));
+        }
+        catch (Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.onFailure("COMMON400","파일 업로드 오류",null));
+        }
     }
 
     @DeleteMapping("/posts/{postId}")
     public ResponseEntity<ApiResponse<PostResponseDto>> deletePost(
             @PathVariable("postId") Long postId) {
         ApiResponse<PostResponseDto> responseDto = postService.deletePost(postId);
-        return ResponseEntity.ok(responseDto);
+        try {
+            postImageService.deletePostAllImage(postId);
+            return ResponseEntity.ok(responseDto);
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.onFailure("COMMON400","파일 업로드 오류",null));
+        }
     }
 
     @GetMapping("/posts/{postId}")

@@ -20,7 +20,7 @@ public class UserPostResponseDto {
 
     public static UserPostResponseDto of(Post post) {
 
-        String imageUrl = post.getImages().isEmpty() ? null : post.getImages().get(0).getImageUrl();
+        String imageUrl = post.getImages().isEmpty() ? null : post.getImages().get(0).getFilePath();
 
         return UserPostResponseDto.builder()
                 .postId(post.getId())

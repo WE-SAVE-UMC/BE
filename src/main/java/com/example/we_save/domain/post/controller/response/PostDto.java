@@ -32,7 +32,7 @@ public class PostDto {
                 .postRegionName(RegionUtil.extractRegionAfterSecondSpace(post.getPostRegionName()))
                 .hearts(post.getHearts())
                 .dislikes(post.getDislikes())
-                .image(post.getImages().isEmpty() ? null : post.getImages().get(0).getImageUrl())
+                .image(post.getImages().isEmpty() ? null : post.getImages().get(0).getFilePath())
                 .imageCount(post.getImages().size())
                 .createdAt(post.getCreateAt().toString())
                 .distance(String.format("%.1f km", distance))  // 거리 값에 km 단위 추가
