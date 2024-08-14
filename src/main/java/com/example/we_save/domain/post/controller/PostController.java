@@ -60,7 +60,12 @@ public class PostController {
     public ResponseEntity<ApiResponse<PostResponseDto>> deletePost(
             @PathVariable("postId") Long postId) {
         ApiResponse<PostResponseDto> responseDto = postService.deletePost(postId);
-        return ResponseEntity.ok(responseDto);
+        try {
+            postImageService.deletePostAllImage(postId);
+            return ResponseEntity.ok(responseDto);
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.onFailure("COMMON400","파일 업로드 오류",null));
+        }
     }
 
     @GetMapping("/posts/{postId}")

@@ -152,6 +152,8 @@ public class PostServiceImpl implements PostService {
 
         postDislikeRepository.deleteByPostId(postId);
 
+        postImageRepository.deleteById(postId);
+
         postRepository.delete(postToDelete);
 
         PostResponseDto responseDto = new PostResponseDto();

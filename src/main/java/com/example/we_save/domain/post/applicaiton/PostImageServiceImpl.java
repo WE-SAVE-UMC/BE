@@ -50,13 +50,28 @@ public class PostImageServiceImpl implements PostImageService {
         }
     }
 
+    //게시글 수정시 파일 서버에 저장된 게시글 이미지를 삭제
     @Override
     public void deletePostImage(long imageId, Post post) throws IOException {
 
     }
 
+    // 게시글 삭제 시 해당 게시글의 모든 이미지를 저장한 폴더를 삭제
     @Override
-    public void deletePostAllImage(Post post) throws IOException {
+    public void deletePostAllImage(long postId) throws IOException {
+        //실제 파일 서버 경로
+        String projectPath = "/home/upload/post/" + postId;
+        //로컬 서버 경로
+        //String projectPath = System.getProperty("user.dir") + "/media/"+postId;
+        Path directoryPath = Paths.get(projectPath);
 
+        // 디렉토리가 존재하면 폴더 및 하위 파일들 삭제
+        if (Files.exists(directoryPath)) {
+            // 폴더 자체를 삭제 (폴더 안에 파일만 있는 경우)
+            Files.walk(directoryPath)
+                    .map(Path::toFile)
+                    .forEach(File::delete);
+        }
+        Files.deleteIfExists(directoryPath);
     }
 }
