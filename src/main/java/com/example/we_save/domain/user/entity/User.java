@@ -1,5 +1,6 @@
 package com.example.we_save.domain.user.entity;
 
+import com.example.we_save.image.entity.Image;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
@@ -46,8 +47,10 @@ public class User  {
     @JoinColumn(name = "notificationsettingId")
     private NotificationSetting notificationSetting;
 
-    @Column(nullable = false)
-    private String imageUrl;
+    @OneToOne
+    @JoinColumn(name="imageId")
+    private Image profileImage;
+
 
     @CreatedDate
     private LocalDateTime createdAt;

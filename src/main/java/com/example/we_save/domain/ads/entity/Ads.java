@@ -1,7 +1,12 @@
 package com.example.we_save.domain.ads.entity;
 
 import com.example.we_save.apiPayload.code.BaseEntity;
-import jakarta.persistence.*;
+import com.example.we_save.domain.ads.entity.AdsOption;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.CascadeType;
+
 import lombok.*;
 
 import java.util.ArrayList;
@@ -19,5 +24,6 @@ public class Ads extends BaseEntity {
     private String question;
 
     @OneToMany(mappedBy = "ads", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AdsOption> options = new ArrayList<>();
+    private final List<AdsOption> options = new ArrayList<>();
+
 }

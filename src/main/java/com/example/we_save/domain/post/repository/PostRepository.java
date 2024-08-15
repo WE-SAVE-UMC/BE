@@ -11,6 +11,22 @@ import java.util.List;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
 
+    // 국내 게시글 최신순 조회 (상황 종료 제외)
+    @Query("SELECT p FROM Post p WHERE p.hearts >= 10 AND p.status != 'COMPLETED' ORDER BY p.createAt DESC")
+    List<Post> findRecentDomesticPostsExcludingCompleted(Pageable pageable);
+
+    // 국내 게시글 최신순 조회 (상황 종료 포함)
+    @Query("SELECT p FROM Post p WHERE p.hearts >= 10 ORDER BY p.createAt DESC")
+    List<Post> findRecentDomesticPosts(Pageable pageable);
+
+    // 국내 게시글 확인순 조회 (상황 종료 제외)
+    @Query("SELECT p FROM Post p WHERE p.hearts >= 10 AND p.status != 'COMPLETED' ORDER BY p.hearts DESC")
+    List<Post> findTopDomesticPostsExcludingCompleted(Pageable pageable);
+
+    // 국내 게시글 확인순 조회 (상황 종료 포함)
+    @Query("SELECT p FROM Post p WHERE p.hearts >= 10 ORDER BY p.hearts DESC")
+    List<Post> findTopDomesticPosts(Pageable pageable);
+
     @Query("SELECT p FROM Post p WHERE p.createAt >= :startDate AND p.region.id = :regionId AND p.status != 'COMPLETED' ORDER BY p.createAt DESC")
     List<Post> findRecentPostsExcludingCompleted(@Param("startDate") LocalDateTime startDate,
                                                  @Param("regionId") Long regionId,
@@ -51,4 +67,47 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Query("SELECT p FROM Post p WHERE p.user.id = :userId ORDER BY p.createAt DESC")
     List<Post> findAllByUser(@Param("userId") Long userId);
+
+    @Query("SELECT p FROM Post p WHERE (p.title LIKE %:query% OR p.content LIKE %:query%) " +
+            "AND p.region.id = :regionId " +
+            "AND (:excludeCompleted = false OR p.status != 'COMPLETED') " +
+            "ORDER BY p.createAt DESC")
+    List<Post> searchPostsByKeywordRecentNearby(@Param("query") String query,
+                                                @Param("regionId") Long regionId,
+                                                @Param("excludeCompleted") boolean excludeCompleted,
+                                                Pageable pageable);
+
+    @Query("SELECT p FROM Post p WHERE (p.title LIKE %:query% OR p.content LIKE %:query%) " +
+            "AND p.region.id = :regionId " +
+            "AND (:excludeCompleted = false OR p.status != 'COMPLETED') " +
+            "ORDER BY p.hearts DESC")
+    List<Post> searchPostsByKeywordTopNearby(@Param("query") String query,
+                                             @Param("regionId") Long regionId,
+                                             @Param("excludeCompleted") boolean excludeCompleted,
+                                             Pageable pageable);
+
+    @Query("SELECT p FROM Post p WHERE (p.title LIKE %:query% OR p.content LIKE %:query%) " +
+            "AND p.region.id = :regionId " +
+            "AND (:excludeCompleted = false OR p.status != 'COMPLETED') " +
+            "ORDER BY ST_Distance_Sphere(POINT(p.longitude, p.latitude), POINT(:longitude, :latitude))")
+    List<Post> searchPostsByKeywordDistance(@Param("query") String query,
+                                            @Param("regionId") Long regionId,
+                                            @Param("excludeCompleted") boolean excludeCompleted,
+                                            @Param("longitude") double longitude,
+                                            @Param("latitude") double latitude,
+                                            Pageable pageable);
+
+    @Query("SELECT p FROM Post p WHERE (p.title LIKE %:query% OR p.content LIKE %:query%) " +
+            "AND (:excludeCompleted = false OR p.status != 'COMPLETED') " +
+            "ORDER BY p.createAt DESC")
+    List<Post> searchPostsByKeywordRecentDomestic(@Param("query") String query,
+                                                  @Param("excludeCompleted") boolean excludeCompleted,
+                                                  Pageable pageable);
+
+    @Query("SELECT p FROM Post p WHERE (p.title LIKE %:query% OR p.content LIKE %:query%) " +
+            "AND (:excludeCompleted = false OR p.status != 'COMPLETED') " +
+            "ORDER BY p.hearts DESC")
+    List<Post> searchPostsByKeywordTopDomestic(@Param("query") String query,
+                                               @Param("excludeCompleted") boolean excludeCompleted,
+                                               Pageable pageable);
 }

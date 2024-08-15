@@ -9,14 +9,18 @@ import com.example.we_save.domain.user.entity.NotificationSetting;
 import com.example.we_save.domain.user.entity.User;
 import com.example.we_save.domain.user.service.NotificationSettingCommandService;
 import com.example.we_save.domain.user.service.UserAuthCommandService;
+import com.example.we_save.image.entity.Image;
+import com.example.we_save.image.service.ImageService;
 import com.example.we_save.jwt.JWTUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 
 @RestController
@@ -25,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserAuthController {
 
     private final UserAuthCommandService userAuthCommandService;
+    private final ImageService imageService;
     private final NotificationSettingCommandService notificationSettingCommandService;
     private final JWTUtil jwtUtil;
 
@@ -32,14 +37,17 @@ public class UserAuthController {
     @PostMapping("/users")
     public ResponseEntity<ApiResponse<UserAuthResponseDto.JoinResultDto>> join(@RequestBody @Valid UserAuthRequestDto.JoinDto request){
         NotificationSetting notificationSetting = notificationSettingCommandService.createNotificationSetting();
-        User user= userAuthCommandService.joinUser(request,notificationSetting);
+        try {
+            User user = userAuthCommandService.joinUser(request, notificationSetting);
 
-        if (user == null){
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.onFailure("COMMON409","409 Confilt, 이미 회원가입이 된 회원입니다.",null));
-        }
-        else{
-            ApiResponse<UserAuthResponseDto.JoinResultDto> response = ApiResponse.onPostSuccess(UserConverter.toJoinResultDto(user), SuccessStatus._POST_OK);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.onFailure("COMMON409", "이미 회원가입이 된 회원입니다.", null));
+            } else {
+                ApiResponse<UserAuthResponseDto.JoinResultDto> response = ApiResponse.onPostSuccess(UserConverter.toJoinResultDto(user), SuccessStatus._POST_OK);
+                return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            }
+        }catch (IllegalArgumentException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.onFailure("COMMON400",e.getMessage(),null));
         }
     }
 
@@ -49,7 +57,7 @@ public class UserAuthController {
         User user = userAuthCommandService.loginUser(request);
 
         if (user == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.onFailure("COMMON401","401 Unauthorized, 인증 정보가 잘못되었습니다.",user));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.onFailure("COMMON401","인증 정보가 잘못되었습니다.",user));
         }
         else{
             String token = jwtUtil.createJwt(user.getId().toString(),"USER",24 * 60 * 60 * 1000L);
@@ -68,14 +76,21 @@ public class UserAuthController {
     }
 
     @Operation(summary = "로그인 된 회원 정보 수정(마이페이지-프로필 수정)", security = @SecurityRequirement(name="Authorization"))
-    @PutMapping("users")
-    public ResponseEntity<ApiResponse> updateUserInfo(@RequestBody @Valid UserAuthRequestDto.updateUserDto request){
-        User user = userAuthCommandService.getAuthenticatedUserInfo();
-        User updateUser = userAuthCommandService.updateUser(user,request.getNickname(),request.getImageUrl());
-        ApiResponse<UserAuthResponseDto.findUserResultDto> response = ApiResponse.onGetSuccess(UserConverter.toUserResultDto(updateUser));
-        return ResponseEntity.ok(response);
-    }
 
+    @PutMapping(value = "/users")
+    public ResponseEntity<ApiResponse> updateUserInfo(@RequestPart("nickname") String nickname,
+                                                      @RequestPart(value = "profileImage",required = false) MultipartFile profileImage ){
+        User user = userAuthCommandService.getAuthenticatedUserInfo();
+        try {
+            imageService.deleteProfileImage(user.getProfileImage().getId(),user); //파일서버에서 기존 프로필 이미지 삭제
+            Image newProfileImage = imageService.saveProfileImage(profileImage,user); //파일서버에 프로필 이미지 등록
+            User updateUser = userAuthCommandService.updateUser(user, nickname, newProfileImage); //유저 정보 업데이트
+            ApiResponse<UserAuthResponseDto.findUserResultDto> response = ApiResponse.onGetSuccess(UserConverter.toUserResultDto(updateUser));
+            return ResponseEntity.ok(response);
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.onFailure("COMMON400","파일 업로드 오류",null));
+        }
+    }
 
     @Operation(summary = "유효한 전화번호 확인")
     @GetMapping("/check-phone/{number}")
@@ -112,15 +127,18 @@ public class UserAuthController {
     }
 
     @Operation(summary = "비밀번호 재설정")
-    @PatchMapping("api/auth/users/password")
+    @PatchMapping("/users")
     public ResponseEntity<ApiResponse> changePassword(@RequestBody @Valid UserAuthRequestDto.changePasswordDto request){
         // 사용자 정보 조회
         User user = userAuthCommandService.findByUserPhoneNumber(request.getPhoneNum());
         if (user == null){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.onFailure("COMMON401","해당 전화번호의 회원이 존재하지 않습니다. 회원가입 해주세요. ",null));
         }
-        User updateUser = userAuthCommandService.updateUserPassword(user, request.getPassword());
-        return ResponseEntity.ok(ApiResponse.onGetSuccess(UserConverter.toUserIdResultDto(updateUser)));
+        try{
+            User updateUser = userAuthCommandService.updateUserPassword(user, request.getPassword());
+            return ResponseEntity.ok(ApiResponse.onGetSuccess(UserConverter.toUserIdResultDto(updateUser)));
+        }catch (IllegalArgumentException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.onFailure("COMMON400",e.getMessage(),null));
+        }
     }
-
 }

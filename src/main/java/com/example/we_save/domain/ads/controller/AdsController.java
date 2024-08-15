@@ -14,8 +14,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/ads")
 public class AdsController {
 
-    @Autowired
-    private AdsService adsService;
+    private final AdsService adsService;
+
+    public AdsController(AdsService adsService) {
+        this.adsService = adsService;
+    }
 
     @PostMapping
     public ResponseEntity<ApiResponse<AdsResponseDto>> createAds(

@@ -26,6 +26,7 @@ public class PostResponseDtoWithComments {
     private double longitude;
     private double latitude;
     private String postRegionName;
+    private Boolean userReaction;
     private int hearts;
     private int dislikes;
     private int comments;
