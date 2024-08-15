@@ -509,6 +509,11 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    public ApiResponse<List<DomesticPostDto>> searchDomesticPosts(String query, String sortBy, int page, boolean excludeCompleted) {
+        return null;
+    }
+
+    @Override
     @Transactional
     public ApiResponse<DomesticPostDto> searchDomesticPosts(String query, String sortBy, DomesticPostDto domesticPostDto, int page, boolean excludeCompleted) {
         Pageable pageable = PageRequest.of(page, PAGE_SIZE);
@@ -528,4 +533,5 @@ public class PostServiceImpl implements PostService {
 
         return ApiResponse.onGetSuccess((DomesticPostDto) postDTOs);
     }
+
 }

@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -37,6 +38,11 @@ public class PostRequestDto {
     private String postRegionName;
 
     private List<String> images;
+
+    {
+        images = new ArrayList<>();
+    }
+
     private boolean report119;
 
 }

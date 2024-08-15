@@ -120,4 +120,34 @@ public class PostController {
 
         return ResponseEntity.ok(postService.changeToPostCompleted(postId));
     }
+
+    @GetMapping("/posts/search/nearby")
+    public ResponseEntity<ApiResponse<NearbyPostResponseDto>> searchNearbyPosts(
+            @RequestParam("query") String query,
+            @RequestParam(value = "sortBy", defaultValue = "recent") String sortBy,
+            @RequestParam("page") int page,
+            @RequestParam("regionName") String regionName,
+            @RequestParam("longitude") double longitude,
+            @RequestParam("latitude") double latitude,
+            @RequestParam(value = "excludeCompleted", defaultValue = "false") boolean excludeCompleted) {
+
+        NearbyPostRequestDto nearbyPostRequestDto = NearbyPostRequestDto.builder()
+                .regionName(regionName)
+                .longitude(longitude)
+                .latitude(latitude)
+                .build();
+
+        return ResponseEntity.ok(postService.searchNearbyPosts(query, sortBy, nearbyPostRequestDto, page, excludeCompleted));
+    }
+
+    @GetMapping("/posts/search/domestic")
+    public ResponseEntity<ApiResponse<List<DomesticPostDto>>> searchDomesticPosts(
+            @RequestParam("query") String query,
+            @RequestParam(value = "sortBy", defaultValue = "recent") String sortBy,
+            @RequestParam("page") int page,
+            @RequestParam(value = "excludeCompleted", defaultValue = "false") boolean excludeCompleted) {
+
+        return ResponseEntity.ok(postService.searchDomesticPosts(query, sortBy, page, excludeCompleted));
+    }
+
 }

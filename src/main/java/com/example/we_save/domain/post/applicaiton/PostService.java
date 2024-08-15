@@ -7,6 +7,7 @@ import com.example.we_save.domain.post.controller.response.DomesticPostDto;
 import com.example.we_save.domain.post.controller.response.NearbyPostResponseDto;
 import com.example.we_save.domain.post.controller.response.PostResponseDto;
 import com.example.we_save.domain.post.controller.response.PostResponseDtoWithComments;
+import jakarta.transaction.Transactional;
 
 import java.util.List;
 
@@ -27,5 +28,8 @@ public interface PostService {
 
     ApiResponse<NearbyPostResponseDto> searchNearbyPosts(String query, String sortBy, NearbyPostRequestDto nearbyPostRequestDto, int page, boolean excludeCompleted);
 
+    ApiResponse<List<DomesticPostDto>> searchDomesticPosts(String query, String sortBy, int page, boolean excludeCompleted);
+
+    @Transactional
     ApiResponse<DomesticPostDto> searchDomesticPosts(String query, String sortBy, DomesticPostDto domesticPostDto, int page, boolean excludeCompleted);
 }
