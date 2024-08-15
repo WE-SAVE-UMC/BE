@@ -7,13 +7,16 @@ import com.example.we_save.domain.post.controller.response.DomesticPostDto;
 import com.example.we_save.domain.post.controller.response.NearbyPostResponseDto;
 import com.example.we_save.domain.post.controller.response.PostResponseDto;
 import com.example.we_save.domain.post.controller.response.PostResponseDtoWithComments;
+import com.example.we_save.domain.post.entity.Post;
+import com.example.we_save.domain.post.entity.PostImage;
+import com.example.we_save.image.entity.Image;
 import jakarta.transaction.Transactional;
 
 import java.util.List;
 
 public interface PostService {
-    ApiResponse<PostResponseDto> createPost(PostRequestDto postRequestDto);
-    ApiResponse<PostResponseDto> updatePost(Long postId, PostRequestDto postRequestDto);
+    Post createPost(PostRequestDto postRequestDto);
+    Post updatePost(Long postId, PostRequestDto postRequestDto);
     ApiResponse<PostResponseDto> deletePost(Long postId);
     ApiResponse<PostResponseDtoWithComments> getPost(Long postId, Long userId);
     ApiResponse<Void> reportPost(Long postId, Long userId);
@@ -32,4 +35,6 @@ public interface PostService {
 
     @Transactional
     ApiResponse<DomesticPostDto> searchDomesticPosts(String query, String sortBy, DomesticPostDto domesticPostDto, int page, boolean excludeCompleted);
+
+    //ApiResponse<DomesticPostDto> searchDomesticPosts(String query, String sortBy, DomesticPostDto domesticPostDto, int page, boolean excludeCompleted);
 }

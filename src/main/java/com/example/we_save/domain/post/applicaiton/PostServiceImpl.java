@@ -17,12 +17,14 @@ import com.example.we_save.domain.region.entity.EupmyeondongRegion;
 import com.example.we_save.domain.region.repository.EupmyeondongRepository;
 import com.example.we_save.domain.user.entity.User;
 import com.example.we_save.domain.user.repository.UserRepository;
+import com.example.we_save.image.entity.Image;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -69,10 +71,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public ApiResponse<PostResponseDto> createPost(PostRequestDto postRequestDto) {
-        if (postRequestDto.getImages().size() > MAX_IMAGE_COUNT) {
-            throw new IllegalArgumentException("최대 10개의 이미지만 첨부할 수 있습니다.");
-        }
+    public Post createPost(PostRequestDto postRequestDto) {
         User user = userRepository.findById(postRequestDto.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
 
@@ -102,29 +101,15 @@ public class PostServiceImpl implements PostService {
                 .reportCount(0)
                 .build();
 
-        List<PostImage> postImages = postRequestDto.getImages().stream()
-                .filter(imageUrl -> imageUrl != null && !imageUrl.trim().isEmpty())
-                .map(imageUrl -> PostImage.builder().imageUrl(imageUrl).post(post).build())
-                .collect(Collectors.toList());
-        post.setImages(postImages);
 
-        Post savedPost = postRepository.save(post);
-
-        PostResponseDto responseDto = new PostResponseDto();
-        responseDto.setPostId(savedPost.getId());
-
-        return ApiResponse.onPostSuccess(responseDto, SuccessStatus._POST_OK);
+        return postRepository.save(post);
     }
 
     @Override
     @Transactional
-    public ApiResponse<PostResponseDto> updatePost(Long postId, PostRequestDto postRequestDto) {
+    public Post updatePost(Long postId, PostRequestDto postRequestDto) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
-
-        if (postRequestDto.getImages().size() > MAX_IMAGE_COUNT) {
-            throw new IllegalArgumentException("최대 10개의 이미지만 첨부할 수 있습니다.");
-        }
 
         post.setCategory(postRequestDto.getCategory());
         post.setTitle(postRequestDto.getTitle());
@@ -132,39 +117,9 @@ public class PostServiceImpl implements PostService {
         post.setStatus(PostStatus.PROCESSING);
         post.setReport119(postRequestDto.isReport119());
 
-        List<String> existingImageUrls = post.getImages().stream()
-                .map(PostImage::getImageUrl)
-                .collect(Collectors.toList());
+        postImageRepository.deleteByPostId(postId); //기존 게시글 이미지 삭제
 
-        List<String> imagesToDelete = existingImageUrls.stream()
-                .filter(url -> postRequestDto.getImages().contains("") || !postRequestDto.getImages().contains(url))
-                .collect(Collectors.toList());
-
-        imagesToDelete.forEach(url -> {
-            PostImage imageToDelete = post.getImages().stream()
-                    .filter(image -> image.getImageUrl().equals(url))
-                    .findFirst()
-                    .orElse(null);
-            if (imageToDelete != null) {
-                post.getImages().remove(imageToDelete);
-                postImageRepository.delete(imageToDelete);
-            }
-        });
-
-        List<PostImage> updatedImages = postRequestDto.getImages().stream()
-                .filter(imageUrl -> !imageUrl.isEmpty())  // 빈 문자열 이미지는 추가하지 않음
-                .map(imageUrl -> PostImage.builder().imageUrl(imageUrl).post(post).build())
-                .collect(Collectors.toList());
-
-        post.getImages().clear();
-        post.getImages().addAll(updatedImages);
-
-        Post updatedPost = postRepository.save(post);
-
-        PostResponseDto responseDto = new PostResponseDto();
-        responseDto.setPostId(updatedPost.getId());
-
-        return ApiResponse.onPostSuccess(responseDto, SuccessStatus._POST_OK);
+        return postRepository.save(post);
     }
 
 
@@ -185,6 +140,8 @@ public class PostServiceImpl implements PostService {
 
         postDislikeRepository.deleteByPostId(postId);
 
+        postImageRepository.deleteById(postId);
+
         postRepository.delete(postToDelete);
 
         PostResponseDto responseDto = new PostResponseDto();
@@ -203,6 +160,13 @@ public class PostServiceImpl implements PostService {
         }
 
         Post post = optionalPost.get();
+        //게시글의 사진 가져오기
+        List<PostImage> postImageList = postImageRepository.findByPostId(postId);
+
+        List<String> postImageUrls =postImageList.stream()
+                .map(PostImage::getFilePath)
+                .collect(Collectors.toList());
+
 
         // 모든 댓글 가져오기
         List<Comment> comments = commentRepository.findByPostId(postId);
@@ -246,12 +210,10 @@ public class PostServiceImpl implements PostService {
                 .hearts(post.getHearts())
                 .dislikes(post.getDislikes())
                 .comments(comments.size())
+                .images(postImageUrls)
                 .imageCount(totalImageCount)
                 .createdAt(post.getCreateAt())
                 .updatedAt(post.getUpdateAt())
-                .images(post.getImages().stream()
-                        .map(PostImage::getImageUrl)
-                        .collect(Collectors.toList()))
                 .commentsList(commentDtos)
                 .build();
 
@@ -533,5 +495,4 @@ public class PostServiceImpl implements PostService {
 
         return ApiResponse.onGetSuccess((DomesticPostDto) postDTOs);
     }
-
 }

@@ -16,7 +16,7 @@ public class UserCommentResponseDto {
 
     public static UserCommentResponseDto of(Comment comment) {
 
-        String imageUrl = comment.getPost().getImages().isEmpty() ? null : comment.getPost().getImages().get(0).getImageUrl();
+        String imageUrl = comment.getPost().getImages().isEmpty() ? null : comment.getPost().getImages().get(0).getFilePath();
 
         return UserCommentResponseDto.builder()
                 .commentId(comment.getId())

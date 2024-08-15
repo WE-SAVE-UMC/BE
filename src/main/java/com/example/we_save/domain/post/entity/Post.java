@@ -3,6 +3,7 @@ package com.example.we_save.domain.post.entity;
 import com.example.we_save.apiPayload.code.BaseEntity;
 import com.example.we_save.domain.region.entity.EupmyeondongRegion;
 import com.example.we_save.domain.user.entity.User;
+import com.example.we_save.image.entity.Image;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;

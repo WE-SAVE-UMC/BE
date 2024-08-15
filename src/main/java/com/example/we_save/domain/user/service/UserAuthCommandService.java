@@ -8,7 +8,7 @@ import com.example.we_save.image.entity.Image;
 import java.util.Optional;
 
 public interface UserAuthCommandService {
-    public User joinUser(UserAuthRequestDto.JoinDto request, NotificationSetting notificationSetting);
+    public User joinUser(UserAuthRequestDto.JoinDto request, NotificationSetting notificationSetting,Image image);
     public User loginUser(UserAuthRequestDto.loginDto request);
     public Boolean isValidPhoneNumber(String phoneNumber);
     public Boolean isValidNickname(String nickname);

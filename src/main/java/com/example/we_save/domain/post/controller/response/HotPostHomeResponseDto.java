@@ -30,7 +30,7 @@ public class HotPostHomeResponseDto {
 
     public static HotPostHomeResponseDto of(Post post, double distance) {
 
-        String imageUrl = post.getImages().isEmpty() ? null : post.getImages().get(0).getImageUrl();
+        String imageUrl = post.getImages().isEmpty() ? null : post.getImages().get(0).getFilePath();
 
         return HotPostHomeResponseDto.builder()
                 .postId(post.getId())
