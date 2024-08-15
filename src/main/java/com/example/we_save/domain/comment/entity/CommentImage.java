@@ -17,5 +17,8 @@ public class CommentImage extends BaseEntity {
     private Comment comment;
 
     @Column(nullable = false)
-    private String imageUrl;
+    private String name;
+
+    @Column(nullable = false)
+    private String filePath;
 }

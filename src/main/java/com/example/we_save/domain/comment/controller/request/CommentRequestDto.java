@@ -1,9 +1,8 @@
 package com.example.we_save.domain.comment.controller.request;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
-
-import java.util.List;
 
 @Getter
 @Setter
@@ -11,14 +10,12 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CommentRequestDto {
-    @NotEmpty(message = "PostId must not be empty")
+    @NotNull(message = "PostId must not be empty")
     private Long postId;
 
-    @NotEmpty(message = "UserId must not be empty")
+    @NotNull(message = "UserId must not be empty")
     private Long userId;
 
     @NotEmpty(message = "Content must not be empty")
     private String content;
-
-    private List<String> images;
 }

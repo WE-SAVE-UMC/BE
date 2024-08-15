@@ -6,16 +6,12 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
-import java.util.List;
-
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class PostRequestDto {
-    @NotNull(message = "UserId must not be empty")
-    private Long userId;
 
     @NotNull(message = "Category must not be empty")
     private Category category;

@@ -16,15 +16,12 @@ import com.example.we_save.domain.post.repository.*;
 import com.example.we_save.domain.region.entity.EupmyeondongRegion;
 import com.example.we_save.domain.region.repository.EupmyeondongRepository;
 import com.example.we_save.domain.user.entity.User;
-import com.example.we_save.domain.user.repository.UserRepository;
-import com.example.we_save.image.entity.Image;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -50,9 +47,6 @@ public class PostServiceImpl implements PostService {
     private PostDislikeRepository postDislikeRepository;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
     private PostImageRepository postImageRepository;
 
     @Autowired
@@ -61,7 +55,6 @@ public class PostServiceImpl implements PostService {
     @Autowired
     private EupmyeondongRepository eupmyeondongRepository;
 
-    private static final int MAX_IMAGE_COUNT = 10;
     private static final int MAX_REPORT_COUNT = 10;
 
     private final int PAGE_SIZE = 10;
@@ -71,9 +64,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public Post createPost(PostRequestDto postRequestDto) {
-        User user = userRepository.findById(postRequestDto.getUserId())
-                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+    public Post createPost(PostRequestDto postRequestDto, User user) {
 
         if (postRequestDto.getCategory() == null) {
             throw new IllegalArgumentException("카테고리는 필수 입력 사항입니다.");
@@ -107,7 +98,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public Post updatePost(Long postId, PostRequestDto postRequestDto) {
+    public Post updatePost(Long postId, PostRequestDto postRequestDto, User user) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
 
@@ -152,7 +143,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public ApiResponse<PostResponseDtoWithComments> getPost(Long postId, Long userId){
+    public ApiResponse<PostResponseDtoWithComments> getPost(Long postId, User user){
         Optional<Post> optionalPost = postRepository.findById(postId);
 
         if (!optionalPost.isPresent()) {
@@ -182,7 +173,7 @@ public class PostServiceImpl implements PostService {
             dto.setUserId(comment.getUser().getId());
             dto.setContent(comment.getContent());
             List<String> imageUrls = comment.getImages().stream()
-                    .map(CommentImage::getImageUrl)
+                    .map(CommentImage::getFilePath)
                     .collect(Collectors.toList());
             dto.setImages(imageUrls);
             dto.setCreatedAt(comment.getCreateAt());
@@ -191,9 +182,9 @@ public class PostServiceImpl implements PostService {
         }).collect(Collectors.toList());
 
         Boolean userReaction = null;
-        if (postHeartRepository.existsByPostIdAndUserId(postId, userId)) {
+        if (postHeartRepository.existsByPostIdAndUserId(postId, user.getId())) {
             userReaction = true; // "확인했어요"
-        } else if (postDislikeRepository.existsByPostIdAndUserId(postId, userId)) {
+        } else if (postDislikeRepository.existsByPostIdAndUserId(postId, user.getId())) {
             userReaction = false; // "허위에요"
         }
 
@@ -222,19 +213,12 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public ApiResponse<Void> reportPost(Long postId, Long userId) {
-        Optional<Post> optionalPost = postRepository.findById(postId);
-
-        if (!optionalPost.isPresent()) {
-            return ApiResponse.onFailure(ErrorStatus._BAD_REQUEST.getCode(), "잘못된 요청입니다.", null);
-        }
-
-        Post post = optionalPost.get();
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+    public ApiResponse<Void> reportPost(Long postId, User user) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
 
         // 이미 해당 사용자가 해당 게시글에 대해 신고했는지 확인
-        if (postReportRepository.existsByPostIdAndUserId(postId, userId)) {
+        if (postReportRepository.existsByPostIdAndUserId(postId, user.getId())) {
             return ApiResponse.onFailure(ErrorStatus._ALREADY_REPORTED.getCode(), ErrorStatus._ALREADY_REPORTED.getMessage(), null);
         }
         PostReport report = PostReport.builder()
@@ -260,23 +244,19 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public ApiResponse<Void> toggleHeart(Long postId, Long userId) {
+    public ApiResponse<Void> toggleHeart(Long postId, User user) {
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
 
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
-
         // 이미 "허위에요"를 누른 경우
-        if (postDislikeRepository.existsByPostIdAndUserId(postId, userId)){
+        if (postDislikeRepository.existsByPostIdAndUserId(postId, user.getId())){
             return ApiResponse.onFailure(ErrorStatus._ALREADY_REPORTED.getCode(), "이미 '허위에요'를 누르셨습니다.", null);
         }
 
         // 이미 "확인했어요"를 누른 경우, 취소
-        if (postHeartRepository.existsByPostIdAndUserId(postId, userId)) {
-            postHeartRepository.deleteByPostIdAndUserId(postId, userId);
+        if (postHeartRepository.existsByPostIdAndUserId(postId, user.getId())) {
+            postHeartRepository.deleteByPostIdAndUserId(postId, user.getId());
             post.setHearts(post.getHearts() - 1);
             postRepository.save(post);
             return ApiResponse.onCancelSuccess(null);
@@ -296,22 +276,18 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public ApiResponse<Void> toggleDislike(Long postId, Long userId) {
+    public ApiResponse<Void> toggleDislike(Long postId, User user) {
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
-
         // 이미 "확인했어요"를 누른 경우
-        if (postHeartRepository.existsByPostIdAndUserId(postId, userId)) {
+        if (postHeartRepository.existsByPostIdAndUserId(postId, user.getId())) {
             return ApiResponse.onFailure(ErrorStatus._ALREADY_REPORTED.getCode(), "이미 '확인했어요'를 누르셨습니다.", null);
         }
 
         // 이미 "허위에요"를 누른 경우, 취소
-        if (postDislikeRepository.existsByPostIdAndUserId(postId, userId)) {
-            postDislikeRepository.deleteByPostIdAndUserId(postId, userId);
+        if (postDislikeRepository.existsByPostIdAndUserId(postId, user.getId())) {
+            postDislikeRepository.deleteByPostIdAndUserId(postId, user.getId());
             post.setDislikes(post.getDislikes() - 1);
             postRepository.save(post);
             return ApiResponse.onCancelSuccess(null);
@@ -375,7 +351,8 @@ public class PostServiceImpl implements PostService {
         List<PostDto> postDTOs = posts.stream()
                 .map(post -> {
                     double distanceToPost = calculateDistanceToPost(post, nearbyPostRequestDto.getLatitude(), nearbyPostRequestDto.getLongitude());
-                    return PostDto.of(post, distanceToPost);
+                    List<Comment> comments = commentRepository.findByPostId(post.getId());
+                    return PostDto.of(post, distanceToPost, comments);
                 })
                 .collect(Collectors.toList());
 
@@ -401,7 +378,10 @@ public class PostServiceImpl implements PostService {
         }
 
         List<DomesticPostDto> postDTOs = posts.stream()
-                .map(DomesticPostDto::of)
+                .map(post -> {
+                    List<Comment> comments = commentRepository.findByPostId(post.getId()); // 댓글 목록 조회
+                    return DomesticPostDto.of(post, comments); // 댓글을 함께 전달
+                })
                 .collect(Collectors.toList());
 
         return ApiResponse.onGetSuccess(postDTOs);
@@ -419,7 +399,10 @@ public class PostServiceImpl implements PostService {
         }
 
         List<DomesticPostDto> postDTOs = posts.stream()
-                .map(DomesticPostDto::of)
+                .map(post -> {
+                    List<Comment> comments = commentRepository.findByPostId(post.getId()); // 댓글 목록 조회
+                    return DomesticPostDto.of(post, comments); // 댓글을 함께 전달
+                })
                 .collect(Collectors.toList());
 
         return ApiResponse.onGetSuccess(postDTOs);
