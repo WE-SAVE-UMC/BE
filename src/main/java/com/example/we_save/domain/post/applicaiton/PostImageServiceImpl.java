@@ -33,10 +33,10 @@ public class PostImageServiceImpl implements PostImageService {
         }
 
         //실제 파일 서버 경로
-        //String projectPath = "/home/upload/post/"+post.getId();
+        String projectPath = "/home/upload/post/"+post.getId();
 
         //로컬 서버 경로
-        String projectPath = System.getProperty("user.dir") + "/media/"+post.getId();
+        //String projectPath = System.getProperty("user.dir") + "/media/" + post.getId();
         Path directoryPath = Paths.get(projectPath);
         if (Files.notExists(directoryPath)) {
             Files.createDirectories(directoryPath);
@@ -61,9 +61,9 @@ public class PostImageServiceImpl implements PostImageService {
     @Override
     public void deletePostAllImage(long postId) throws IOException {
         //실제 파일 서버 경로
-        //String projectPath = "/home/upload/post/" + postId;
+        String projectPath = "/home/upload/post/" + postId;
         //로컬 서버 경로
-        String projectPath = System.getProperty("user.dir") + "/media/"+postId;
+        //String projectPath = System.getProperty("user.dir") + "/media/" + postId;
         Path directoryPath = Paths.get(projectPath);
 
         // 디렉토리가 존재하면 폴더 및 하위 파일들 삭제
@@ -76,3 +76,4 @@ public class PostImageServiceImpl implements PostImageService {
         Files.deleteIfExists(directoryPath);
     }
 }
+

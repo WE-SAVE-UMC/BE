@@ -23,6 +23,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -101,6 +102,21 @@ public class PostServiceImpl implements PostService {
     public Post updatePost(Long postId, PostRequestDto postRequestDto, User user) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
+
+        // 기존 이미지들을 삭제
+        List<PostImage> existingImages = postImageRepository.findByPostId(postId);
+
+        // DB에서 이미지 삭제
+        postImageRepository.deleteByPostId(postId);
+
+        // 파일 시스템에서 이미지 삭제
+        for (PostImage image : existingImages) {
+            String imagePath = System.getProperty("user.dir") + image.getFilePath();
+            File file = new File(imagePath);
+            if (file.exists()) {
+                file.delete();
+            }
+        }
 
         post.setCategory(postRequestDto.getCategory());
         post.setTitle(postRequestDto.getTitle());
@@ -445,7 +461,8 @@ public class PostServiceImpl implements PostService {
         List<PostDto> postDTOs = posts.stream()
                 .map(post -> {
                     double distanceToPost = calculateDistanceToPost(post, nearbyPostRequestDto.getLatitude(), nearbyPostRequestDto.getLongitude());
-                    return PostDto.of(post, distanceToPost);
+                    List<Comment> comments = commentRepository.findByPostId(post.getId());
+                    return PostDto.of(post, distanceToPost, comments);
                 })
                 .collect(Collectors.toList());
 
@@ -468,7 +485,10 @@ public class PostServiceImpl implements PostService {
         }
 
         List<DomesticPostDto> postDTOs = posts.stream()
-                .map(DomesticPostDto::of)
+                .map(post -> {
+                    List<Comment> comments = commentRepository.findByPostId(post.getId());
+                    return DomesticPostDto.of(post, comments);
+                })
                 .collect(Collectors.toList());
 
         return ApiResponse.onGetSuccess((DomesticPostDto) postDTOs);
