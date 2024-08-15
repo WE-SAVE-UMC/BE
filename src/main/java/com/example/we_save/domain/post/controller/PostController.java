@@ -11,12 +11,8 @@ import com.example.we_save.domain.post.controller.response.NearbyPostResponseDto
 import com.example.we_save.domain.post.controller.response.PostResponseDto;
 import com.example.we_save.domain.post.controller.response.PostResponseDtoWithComments;
 import com.example.we_save.domain.post.entity.Post;
-import com.example.we_save.domain.post.entity.PostImage;
 import com.example.we_save.domain.user.service.UserService;
-import com.example.we_save.image.entity.Image;
-import com.example.we_save.image.service.ImageService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +33,7 @@ public class PostController {
 
     @PostMapping("/posts")
     public ResponseEntity<ApiResponse<PostResponseDto>> createPost(
-            @RequestPart PostRequestDto postRequestDto,
+            @RequestPart("postRequestDto") PostRequestDto postRequestDto,
             @RequestPart("images") List<MultipartFile> files) {
 
         Post savePost = postService.createPost(postRequestDto); //게시글 정보 등록
@@ -57,7 +53,7 @@ public class PostController {
     @PutMapping("/posts/{postId}")
     public ResponseEntity<ApiResponse<PostResponseDto>> updatePost(
             @PathVariable("postId") Long postId,
-            @RequestPart PostRequestDto postRequestDto,
+            @RequestPart("postRequestDto") PostRequestDto postRequestDto,
             @RequestPart("images") List<MultipartFile> files) {
         Post updatePost = postService.updatePost(postId, postRequestDto);//게시글 정보 수정, 게시글 이미지 DB정보 삭제
 
