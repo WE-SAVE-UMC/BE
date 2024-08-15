@@ -438,4 +438,56 @@ public class PostServiceImpl implements PostService {
 
         return ApiResponse.onPostSuccess(null, SuccessStatus._POST_OK);
     }
+
+    @Override
+    @Transactional
+    public ApiResponse<NearbyPostResponseDto> searchNearbyPosts(String query, String sortBy, NearbyPostRequestDto nearbyPostRequestDto, int page, boolean excludeCompleted) {
+        Pageable pageable = PageRequest.of(page, PAGE_SIZE);
+        List<Post> posts;
+
+        long regionId = regionUtil.convertRegionNameToRegionId(nearbyPostRequestDto.getRegionName());
+
+        if ("recent".equalsIgnoreCase(sortBy)) {
+            posts = postRepository.searchPostsByKeywordRecentNearby(query, regionId, excludeCompleted, pageable);
+        } else if ("hearts".equalsIgnoreCase(sortBy)) {
+            posts = postRepository.searchPostsByKeywordTopNearby(query, regionId, excludeCompleted, pageable);
+        } else if ("distance".equalsIgnoreCase(sortBy)) {
+            posts = postRepository.searchPostsByKeywordDistance(query, regionId, excludeCompleted, nearbyPostRequestDto.getLongitude(), nearbyPostRequestDto.getLatitude(), pageable);
+        } else {
+            throw new IllegalArgumentException("Invalid sortBy value: " + sortBy);
+        }
+
+        String userRegionName = RegionUtil.extractEupMyeonDong(nearbyPostRequestDto.getRegionName());
+
+        List<PostDto> postDTOs = posts.stream()
+                .map(post -> {
+                    double distanceToPost = calculateDistanceToPost(post, nearbyPostRequestDto.getLatitude(), nearbyPostRequestDto.getLongitude());
+                    return PostDto.of(post, distanceToPost);
+                })
+                .collect(Collectors.toList());
+
+        NearbyPostResponseDto responseDto = NearbyPostResponseDto.of(userRegionName, postDTOs);
+        return ApiResponse.onGetSuccess(responseDto);
+    }
+
+    @Override
+    @Transactional
+    public ApiResponse<DomesticPostDto> searchDomesticPosts(String query, String sortBy, DomesticPostDto domesticPostDto, int page, boolean excludeCompleted) {
+        Pageable pageable = PageRequest.of(page, PAGE_SIZE);
+        List<Post> posts;
+
+        if ("recent".equalsIgnoreCase(sortBy)) {
+            posts = postRepository.searchPostsByKeywordRecentDomestic(query, excludeCompleted, pageable);
+        } else if ("hearts".equalsIgnoreCase(sortBy)) {
+            posts = postRepository.searchPostsByKeywordTopDomestic(query, excludeCompleted, pageable);
+        } else {
+            throw new IllegalArgumentException("Invalid sortBy value: " + sortBy);
+        }
+
+        List<DomesticPostDto> postDTOs = posts.stream()
+                .map(DomesticPostDto::of)
+                .collect(Collectors.toList());
+
+        return ApiResponse.onGetSuccess((DomesticPostDto) postDTOs);
+    }
 }
