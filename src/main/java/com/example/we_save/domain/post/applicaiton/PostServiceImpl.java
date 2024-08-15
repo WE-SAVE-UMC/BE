@@ -445,7 +445,8 @@ public class PostServiceImpl implements PostService {
         List<PostDto> postDTOs = posts.stream()
                 .map(post -> {
                     double distanceToPost = calculateDistanceToPost(post, nearbyPostRequestDto.getLatitude(), nearbyPostRequestDto.getLongitude());
-                    return PostDto.of(post, distanceToPost);
+                    List<Comment> comments = commentRepository.findByPostId(post.getId());
+                    return PostDto.of(post, distanceToPost, comments);
                 })
                 .collect(Collectors.toList());
 
@@ -468,7 +469,10 @@ public class PostServiceImpl implements PostService {
         }
 
         List<DomesticPostDto> postDTOs = posts.stream()
-                .map(DomesticPostDto::of)
+                .map(post -> {
+                    List<Comment> comments = commentRepository.findByPostId(post.getId());
+                    return DomesticPostDto.of(post, comments);
+                })
                 .collect(Collectors.toList());
 
         return ApiResponse.onGetSuccess((DomesticPostDto) postDTOs);
