@@ -130,7 +130,7 @@ public class PostController {
     }
 
     @Operation(summary = "근처 게시글 최근순")
-    @GetMapping("/posts/nearby/recent")
+    @PostMapping("/posts/nearby/recent")
     public ResponseEntity<ApiResponse<NearbyPostResponseDto>> getRecentNearbyPosts(
             @RequestBody NearbyPostRequestDto nearbyPostRequestDto,
             @RequestParam("page") int page,
@@ -139,7 +139,7 @@ public class PostController {
     }
 
     @Operation(summary = "근처 게시글 확인순")
-    @GetMapping("/posts/nearby/top")
+    @PostMapping("/posts/nearby/top")
     public ResponseEntity<ApiResponse<NearbyPostResponseDto>> getTopNearbyPosts(
             @RequestBody NearbyPostRequestDto nearbyPostRequestDto,
             @RequestParam("page") int page,
@@ -148,7 +148,7 @@ public class PostController {
     }
 
     @Operation(summary = "근처 게시글 거리순")
-    @GetMapping("/posts/nearby/distance")
+    @PostMapping("/posts/nearby/distance")
     public ResponseEntity<ApiResponse<NearbyPostResponseDto>> getDistanceNearbyPosts(
             @RequestBody NearbyPostRequestDto nearbyPostRequestDto,
             @RequestParam("page") int page,
@@ -157,7 +157,7 @@ public class PostController {
     }
 
     @Operation(summary = "국내 게시글 최신순")
-    @GetMapping("/posts/domestic/recent")
+    @PostMapping("/posts/domestic/recent")
     public ResponseEntity<ApiResponse<List<DomesticPostDto>>> getRecentDomesticPosts(
             @RequestParam(value = "excludeCompleted", required = false, defaultValue = "false") boolean excludeCompleted) {
         ApiResponse<List<DomesticPostDto>> response = postService.getRecentDomesticPosts(excludeCompleted);
@@ -165,7 +165,7 @@ public class PostController {
     }
 
     @Operation(summary = "국내 게시글 확인순")
-    @GetMapping("/posts/domestic/top")
+    @PostMapping("/posts/domestic/top")
     public ResponseEntity<ApiResponse<List<DomesticPostDto>>> getTopDomesticPosts(
             @RequestParam(value = "excludeCompleted", required = false, defaultValue = "false") boolean excludeCompleted) {
         ApiResponse<List<DomesticPostDto>> response = postService.getTopDomesticPosts(excludeCompleted);

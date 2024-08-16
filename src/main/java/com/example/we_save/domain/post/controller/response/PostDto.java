@@ -4,6 +4,7 @@ import com.example.we_save.apiPayload.util.RegionUtil;
 import com.example.we_save.domain.comment.entity.Comment;
 import com.example.we_save.domain.post.entity.Category;
 import com.example.we_save.domain.post.entity.Post;
+import com.example.we_save.domain.post.entity.PostStatus;
 import lombok.*;
 
 import java.util.List;
@@ -25,6 +26,7 @@ public class PostDto {
     private int imageCount;
     private String createdAt;
     private String distance;
+    private boolean completed;
 
     public static PostDto of(Post post, double distance, List<Comment> comments) {
         // 댓글 이미지의 개수를 합산
@@ -44,6 +46,7 @@ public class PostDto {
                 .imageCount(commentImageCount) // 댓글 이미지 개수를 설정
                 .createdAt(post.getCreateAt().toString())
                 .distance(String.format("%.1f km", distance))  // 거리 값에 km 단위 추가
+                .completed(post.getStatus() == PostStatus.COMPLETED)
                 .build();
     }
 
