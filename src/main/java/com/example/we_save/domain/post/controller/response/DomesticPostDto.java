@@ -4,6 +4,7 @@ import com.example.we_save.apiPayload.util.RegionUtil;
 import com.example.we_save.domain.comment.entity.Comment;
 import com.example.we_save.domain.post.entity.Category;
 import com.example.we_save.domain.post.entity.Post;
+import com.example.we_save.domain.post.entity.PostStatus;
 import lombok.*;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class DomesticPostDto {
     private String image;
     private int imageCount;
     private String createdAt;
+    private boolean completed;
 
     public static DomesticPostDto of(Post post, List<Comment> comments) {
         // 댓글 이미지의 개수를 합산
@@ -42,6 +44,7 @@ public class DomesticPostDto {
                 .image(post.getImages().isEmpty() ? null : post.getImages().get(0).getFilePath())
                 .imageCount(commentImageCount) // 댓글 이미지 개수를 설정
                 .createdAt(post.getCreateAt().toString())
+                .completed(post.getStatus() == PostStatus.COMPLETED)
                 .build();
     }
 
