@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api")
@@ -72,8 +73,11 @@ public class PostController {
 
         try {
             postImageService.deletePostAllImage(postId); // 서버에 있는 기존 게시글 이미지 삭제
-            if (files != null && !files.isEmpty()) {
-                postImageService.savePostImages(files, updatePost); // 서버에 새로 이미지 등록
+            if (files != null && !files.isEmpty() ) {
+                if (!(Objects.equals(files.get(0).getOriginalFilename(), ""))){
+                    System.out.println(files.get(0).getOriginalFilename());
+                    postImageService.savePostImages(files, updatePost); // 서버에 새로 이미지 등록
+                }
             }
             return ResponseEntity.ok(ApiResponse.onGetSuccess(PostResponseDto.builder().postId(updatePost.getId()).build()));
         }catch (IllegalArgumentException e){
