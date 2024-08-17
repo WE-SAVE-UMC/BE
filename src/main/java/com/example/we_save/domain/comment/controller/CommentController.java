@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/posts/comments")
@@ -73,7 +74,9 @@ public class CommentController {
 
             // 새로운 이미지가 있을 경우에만 저장
             if (files != null && !files.isEmpty()) {
-                commentImageService.saveCommentImage(files, updatedComment);
+                if (!(Objects.equals(files.get(0).getOriginalFilename(), ""))){
+                    commentImageService.saveCommentImage(files, updatedComment); // 서버에 새로 이미지 등록
+                }
             }
 
             return ResponseEntity.ok(ApiResponse.onGetSuccess(CommentResponseDto.builder().commentId(updatedComment.getId()).build()));

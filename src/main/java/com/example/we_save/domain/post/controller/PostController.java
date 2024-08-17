@@ -75,7 +75,6 @@ public class PostController {
             postImageService.deletePostAllImage(postId); // 서버에 있는 기존 게시글 이미지 삭제
             if (files != null && !files.isEmpty() ) {
                 if (!(Objects.equals(files.get(0).getOriginalFilename(), ""))){
-                    System.out.println(files.get(0).getOriginalFilename());
                     postImageService.savePostImages(files, updatePost); // 서버에 새로 이미지 등록
                 }
             }
