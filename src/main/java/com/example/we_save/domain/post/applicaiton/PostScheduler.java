@@ -15,7 +15,7 @@ public class PostScheduler {
 
     private List<NearbyPostResponseDto> cachedTopPosts;
 
-    @Scheduled(fixedRate = 3600000)
+    @Scheduled(fixedRate = 3600000) // 1시간마다 실행
     public void updateTopPostsCache() {
         cachedTopPosts = postService.getTop5RecentPostsWithin24Hours();
         System.out.println("Top 5 recent posts have been updated: " + cachedTopPosts);
