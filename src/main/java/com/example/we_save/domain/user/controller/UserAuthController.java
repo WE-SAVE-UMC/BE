@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 
 
@@ -83,13 +84,23 @@ public class UserAuthController {
                                                       @RequestPart(value = "profileImage",required = false) MultipartFile profileImage ){
         User user = userAuthCommandService.getAuthenticatedUserInfo();
         try {
-            imageService.deleteProfileImage(user.getProfileImage().getId(),user); //파일서버에서 기존 프로필 이미지 삭제
-            Image newProfileImage = imageService.saveProfileImage(profileImage,user); //파일서버에 프로필 이미지 등록
+
+            imageService.deleteProfileImage(user.getProfileImage().getId(), user); //파일서버에서 기존 프로필 이미지 삭제
+            Image newProfileImage;
+
+            if (profileImage == null || profileImage.isEmpty()) {
+                newProfileImage = imageService.saveDefaultProfileImage(); //이미지 등록 안할시 디폴트 이미지 등록
+            } else {
+                newProfileImage = imageService.saveProfileImage(profileImage, user); //파일서버에 프로필 이미지 등록
+            }
             User updateUser = userAuthCommandService.updateUser(user, nickname, newProfileImage); //유저 정보 업데이트
             ApiResponse<UserAuthResponseDto.findUserResultDto> response = ApiResponse.onGetSuccess(UserConverter.toUserResultDto(updateUser));
             return ResponseEntity.ok(response);
+            
         }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.onFailure("COMMON400","파일 업로드 오류",null));
+            Image newProfileImage = imageService.saveDefaultProfileImage();
+            User updateUser = userAuthCommandService.updateUser(user, nickname, newProfileImage); //유저 정보 업데이트
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.onFailure("COMMON400","파일 업로드 오류",UserConverter.toUserResultDto(updateUser)));
         }
     }
 
