@@ -36,7 +36,7 @@ public class CommentController {
     @PostMapping
     public ResponseEntity<ApiResponse<CommentResponseDto>> createComment(
             @RequestPart("commentRequestDto") CommentRequestDto commentRequestDto,
-            @RequestPart("images") List<MultipartFile> files) {
+            @RequestPart(value = "images", required = false) List<MultipartFile> files) {
 
         User user = userAuthCommandService.getAuthenticatedUserInfo();
 
@@ -44,8 +44,10 @@ public class CommentController {
         Comment saveComment = commentService.createComment(commentRequestDto, user);
 
         try {
-            // 댓글 이미지 저장
-            commentImageService.saveCommentImage(files, saveComment);
+            // 이미지가 존재할 때만 저장 로직 실행
+            if (files != null && !files.isEmpty()) {
+                commentImageService.saveCommentImage(files, saveComment);
+            }
             return ResponseEntity.ok(ApiResponse.onPostSuccess(CommentResponseDto.builder().commentId(saveComment.getId()).build(), SuccessStatus._POST_OK));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.onFailure("COMMON400", e.getMessage(), null));
@@ -59,7 +61,7 @@ public class CommentController {
     public ResponseEntity<ApiResponse<CommentResponseDto>> updateComment(
             @PathVariable("commentId") Long commentId,
             @RequestPart("commentRequestDto") CommentRequestDto commentRequestDto,
-            @RequestPart("images") List<MultipartFile> files) {
+            @RequestPart(value = "images", required = false) List<MultipartFile> files) {
 
         User user = userAuthCommandService.getAuthenticatedUserInfo();
         // 댓글 수정
@@ -69,8 +71,10 @@ public class CommentController {
             // 기존 이미지 삭제
             commentImageService.deleteCommentAllImage(commentId);
 
-            // 새로운 이미지 저장
-            commentImageService.saveCommentImage(files, updatedComment);
+            // 새로운 이미지가 있을 경우에만 저장
+            if (files != null && !files.isEmpty()) {
+                commentImageService.saveCommentImage(files, updatedComment);
+            }
 
             return ResponseEntity.ok(ApiResponse.onGetSuccess(CommentResponseDto.builder().commentId(updatedComment.getId()).build()));
         } catch (IllegalArgumentException e) {
