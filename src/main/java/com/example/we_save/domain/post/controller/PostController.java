@@ -40,14 +40,16 @@ public class PostController {
     @PostMapping("/posts")
     public ResponseEntity<ApiResponse<PostResponseDto>> createPost(
             @RequestPart("postRequestDto") PostRequestDto postRequestDto,
-            @RequestPart("images") List<MultipartFile> files) {
+            @RequestPart(value = "images", required = false) List<MultipartFile> files) {
 
         User user = userAuthCommandService.getAuthenticatedUserInfo();
 
         Post savePost = postService.createPost(postRequestDto, user); //게시글 정보 등록
 
         try {
-            postImageService.savePostImages(files, savePost); //게시글 사진 등록
+            if (files != null && !files.isEmpty()) {
+                postImageService.savePostImages(files, savePost); //게시글 사진 등록
+            }
             return ResponseEntity.ok(ApiResponse.onPostSuccess(PostResponseDto.builder().postId(savePost.getId()).build(), SuccessStatus._POST_OK));
         }catch (IllegalArgumentException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.onFailure("COMMON400", e.getMessage(), null));
@@ -63,14 +65,16 @@ public class PostController {
     public ResponseEntity<ApiResponse<PostResponseDto>> updatePost(
             @PathVariable("postId") Long postId,
             @RequestPart("postRequestDto") PostRequestDto postRequestDto,
-            @RequestPart("images") List<MultipartFile> files) {
+            @RequestPart(value = "images", required = false) List<MultipartFile> files) {
 
         User user = userAuthCommandService.getAuthenticatedUserInfo();
         Post updatePost = postService.updatePost(postId, postRequestDto,user);//게시글 정보 수정, 게시글 이미지 DB정보 삭제
 
         try {
-            postImageService.deletePostAllImage(postId); //서버에 있는 기존 게시글 이미지 삭제
-            postImageService.savePostImages(files, updatePost); //서버에 새로 이미지 등록
+            postImageService.deletePostAllImage(postId); // 서버에 있는 기존 게시글 이미지 삭제
+            if (files != null && !files.isEmpty()) {
+                postImageService.savePostImages(files, updatePost); // 서버에 새로 이미지 등록
+            }
             return ResponseEntity.ok(ApiResponse.onGetSuccess(PostResponseDto.builder().postId(updatePost.getId()).build()));
         }catch (IllegalArgumentException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.onFailure("COMMON400", e.getMessage(), null));
