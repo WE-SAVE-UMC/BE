@@ -50,7 +50,7 @@ public class CommentImageServiceImpl implements CommentImageService {
             CommentImage commentImage = new CommentImage();
             commentImage.setComment(comment);
             commentImage.setName(fileName);
-            commentImage.setFilePath("/files/comments/" + comment.getId() + fileName);
+            commentImage.setFilePath("/files/comments/" + comment.getId() +"/"+ fileName);
             commentImageRepository.save(commentImage);
         }
     }

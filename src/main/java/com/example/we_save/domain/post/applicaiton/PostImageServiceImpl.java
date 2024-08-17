@@ -51,7 +51,7 @@ public class PostImageServiceImpl implements PostImageService {
             PostImage postImage = new PostImage();
             postImage.setPost(post);
             postImage.setName(fileName);
-            postImage.setFilePath("/files/post/" + post.getId() + fileName);
+            postImage.setFilePath("/files/post/" + post.getId() +"/"+ fileName);
             postImageRepository.save(postImage);
         }
     }
