@@ -32,10 +32,10 @@ public class CommentImageServiceImpl implements CommentImageService {
         }
 
         // 실제 파일 서버 경로
-        //String projectPath = "/home/upload/comment/" + comment.getId();
+        String projectPath = "/home/upload/comment/" + comment.getId();
 
         // 로컬 서버 경로
-        String projectPath = System.getProperty("user.dir") + "/media/comments/" + comment.getId();
+        //String projectPath = System.getProperty("user.dir") + "/media/comments/" + comment.getId();
         Path directoryPath = Paths.get(projectPath);
         if (Files.notExists(directoryPath)) {
             Files.createDirectories(directoryPath);
@@ -58,10 +58,10 @@ public class CommentImageServiceImpl implements CommentImageService {
     @Override
     public void deleteCommentAllImage(long commentId) throws IOException {
         // 실제 파일 서버 경로
-        //String projectPath = "/home/upload/comment/" + commentId;
+        String projectPath = "/home/upload/comment/" + commentId;
 
         // 로컬 서버 경로
-        String projectPath = System.getProperty("user.dir") + "/media/comments/" + commentId;
+        //String projectPath = System.getProperty("user.dir") + "/media/comments/" + commentId;
         Path directoryPath = Paths.get(projectPath);
 
         // 디렉토리가 존재하면 폴더 및 하위 파일들 삭제
