@@ -1,5 +1,5 @@
 ---
-name: "\U0001F528[FIX]"
+name: "\U0001F528 [FIX]"
 about: fix 작업사항을 입력해주세요
 title: "[FIX]"
 labels: "\U0001F528fix"

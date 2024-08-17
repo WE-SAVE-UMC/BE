@@ -1,5 +1,5 @@
 ---
-name: "♻️[REFACTOR]"
+name: "♻️ [REFACTOR]"
 about: refactor 작업사항을 입력해주세요
 title: "[REFACTOR]"
 labels: "♻️refactor"
