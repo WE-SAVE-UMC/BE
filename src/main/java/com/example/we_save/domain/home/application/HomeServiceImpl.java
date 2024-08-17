@@ -70,7 +70,8 @@ public class HomeServiceImpl implements HomeService {
     @Override
     public ApiResponse<HomeSearchResponseDto> findCountermeasuresByTag(String tag) {
 
-        List<String> tags = Arrays.asList(tag.split("\\s+"));
+        String cleanedTag = tag.replaceAll("[\\p{Punct}]+", "");
+        List<String> tags = Arrays.asList(cleanedTag.split("\\s+"));
         Set<Countermeasure> countermeasureSet = new HashSet<>();
         Set<String> foundTags = new HashSet<>();
 
