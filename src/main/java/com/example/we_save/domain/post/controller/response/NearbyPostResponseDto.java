@@ -29,4 +29,5 @@ public class NearbyPostResponseDto {
                 .userRegionName(userRegionName)
                 .build();
     }
+
 }

@@ -496,6 +496,7 @@ public class PostServiceImpl implements PostService {
                 .collect(Collectors.toList());
 
         NearbyPostResponseDto responseDto = NearbyPostResponseDto.of(userRegionName, postDTOs);
+
         return ApiResponse.onGetSuccess(responseDto);
     }
 
