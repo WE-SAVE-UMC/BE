@@ -3,6 +3,7 @@ package com.example.we_save.domain.post.controller;
 import com.example.we_save.apiPayload.ApiResponse;
 import com.example.we_save.apiPayload.code.status.SuccessStatus;
 import com.example.we_save.domain.post.applicaiton.PostImageService;
+import com.example.we_save.domain.post.applicaiton.PostScheduler;
 import com.example.we_save.domain.post.applicaiton.PostService;
 import com.example.we_save.domain.post.controller.request.NearbyPostRequestDto;
 import com.example.we_save.domain.post.controller.request.PostRequestDto;
@@ -20,6 +21,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Objects;
@@ -36,6 +40,9 @@ public class PostController {
 
     @Autowired
     private UserAuthCommandService userAuthCommandService;
+
+    @Autowired
+    private PostScheduler postScheduler;
 
     @Operation(summary = "게시글 작성", security = @SecurityRequirement(name = "Authorization"))
     @PostMapping("/posts")
@@ -184,5 +191,39 @@ public class PostController {
     public ResponseEntity<ApiResponse<Void>> changeToPostCompleted(@PathVariable("postId") long postId) {
 
         return ResponseEntity.ok(postService.changeToPostCompleted(postId));
+    }
+
+    @Operation(summary = "최근 24시간 이내에 확인 수가 가장 많은 게시물 5개 가져오기")
+    @GetMapping("/posts/nearby/notifications")
+    public ResponseEntity<ApiResponse<List<NearbyPostResponseDto>>> getTop5RecentPosts() {
+        List<NearbyPostResponseDto> notifications = postScheduler.getCachedTopPosts();
+        return ResponseEntity.ok(ApiResponse.onGetSuccess(notifications));
+    }
+
+    @Operation(summary = "내 근처 게시글 검색", security = @SecurityRequirement(name = "Authorization"))
+    @PostMapping("/posts/search/nearby")
+    public ResponseEntity<ApiResponse<List<NearbyPostResponseDto>>> searchNearbyPosts(
+            @RequestParam("query") String query,
+            @RequestParam(value = "sortBy", defaultValue = "recent") String sortBy,
+            @RequestParam(value = "excludeCompleted", defaultValue = "true") boolean excludeCompleted,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestBody NearbyPostRequestDto nearbyPostRequestDto) {
+
+        List<NearbyPostResponseDto> result = postService.searchNearbyPosts(query, sortBy, excludeCompleted, page, size, nearbyPostRequestDto);
+        return ResponseEntity.ok(ApiResponse.onGetSuccess(result));
+    }
+
+    @Operation(summary = "국내 게시글 검색", security = @SecurityRequirement(name = "Authorization"))
+    @PostMapping("/posts/search/domestic")
+    public ResponseEntity<ApiResponse<List<DomesticPostDto>>> searchDomesticPosts(
+            @RequestParam("query") String query,
+            @RequestParam(value = "sortBy", defaultValue = "recent") String sortBy,
+            @RequestParam(value = "excludeCompleted", defaultValue = "true") boolean excludeCompleted,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+
+        List<DomesticPostDto> result = postService.searchDomesticPosts(query, sortBy, excludeCompleted, page, size);
+        return ResponseEntity.ok(ApiResponse.onGetSuccess(result));
     }
 }

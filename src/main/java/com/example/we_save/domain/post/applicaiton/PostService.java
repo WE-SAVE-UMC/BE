@@ -9,6 +9,7 @@ import com.example.we_save.domain.post.controller.response.PostResponseDto;
 import com.example.we_save.domain.post.controller.response.PostResponseDtoWithComments;
 import com.example.we_save.domain.post.entity.Post;
 import com.example.we_save.domain.user.entity.User;
+import jakarta.transaction.Transactional;
 
 import java.util.List;
 
@@ -27,7 +28,14 @@ public interface PostService {
     ApiResponse<List<DomesticPostDto>> getTopDomesticPosts(boolean excludeCompleted);
     ApiResponse<Void> changeToPostCompleted(long postId);
 
+    List<NearbyPostResponseDto> searchNearbyPosts(String query, String sortBy, boolean excludeCompleted, int page, int size, NearbyPostRequestDto nearbyPostRequestDto);
+    List<DomesticPostDto> searchDomesticPosts(String query, String sortBy, boolean excludeCompleted, int page, int size);
+
+    @Transactional
     ApiResponse<NearbyPostResponseDto> searchNearbyPosts(String query, String sortBy, NearbyPostRequestDto nearbyPostRequestDto, int page, boolean excludeCompleted);
 
-    ApiResponse<DomesticPostDto> searchDomesticPosts(String query, String sortBy, DomesticPostDto domesticPostDto, int page, boolean excludeCompleted);
+    @Transactional
+    ApiResponse<List<DomesticPostDto>> searchDomesticPosts(String query, String sortBy, int page, boolean excludeCompleted);
+
+    List<NearbyPostResponseDto> getTop5RecentPostsWithin24Hours();
 }

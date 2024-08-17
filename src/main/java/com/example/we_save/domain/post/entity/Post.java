@@ -71,4 +71,6 @@ public class Post extends BaseEntity {
     private boolean report119;
 
     private int reportCount;
+
+    private boolean completed;
 }
