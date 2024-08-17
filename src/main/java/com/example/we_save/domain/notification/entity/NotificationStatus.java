@@ -32,10 +32,11 @@ public class NotificationStatus {
     private String title; // 게시물 제목
 
     @Column(name = "expiry_time", nullable = false)
-    private String expiryTime; // 기준 시간 (게시물 작성 이후 1시간)
+    private LocalDateTime expiryTime; // 기준 시간 (게시물 작성 이후 1시간)
 
+    @Builder.Default
     @Column(name = "is_read", nullable = false)
-    private boolean isRead; // 알림 읽음 상태
+    private boolean isRead = false; // 알림 읽음 상태
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt; // 알림 생성 시간
