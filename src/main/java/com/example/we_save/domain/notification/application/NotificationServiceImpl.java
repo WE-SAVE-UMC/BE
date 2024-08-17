@@ -9,16 +9,20 @@ import com.example.we_save.domain.notification.repository.NotificationRepository
 import com.example.we_save.domain.post.entity.Post;
 import com.example.we_save.domain.post.repository.PostRepository;
 import com.example.we_save.domain.user.entity.User;
+import com.example.we_save.domain.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
@@ -35,6 +39,12 @@ public class NotificationServiceImpl implements NotificationService {
     @Autowired
     private final PostRepository postRepository;
 
+    @Autowired
+    private TaskScheduler taskScheduler;
+
+    @Autowired
+    private UserRepository userRepository;
+
     private final int PAGE_SIZE = 10;
 
     private final ConcurrentMap<Long, SseEmitter> sseEmitters = new ConcurrentHashMap<>();
@@ -43,13 +53,8 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     public List<NotificationResponseDto> getNotifications(User user, int page, int size, boolean excludeCompleted) {
         Pageable pageable = PageRequest.of(page, size);
-        List<Notification> notifications = notificationRepository.findByUserOrderByCreatedAtDesc(user);
 
-        if (excludeCompleted) {
-            notifications = notifications.stream()
-                    .filter(notification -> !notification.isCompleted() && notification.getExpiryTime().isBefore(LocalDateTime.now()))
-                    .collect(Collectors.toList());
-        }
+        List<Notification> notifications = notificationRepository.findByUserOrderByCreatedAtDesc(user);
 
         return notifications.stream()
                 .map(NotificationResponseDto::new)
@@ -67,19 +72,23 @@ public class NotificationServiceImpl implements NotificationService {
         Post post = postRepository.findById(requestDto.getPostId())
                 .orElseThrow(() -> new EntityNotFoundException("Invalid post ID"));
 
-        Notification notification = Notification.builder()
-                .user(user)
-                .post(post)
-                .commentId(requestDto.getCommentId())
-                .content(requestDto.getContent())
-                .isRead(false)
-                .createdAt(LocalDateTime.now())
-                .build();
+        List<User> allUsers = userRepository.findAll();
 
-        notificationRepository.save(notification);
+        for (User recipient : allUsers) {
+            Notification notification = Notification.builder()
+                    .user(recipient)
+                    .post(post)
+                    .title(requestDto.getTitle())
+                    .confirmCount(requestDto.getConfirmCount())
+                    .isRead(false)
+                    .createdAt(LocalDateTime.now())
+                    .build();
 
+            notificationRepository.save(notification);
+        }
         return ApiResponse.onPostSuccess(null, SuccessStatus._POST_OK);
     }
+
 
     @Override
     @Transactional
@@ -97,8 +106,12 @@ public class NotificationServiceImpl implements NotificationService {
 
         notificationRepository.save(notification);
 
+        User postAuthor = post.getUser();
+        sendNotificationToUser(postAuthor, notification);
+
         return ApiResponse.onPostSuccess(null, SuccessStatus._POST_OK);
     }
+
 
     @Override
     @Transactional
@@ -130,15 +143,26 @@ public class NotificationServiceImpl implements NotificationService {
                 .user(user)
                 .post(post)
                 .title(requestDto.getTitle())
-                .expiryTime(requestDto.getExpiryTime())
+                .expiryTime(LocalDateTime.now().plusHours(1))
                 .isCompleted(false)
                 .isRead(false)
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        notificationRepository.save(notification);
+        scheduleNotification(notification);
 
         return ApiResponse.onPostSuccess(null, SuccessStatus._POST_OK);
+    }
+
+    private void scheduleNotification(Notification notification) {
+        Runnable task = () -> {
+            if (!notification.getPost().isCompleted()) {
+                sendNotificationToUser(notification.getUser(), notification);
+            }
+        };
+
+        Instant sendTime = notification.getExpiryTime().atZone(ZoneId.systemDefault()).toInstant();
+        taskScheduler.schedule(task, sendTime);
     }
 
     @Override
