@@ -41,7 +41,7 @@ public class HotPostHomeResponseDto {
                 .regionName(RegionUtil.extractRegionBeforeSecondSpace(post.getPostRegionName()))
                 .latitude(post.getLatitude())
                 .longitude(post.getLongitude())
-                .categoryName(post.getCategory().name())
+                .categoryName(post.getCategory().getValue())
                 .distance(Math.round(distance * 10) / 10.0)
                 .hearts(post.getHearts())
                 .createAt(post.getCreateAt())
