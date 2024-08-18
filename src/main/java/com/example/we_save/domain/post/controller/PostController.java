@@ -186,6 +186,63 @@ public class PostController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "근처 게시글 검색 - 최근순")
+    @PostMapping("/posts/search/nearby/recent")
+    public ResponseEntity<ApiResponse<NearbyPostResponseDto>> searchNearbyPostsByRecent(
+            @RequestBody NearbyPostRequestDto nearbyPostRequestDto,
+            @RequestParam("query") String query,
+            @RequestParam("page") int page,
+            @RequestParam("excludeCompleted") boolean excludeCompleted) {
+
+        return ResponseEntity.ok(postService.searchNearbyPostsByRecent(query, nearbyPostRequestDto, page, excludeCompleted));
+    }
+
+    @Operation(summary = "근처 게시글 검색 - 확인순")
+    @PostMapping("/posts/search/nearby/top")
+    public ResponseEntity<ApiResponse<NearbyPostResponseDto>> searchNearbyPostsByTop(
+            @RequestBody NearbyPostRequestDto nearbyPostRequestDto,
+            @RequestParam("query") String query,
+            @RequestParam("page") int page,
+            @RequestParam("excludeCompleted") boolean excludeCompleted) {
+
+        return ResponseEntity.ok(postService.searchNearbyPostsByTop(query, nearbyPostRequestDto, page, excludeCompleted));
+    }
+
+    @Operation(summary = "근처 게시글 검색 - 거리순")
+    @PostMapping("/posts/search/nearby/distance")
+    public ResponseEntity<ApiResponse<NearbyPostResponseDto>> searchNearbyPostsByDistance(
+            @RequestBody NearbyPostRequestDto nearbyPostRequestDto,
+            @RequestParam("query") String query,
+            @RequestParam("page") int page,
+            @RequestParam("excludeCompleted") boolean excludeCompleted) {
+
+        return ResponseEntity.ok(postService.searchNearbyPostsByDistance(query, nearbyPostRequestDto, page, excludeCompleted));
+    }
+
+//    @Operation(summary = "국내 게시글 검색 - 최신순", security = @SecurityRequirement(name = "Authorization"))
+//    @PostMapping("/posts/search/domestic/recent")
+//    public ResponseEntity<ApiResponse<List<DomesticPostDto>>> searchDomesticPostsByRecent(
+//            @RequestParam("query") String query,
+//            @RequestParam(value = "excludeCompleted", required = false, defaultValue = "false") boolean excludeCompleted,
+//            @RequestParam(value = "page", defaultValue = "0") int page,
+//            @RequestParam(value = "size", defaultValue = "10") int size) {
+//
+//        List<DomesticPostDto> result = postService.searchDomesticPostsByRecent(query, excludeCompleted, page, size);
+//        return ResponseEntity.ok(ApiResponse.onGetSuccess(result));
+//    }
+//
+//    @Operation(summary = "국내 게시글 검색 - 확인순", security = @SecurityRequirement(name = "Authorization"))
+//    @PostMapping("/posts/search/domestic/top")
+//    public ResponseEntity<ApiResponse<List<DomesticPostDto>>> searchDomesticPostsByTop(
+//            @RequestParam("query") String query,
+//            @RequestParam(value = "excludeCompleted", required = false, defaultValue = "false") boolean excludeCompleted,
+//            @RequestParam(value = "page", defaultValue = "0") int page,
+//            @RequestParam(value = "size", defaultValue = "10") int size) {
+//
+//        List<DomesticPostDto> result = postService.searchDomesticPostsByTop(query, excludeCompleted, page, size);
+//        return ResponseEntity.ok(ApiResponse.onGetSuccess(result));
+//    }
+
     @Operation(summary = "게시물 상황종료 처리")
     @PutMapping("/posts/status/{postId}")
     public ResponseEntity<ApiResponse<Void>> changeToPostCompleted(@PathVariable("postId") long postId) {
@@ -200,30 +257,30 @@ public class PostController {
         return ResponseEntity.ok(ApiResponse.onGetSuccess(notifications));
     }
 
-    @Operation(summary = "내 근처 게시글 검색", security = @SecurityRequirement(name = "Authorization"))
-    @PostMapping("/posts/search/nearby")
-    public ResponseEntity<ApiResponse<List<NearbyPostResponseDto>>> searchNearbyPosts(
-            @RequestParam("query") String query,
-            @RequestParam(value = "sortBy", defaultValue = "recent") String sortBy,
-            @RequestParam(value = "excludeCompleted", defaultValue = "true") boolean excludeCompleted,
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size,
-            @RequestBody NearbyPostRequestDto nearbyPostRequestDto) {
-
-        List<NearbyPostResponseDto> result = postService.searchNearbyPosts(query, sortBy, excludeCompleted, page, size, nearbyPostRequestDto);
-        return ResponseEntity.ok(ApiResponse.onGetSuccess(result));
-    }
-
-    @Operation(summary = "국내 게시글 검색", security = @SecurityRequirement(name = "Authorization"))
-    @PostMapping("/posts/search/domestic")
-    public ResponseEntity<ApiResponse<List<DomesticPostDto>>> searchDomesticPosts(
-            @RequestParam("query") String query,
-            @RequestParam(value = "sortBy", defaultValue = "recent") String sortBy,
-            @RequestParam(value = "excludeCompleted", defaultValue = "true") boolean excludeCompleted,
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size) {
-
-        List<DomesticPostDto> result = postService.searchDomesticPosts(query, sortBy, excludeCompleted, page, size);
-        return ResponseEntity.ok(ApiResponse.onGetSuccess(result));
-    }
+//    @Operation(summary = "내 근처 게시글 검색", security = @SecurityRequirement(name = "Authorization"))
+//    @PostMapping("/posts/search/nearby")
+//    public ResponseEntity<ApiResponse<List<NearbyPostResponseDto>>> searchNearbyPosts(
+//            @RequestParam("query") String query,
+//            @RequestParam(value = "sortBy", defaultValue = "recent") String sortBy,
+//            @RequestParam("excludeCompleted") boolean excludeCompleted,
+//            @RequestParam(value = "page") int page,
+//            @RequestParam(value = "size") int size,
+//            @RequestBody NearbyPostRequestDto nearbyPostRequestDto) {
+//
+//        List<NearbyPostResponseDto> result = postService.searchNearbyPosts(query, sortBy, excludeCompleted, page, size, nearbyPostRequestDto);
+//        return ResponseEntity.ok(ApiResponse.onGetSuccess(result));
+//    }
+//
+//    @Operation(summary = "국내 게시글 검색", security = @SecurityRequirement(name = "Authorization"))
+//    @PostMapping("/posts/search/domestic")
+//    public ResponseEntity<ApiResponse<List<DomesticPostDto>>> searchDomesticPosts(
+//            @RequestParam("query") String query,
+//            @RequestParam(value = "sortBy", defaultValue = "recent") String sortBy,
+//            @RequestParam(value = "excludeCompleted", defaultValue = "true") boolean excludeCompleted,
+//            @RequestParam(value = "page", defaultValue = "0") int page,
+//            @RequestParam(value = "size", defaultValue = "10") int size) {
+//
+//        List<DomesticPostDto> result = postService.searchDomesticPosts(query, sortBy, excludeCompleted, page, size);
+//        return ResponseEntity.ok(ApiResponse.onGetSuccess(result));
+//    }
 }

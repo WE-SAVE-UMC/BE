@@ -5,6 +5,10 @@ import com.example.we_save.apiPayload.code.status.SuccessStatus;
 import com.example.we_save.domain.notification.controller.request.NotificationRequestDto;
 import com.example.we_save.domain.notification.controller.response.NotificationResponseDto;
 import com.example.we_save.domain.notification.entity.Notification;
+import com.example.we_save.domain.notification.entity.NotificationButton;
+import com.example.we_save.domain.notification.entity.NotificationComment;
+import com.example.we_save.domain.notification.repository.NotificationButtonRepository;
+import com.example.we_save.domain.notification.repository.NotificationCommentRepository;
 import com.example.we_save.domain.notification.repository.NotificationRepository;
 import com.example.we_save.domain.post.entity.Post;
 import com.example.we_save.domain.post.repository.PostRepository;
@@ -24,6 +28,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 import java.io.IOException;
@@ -44,6 +49,12 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private final NotificationCommentRepository notificationCommentRepository;
+
+    @Autowired
+    private final NotificationButtonRepository notificationButtonRepository;
 
     private final int PAGE_SIZE = 10;
 
@@ -66,29 +77,97 @@ public class NotificationServiceImpl implements NotificationService {
         return null;
     }
 
+//    @Override
+//    @Transactional
+//    public ApiResponse<Void> createCommentNotification(User user, NotificationRequestDto requestDto) {
+//        Post post = postRepository.findById(requestDto.getPostId())
+//                .orElseThrow(() -> new EntityNotFoundException("Invalid post ID"));
+//
+//        List<User> allUsers = userRepository.findAll();
+//
+//        for (User recipient : allUsers) {
+//            Notification notification = Notification.builder()
+//                    .user(recipient)
+//                    .post(post)
+//                    .title(requestDto.getTitle())
+//                    .confirmCount(requestDto.getConfirmCount())
+//                    .isRead(false)
+//                    .createdAt(LocalDateTime.now())
+//                    .build();
+//
+//            notificationRepository.save(notification);
+//            sendNotificationToUser(recipient, notification); // SSE로 실시간 알림 전송
+//
+//        }
+//        return ApiResponse.onPostSuccess(null, SuccessStatus._POST_OK);
+//    }
+
     @Override
     @Transactional
     public ApiResponse<Void> createCommentNotification(User user, NotificationRequestDto requestDto) {
         Post post = postRepository.findById(requestDto.getPostId())
                 .orElseThrow(() -> new EntityNotFoundException("Invalid post ID"));
 
-        List<User> allUsers = userRepository.findAll();
+        NotificationComment notificationComment = NotificationComment.builder()
+                .user(user)
+                .post(post)
+                .commenterName(requestDto.getAuthorName())
+                .content(requestDto.getContent())
+                .isRead(false)
+                .createdAt(LocalDateTime.now())
+                .build();
 
-        for (User recipient : allUsers) {
-            Notification notification = Notification.builder()
-                    .user(recipient)
-                    .post(post)
-                    .title(requestDto.getTitle())
-                    .confirmCount(requestDto.getConfirmCount())
-                    .isRead(false)
-                    .createdAt(LocalDateTime.now())
-                    .build();
+        notificationCommentRepository.save(notificationComment); // NotificationComment 저장
 
-            notificationRepository.save(notification);
-        }
+        User postAuthor = post.getUser();
+        sendCommentNotificationToUser(postAuthor, notificationComment);
+
         return ApiResponse.onPostSuccess(null, SuccessStatus._POST_OK);
     }
 
+    public void sendCommentNotificationToUser(User user, NotificationComment notificationComment) {
+        SseEmitter emitter = sseEmitters.get(user.getId());
+
+        if (emitter != null) {
+            try {
+                emitter.send(SseEmitter.event()
+                        .name("commentNotification")
+                        .data(Map.of(
+                                "postId", notificationComment.getPost().getId(),
+                                "commenterName", notificationComment.getCommenterName(),
+                                "content", notificationComment.getContent(),
+                                "createdAt", notificationComment.getCreatedAt(),
+                                "isRead", notificationComment.isRead()
+                        )));
+            } catch (IOException e) {
+                emitter.completeWithError(e);
+                sseEmitters.remove(user.getId());
+            }
+        }
+    }
+
+
+//    @Override
+//    @Transactional
+//    public ApiResponse<Void> createButtonNotification(User user, NotificationRequestDto requestDto) {
+//        Post post = postRepository.findById(requestDto.getPostId())
+//                .orElseThrow(() -> new EntityNotFoundException("Invalid post ID"));
+//
+//        Notification notification = Notification.builder()
+//                .user(user)
+//                .post(post)
+//                .buttonType(requestDto.getButtonType())
+//                .isRead(false)
+//                .createdAt(LocalDateTime.now())
+//                .build();
+//
+//        notificationRepository.save(notification);
+//
+//        User postAuthor = post.getUser();
+//        sendNotificationToUser(postAuthor, notification);
+//
+//        return ApiResponse.onPostSuccess(null, SuccessStatus._POST_OK);
+//    }
 
     @Override
     @Transactional
@@ -96,7 +175,7 @@ public class NotificationServiceImpl implements NotificationService {
         Post post = postRepository.findById(requestDto.getPostId())
                 .orElseThrow(() -> new EntityNotFoundException("Invalid post ID"));
 
-        Notification notification = Notification.builder()
+        NotificationButton notificationButton = NotificationButton.builder()
                 .user(user)
                 .post(post)
                 .buttonType(requestDto.getButtonType())
@@ -104,14 +183,33 @@ public class NotificationServiceImpl implements NotificationService {
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        notificationRepository.save(notification);
+        notificationButtonRepository.save(notificationButton);
 
         User postAuthor = post.getUser();
-        sendNotificationToUser(postAuthor, notification);
+        sendButtonNotificationToUser(postAuthor, notificationButton);
 
         return ApiResponse.onPostSuccess(null, SuccessStatus._POST_OK);
     }
 
+    public void sendButtonNotificationToUser(User user, NotificationButton notificationButton) {
+        SseEmitter emitter = sseEmitters.get(user.getId());
+
+        if (emitter != null) {
+            try {
+                emitter.send(SseEmitter.event()
+                        .name("buttonNotification")
+                        .data(Map.of(
+                                "postId", notificationButton.getPost().getId(),
+                                "buttonType", notificationButton.getButtonType(),
+                                "createdAt", notificationButton.getCreatedAt(),
+                                "isRead", notificationButton.isRead()
+                        )));
+            } catch (IOException e) {
+                emitter.completeWithError(e);
+                sseEmitters.remove(user.getId());
+            }
+        }
+    }
 
     @Override
     @Transactional
@@ -129,6 +227,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .build();
 
         notificationRepository.save(notification);
+        sendNotificationToUser(user, notification);
 
         return ApiResponse.onPostSuccess(null, SuccessStatus._POST_OK);
     }
@@ -150,6 +249,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .build();
 
         scheduleNotification(notification);
+        sendNotificationToUser(user, notification);
 
         return ApiResponse.onPostSuccess(null, SuccessStatus._POST_OK);
     }

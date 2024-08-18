@@ -22,7 +22,7 @@ public class NotificationRequestDto {
 
     private Long commentId;
     private String content;
-    private String commenterName;
+    private String authorName;
 
     private String buttonType;
 

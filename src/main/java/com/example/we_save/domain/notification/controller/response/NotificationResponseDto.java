@@ -31,4 +31,19 @@ public class NotificationResponseDto {
         this.isRead = notification.isRead();
         this.createdAt = notification.getCreatedAt();
     }
+
+    @Data
+    @AllArgsConstructor
+    public class CommentNotificationDto {
+        private String authorName;
+        private String content;
+    }
+
+    @Data
+    @AllArgsConstructor
+    public class ButtonNotificationDto {
+        private String buttonType;
+        private int count;
+        private String postTitle;
+    }
 }
