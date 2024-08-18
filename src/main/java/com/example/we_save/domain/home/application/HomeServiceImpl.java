@@ -3,8 +3,10 @@ package com.example.we_save.domain.home.application;
 import com.example.we_save.apiPayload.ApiResponse;
 import com.example.we_save.apiPayload.util.RegionUtil;
 import com.example.we_save.domain.countermeasure.controller.response.CountermeasureResponseDto;
+import com.example.we_save.domain.countermeasure.controller.response.HomeSearchResponseDto;
 import com.example.we_save.domain.countermeasure.entity.Countermeasure;
-import com.example.we_save.domain.countermeasure.repository.CountermeasureRepository;
+import com.example.we_save.domain.countermeasure.entity.CountermeasureHashTag;
+import com.example.we_save.domain.countermeasure.repository.CountermeasureHashTagRepository;
 import com.example.we_save.domain.home.controller.request.HomeLocationRequestDto;
 import com.example.we_save.domain.home.controller.response.HomeResponseDto;
 import com.example.we_save.domain.post.controller.response.HotPostHomeResponseDto;
@@ -17,7 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,7 +28,7 @@ public class HomeServiceImpl implements HomeService {
 
     private final PostRepository postRepository;
     private final RegionUtil regionUtil;
-    private final CountermeasureRepository countermeasureRepository;
+    private final CountermeasureHashTagRepository countermeasureHashTagRepository;
 
     private final int LIMIT = 10;
     private final int RECENT = 0;
@@ -66,15 +68,34 @@ public class HomeServiceImpl implements HomeService {
     }
 
     @Override
-    public ApiResponse<List<CountermeasureResponseDto>> findCountermeasuresByKeyword(String keyword) {
+    public ApiResponse<HomeSearchResponseDto> findCountermeasuresByTag(String tag) {
 
-        List<Countermeasure> countermeasures = countermeasureRepository.findAllByTitleContainingOrMainContentContaining(keyword);
+        String cleanedTag = tag.replaceAll("[\\p{Punct}]+", "");
+        List<String> tags = Arrays.asList(cleanedTag.split("\\s+"));
+        Set<Countermeasure> countermeasureSet = new HashSet<>();
+        Set<String> foundTags = new HashSet<>();
 
+        tags.forEach((hashtag) -> {
+            List<CountermeasureHashTag> countermeasureHashTags
+                    = countermeasureHashTagRepository.findAllByHashTag_TagName(hashtag);
+            countermeasureHashTags.forEach(countermeasureHashTag -> {
+                countermeasureSet.add(countermeasureHashTag.getCountermeasure());
+                foundTags.add(countermeasureHashTag.getHashTag().getTagName());
+            });
+        });
+
+        List<Countermeasure> countermeasures = new ArrayList<>(countermeasureSet);
+        List<String> foundTagList = new ArrayList<>(foundTags);
         List<CountermeasureResponseDto> countermeasureDtos = countermeasures.stream()
                 .map(CountermeasureResponseDto::of)
                 .collect(Collectors.toList());
 
-        return ApiResponse.onGetSuccess(countermeasureDtos);
+        HomeSearchResponseDto homeSearchResponseDto = HomeSearchResponseDto.builder()
+                .tags(foundTagList)
+                .countermeasureDtos(countermeasureDtos)
+                .build();
+
+        return ApiResponse.onGetSuccess(homeSearchResponseDto);
     }
 
     private List<NearPostHomeResponseDto> getNearDisasterPages(HomeLocationRequestDto locationDto, int limit, int type) {
