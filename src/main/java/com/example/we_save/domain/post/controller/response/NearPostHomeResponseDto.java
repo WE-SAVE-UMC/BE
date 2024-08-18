@@ -33,7 +33,7 @@ public class NearPostHomeResponseDto {
         return NearPostHomeResponseDto.builder()
                 .postId(post.getId())
                 .regionId(regionId)
-                .distance(distance)
+                .distance(Math.round(distance * 10) / 10.0)
                 .hearts(post.getHearts())
                 .regionName(RegionUtil.extractRegionAfterSecondSpace(post.getPostRegionName()))
                 .createAt(post.getCreateAt())
