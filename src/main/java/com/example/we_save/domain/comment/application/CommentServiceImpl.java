@@ -53,7 +53,12 @@ public class CommentServiceImpl implements CommentService {
                 .content(commentRequestDto.getContent())
                 .build();
 
-        return commentRepository.save(comment);
+        Comment savedComment = commentRepository.save(comment);
+
+        post.setComments(post.getComments() + 1);
+        postRepository.save(post);
+
+        return savedComment;
     }
 
     @Override
