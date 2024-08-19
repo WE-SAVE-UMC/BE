@@ -1,4 +1,205 @@
-package com.example.we_save.domain.notification.application;
+//package com.example.we_save.domain.notification.application;
+//
+//import com.example.we_save.domain.notification.controller.request.NotificationRequestDto;
+//import com.example.we_save.domain.notification.controller.response.NotificationResponseDto;
+//import com.example.we_save.domain.notification.entity.Notification;
+//import com.example.we_save.domain.notification.repository.NotificationRepository;
+//import com.example.we_save.domain.post.entity.Post;
+//import com.example.we_save.domain.post.repository.PostRepository;
+//import com.example.we_save.domain.user.entity.User;
+//import com.example.we_save.domain.user.repository.UserRepository;
+//import com.example.we_save.apiPayload.ApiResponse;
+//import com.example.we_save.apiPayload.code.status.SuccessStatus;
+//import jakarta.persistence.EntityNotFoundException;
+//import jakarta.transaction.Transactional;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.stereotype.Service;
+//import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+//
+//import java.time.LocalDateTime;
+//import java.time.ZoneId;
+//import java.util.List;
+//import java.util.Map;
+//import java.util.concurrent.ConcurrentHashMap;
+//import java.util.concurrent.ConcurrentMap;
+//import java.util.stream.Collectors;
+//
+//@Service
+//public class NotificationServiceImpl implements NotificationService {
+//
+//    private final NotificationRepository notificationRepository;
+//    private final PostRepository postRepository;
+//    private final UserRepository userRepository;
+//    private final ConcurrentMap<Long, SseEmitter> sseEmitters = new ConcurrentHashMap<>();
+//
+//    @Autowired
+//    public NotificationServiceImpl(NotificationRepository notificationRepository,
+//                                   PostRepository postRepository,
+//                                   UserRepository userRepository) {
+//        this.notificationRepository = notificationRepository;
+//        this.postRepository = postRepository;
+//        this.userRepository = userRepository;
+//    }
+//
+//    @Override
+//    @Transactional(readOnly = true)
+//    public List<NotificationResponseDto> getNotifications(User user, int page, int size, boolean excludeCompleted) {
+//        // 특정 사용자의 모든 알림을 조회
+//        return notificationRepository.findAll().stream()
+//                .map(NotificationResponseDto::of)
+//                .collect(Collectors.toList());
+//    }
+//
+//    @Override
+//    public ApiResponse<List<NotificationResponseDto>> getNotifications(User user, int page, boolean excludeCompleted) {
+//        // 구현 예시
+//        List<Notification> notifications = notificationRepository.findByUserId(user.getId());
+//        List<NotificationResponseDto> responseDtos = notifications.stream()
+//                .map(NotificationResponseDto::of)
+//                .collect(Collectors.toList());
+//
+//        return ApiResponse.onGetSuccess(responseDtos);
+//    }
+//
+//    @Override
+//    public ApiResponse<Void> createCommentNotification(User user, NotificationRequestDto requestDto) {
+//        Post post = postRepository.findById(requestDto.getPostId())
+//                .orElseThrow(() -> new EntityNotFoundException("Post not found"));
+//
+//        Notification notification = Notification.builder()
+//                .user(user)
+//                .post(post)
+//                .notificationType("COMMENT")
+//                .postTitle(post.getTitle())
+//                .username(requestDto.getUsername())
+//                .timestamp(LocalDateTime.now())
+//                .isRead(false)
+//                .build();
+//
+//        notificationRepository.save(notification);
+//
+//        sendNotificationToUser(user, notification);
+//        return ApiResponse.onPostSuccess(null, SuccessStatus._POST_OK);
+//    }
+//
+//    @Override
+//    public ApiResponse<Void> createButtonNotification(User user, NotificationRequestDto requestDto) {
+//        Post post = postRepository.findById(requestDto.getPostId())
+//                .orElseThrow(() -> new EntityNotFoundException("Post not found"));
+//
+//        Notification notification = Notification.builder()
+//                .user(user)
+//                .post(post)
+//                .notificationType("BUTTON")
+//                .postTitle(post.getTitle())
+//                .buttonType(requestDto.getButtonType())
+//                .buttonTotalCount(requestDto.getButtonTotalCount())
+//                .timestamp(LocalDateTime.now())
+//                .isRead(false)
+//                .build();
+//
+//        notificationRepository.save(notification);
+//
+//        sendNotificationToUser(user, notification);
+//        return ApiResponse.onPostSuccess(null, SuccessStatus._POST_OK);
+//    }
+//
+//    @Override
+//    public ApiResponse<Void> createPopularNotification(User user, NotificationRequestDto requestDto) {
+//        Post post = postRepository.findById(requestDto.getPostId())
+//                .orElseThrow(() -> new EntityNotFoundException("Post not found"));
+//
+//        Notification notification = Notification.builder()
+//                .user(user)
+//                .post(post)
+//                .notificationType("POPULAR")
+//                .postTitle(post.getTitle())
+//                .buttonTotalCount(requestDto.getButtonTotalCount())
+//                .timestamp(LocalDateTime.now())
+//                .isRead(false)
+//                .build();
+//
+//        notificationRepository.save(notification);
+//
+//        sendNotificationToUser(user, notification);
+//        return ApiResponse.onPostSuccess(null, SuccessStatus._POST_OK);
+//    }
+//
+//    @Override
+//    public ApiResponse<Void> createStatusNotification(User user, NotificationRequestDto requestDto) {
+//        Post post = postRepository.findById(requestDto.getPostId())
+//                .orElseThrow(() -> new EntityNotFoundException("Post not found"));
+//
+//        Notification notification = Notification.builder()
+//                .user(user)
+//                .post(post)
+//                .notificationType("STATUS")
+//                .postTitle(post.getTitle())
+//                .timestamp(LocalDateTime.now())
+//                .isRead(false)
+//                .build();
+//
+//        notificationRepository.save(notification);
+//
+//        // 스케줄링을 통해 1시간 후 알림을 전송하도록 설정할 수 있습니다.
+//        scheduleNotification(notification);
+//
+//        return ApiResponse.onPostSuccess(null, SuccessStatus._POST_OK);
+//    }
+//
+//    private void scheduleNotification(Notification notification) {
+//        // 스케줄링 작업 예시 (1시간 후 실행)
+//        Runnable task = () -> sendNotificationToUser(notification.getUser(), notification);
+//        long delay = 60 * 60 * 1000L; // 1시간 후
+//        ZoneId defaultZoneId = ZoneId.systemDefault();
+//        // 스케줄링 구현 필요 시 추가 (예: ScheduledExecutorService 사용)
+//    }
+//
+//    @Override
+//    public ApiResponse<Void> markNotificationAsRead(User user, Long notificationId) {
+//        Notification notification = notificationRepository.findByIdAndUser(notificationId, user)
+//                .orElseThrow(() -> new EntityNotFoundException("Notification not found"));
+//
+//        notification.setRead(true);
+//        notificationRepository.save(notification);
+//
+//        return ApiResponse.onPostSuccess(null, SuccessStatus._POST_OK);
+//    }
+//
+//    @Override
+//    public SseEmitter streamNotifications(User user) {
+//        SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+//
+//        emitter.onCompletion(() -> sseEmitters.remove(user.getId()));
+//        emitter.onTimeout(() -> sseEmitters.remove(user.getId()));
+//
+//        sseEmitters.put(user.getId(), emitter);
+//
+//        try {
+//            emitter.send(SseEmitter.event().name("init").data("SSE connection established."));
+//        } catch (Exception e) {
+//            emitter.completeWithError(e);
+//        }
+//
+//        return emitter;
+//    }
+//
+//    private void sendNotificationToUser(User user, Notification notification) {
+//        SseEmitter emitter = sseEmitters.get(user.getId());
+//
+//        if (emitter != null) {
+//            try {
+//                emitter.send(SseEmitter.event()
+//                        .name("notification")
+//                        .data(NotificationResponseDto.of(notification)));
+//            } catch (Exception e) {
+//                emitter.completeWithError(e);
+//                sseEmitters.remove(user.getId());
+//            }
+//        }
+//    }
+//}
+
 
 //import com.example.we_save.apiPayload.ApiResponse;
 //import com.example.we_save.apiPayload.code.status.SuccessStatus;
