@@ -1,7 +1,7 @@
 package com.example.we_save.domain.home.controller;
 
 import com.example.we_save.apiPayload.ApiResponse;
-import com.example.we_save.domain.countermeasure.controller.response.CountermeasureResponseDto;
+import com.example.we_save.domain.countermeasure.controller.response.HomeSearchResponseDto;
 import com.example.we_save.domain.home.application.HomeService;
 import com.example.we_save.domain.home.controller.request.HomeLocationRequestDto;
 import com.example.we_save.domain.home.controller.response.HomeResponseDto;
@@ -50,14 +50,14 @@ public class HomeController {
 
     @Operation(summary = "메인페이지 검색")
     @GetMapping("/search")
-    ResponseEntity<ApiResponse<List<CountermeasureResponseDto>>> searchCountermeasures
-            (@RequestParam(value = "keyword", required = false) String keyword) {
+    ResponseEntity<ApiResponse<HomeSearchResponseDto>> searchCountermeasures
+            (@RequestParam(value = "tag", required = false) String tag) {
 
         // 검색어가 없을 경우 실패 응답 반환
-        if (keyword == null || keyword.isEmpty()) {
+        if (tag == null || tag.isEmpty()) {
             return ResponseEntity.ok(ApiResponse.onFailure("400", "Keyword is missing", null));
         }
 
-        return ResponseEntity.ok(homeService.findCountermeasuresByKeyword(keyword));
+        return ResponseEntity.ok(homeService.findCountermeasuresByTag(tag));
     }
 }

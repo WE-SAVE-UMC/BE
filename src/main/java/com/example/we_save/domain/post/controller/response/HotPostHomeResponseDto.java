@@ -22,6 +22,7 @@ public class HotPostHomeResponseDto {
     private String regionName;
     private double latitude;
     private double longitude;
+    private String categoryName;
     private double distance;
     private int hearts;
     private LocalDateTime createAt;
@@ -40,7 +41,8 @@ public class HotPostHomeResponseDto {
                 .regionName(RegionUtil.extractRegionBeforeSecondSpace(post.getPostRegionName()))
                 .latitude(post.getLatitude())
                 .longitude(post.getLongitude())
-                .distance(distance)
+                .categoryName(post.getCategory().getValue())
+                .distance(Math.round(distance * 10) / 10.0)
                 .hearts(post.getHearts())
                 .createAt(post.getCreateAt())
                 .imageUrl(imageUrl)

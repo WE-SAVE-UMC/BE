@@ -14,23 +14,21 @@ public class NotificationDto {
 
     private Long notificationId;
     private Long postId;
-    private Long commentId;
     private String buttonType;
-    private String title;
-    private String content;
+    private String postTitle;
+    private String notificationType;
     private boolean isRead;
     private LocalDateTime createdAt;
 
     public static NotificationDto of(Notification notification) {
         return NotificationDto.builder()
                 .notificationId(notification.getId())
-                .postId(notification.getPost() != null ? notification.getPost().getId() : null)
-                .commentId(notification.getCommentId())
+                .postId(notification.getPostId())
                 .buttonType(notification.getButtonType())
-                .title(notification.getTitle())
-                .content(notification.getContent())
-                .isRead(notification.isRead())
-                .createdAt(notification.getCreatedAt())
+                .postTitle(notification.getPostTitle())
+                .notificationType(notification.getNotificationType())
+                .createdAt(notification.getTimestamp())
                 .build();
     }
+
 }

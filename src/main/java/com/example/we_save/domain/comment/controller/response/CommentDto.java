@@ -13,6 +13,7 @@ import java.util.List;
 public class CommentDto {
     private Long id;
     private Long userId;
+    private String nickname;
     private String content;
     private List<String> images;
     private LocalDateTime createdAt;

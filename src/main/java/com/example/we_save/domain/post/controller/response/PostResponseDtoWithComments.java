@@ -15,6 +15,7 @@ import java.util.List;
 public class PostResponseDtoWithComments {
     private Long id;
     private Long userId;
+    private String nickname;
     private Category category;
     private String title;
     private String content;

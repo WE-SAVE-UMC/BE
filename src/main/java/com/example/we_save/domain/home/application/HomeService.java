@@ -1,7 +1,7 @@
 package com.example.we_save.domain.home.application;
 
 import com.example.we_save.apiPayload.ApiResponse;
-import com.example.we_save.domain.countermeasure.controller.response.CountermeasureResponseDto;
+import com.example.we_save.domain.countermeasure.controller.response.HomeSearchResponseDto;
 import com.example.we_save.domain.home.controller.request.HomeLocationRequestDto;
 import com.example.we_save.domain.home.controller.response.HomeResponseDto;
 import com.example.we_save.domain.post.controller.response.NearPostHomeResponseDto;
@@ -14,5 +14,5 @@ public interface HomeService {
     ApiResponse<List<NearPostHomeResponseDto>> showRecentNearPosts(HomeLocationRequestDto locationDto);
     ApiResponse<List<NearPostHomeResponseDto>> showTopNearPosts(HomeLocationRequestDto locationDto);
     ApiResponse<List<NearPostHomeResponseDto>> showDistanceNearPosts(HomeLocationRequestDto locationDto);
-    ApiResponse<List<CountermeasureResponseDto>> findCountermeasuresByKeyword(String keyword);
+    ApiResponse<HomeSearchResponseDto> findCountermeasuresByTag(String tag);
 }
