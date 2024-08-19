@@ -59,16 +59,15 @@ public class PostController {
                 postImageService.savePostImages(files, savePost); //게시글 사진 등록
             }
             return ResponseEntity.ok(ApiResponse.onPostSuccess(PostResponseDto.builder().postId(savePost.getId()).build(), SuccessStatus._POST_OK));
-        }catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.onFailure("COMMON400", e.getMessage(), null));
-        }
-        catch (Exception e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.onFailure("COMMON400","파일 업로드 오류",null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.onFailure("COMMON400", "파일 업로드 오류", null));
         }
 
     }
 
-    @Operation(summary = "게시글 수정", security = @SecurityRequirement(name="Authorization"))
+    @Operation(summary = "게시글 수정", security = @SecurityRequirement(name = "Authorization"))
     @PutMapping("/posts/{postId}")
     public ResponseEntity<ApiResponse<PostResponseDto>> updatePost(
             @PathVariable("postId") Long postId,
@@ -76,21 +75,20 @@ public class PostController {
             @RequestPart(value = "images", required = false) List<MultipartFile> files) {
 
         User user = userAuthCommandService.getAuthenticatedUserInfo();
-        Post updatePost = postService.updatePost(postId, postRequestDto,user);//게시글 정보 수정, 게시글 이미지 DB정보 삭제
+        Post updatePost = postService.updatePost(postId, postRequestDto, user);//게시글 정보 수정, 게시글 이미지 DB정보 삭제
 
         try {
             postImageService.deletePostAllImage(postId); // 서버에 있는 기존 게시글 이미지 삭제
-            if (files != null && !files.isEmpty() ) {
-                if (!(Objects.equals(files.get(0).getOriginalFilename(), ""))){
+            if (files != null && !files.isEmpty()) {
+                if (!(Objects.equals(files.get(0).getOriginalFilename(), ""))) {
                     postImageService.savePostImages(files, updatePost); // 서버에 새로 이미지 등록
                 }
             }
             return ResponseEntity.ok(ApiResponse.onGetSuccess(PostResponseDto.builder().postId(updatePost.getId()).build()));
-        }catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.onFailure("COMMON400", e.getMessage(), null));
-        }
-        catch (Exception e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.onFailure("COMMON400","파일 업로드 오류",null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.onFailure("COMMON400", "파일 업로드 오류", null));
         }
     }
 
@@ -101,22 +99,22 @@ public class PostController {
         try {
             postImageService.deletePostAllImage(postId);
             return ResponseEntity.ok(responseDto);
-        }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.onFailure("COMMON400","파일 업로드 오류",null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.onFailure("COMMON400", "파일 업로드 오류", null));
         }
     }
 
-    @Operation(summary = "게시글 보기", security = @SecurityRequirement(name="Authorization"))
+    @Operation(summary = "게시글 보기", security = @SecurityRequirement(name = "Authorization"))
     @GetMapping("/posts/{postId}")
     public ResponseEntity<ApiResponse<PostResponseDtoWithComments>> getPost(
-            @PathVariable("postId") Long postId){
+            @PathVariable("postId") Long postId) {
 
         User user = userAuthCommandService.getAuthenticatedUserInfo();
-        ApiResponse<PostResponseDtoWithComments> responseDto = postService.getPost(postId,user);
+        ApiResponse<PostResponseDtoWithComments> responseDto = postService.getPost(postId, user);
         return ResponseEntity.ok(responseDto);
     }
 
-    @Operation(summary = "게시글 신고", security = @SecurityRequirement(name="Authorization"))
+    @Operation(summary = "게시글 신고", security = @SecurityRequirement(name = "Authorization"))
     @PostMapping("/posts/{postId}/report")
     public ResponseEntity<ApiResponse<Void>> reportPost(
             @PathVariable("postId") Long postId) {
@@ -125,7 +123,7 @@ public class PostController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "게시글 확인했어요", security = @SecurityRequirement(name="Authorization"))
+    @Operation(summary = "게시글 확인했어요", security = @SecurityRequirement(name = "Authorization"))
     @PostMapping("/posts/{postId}/heart")
     public ResponseEntity<ApiResponse<Void>> toggleHeart(
             @PathVariable("postId") Long postId) {
@@ -134,7 +132,7 @@ public class PostController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "게시글 허위에요", security = @SecurityRequirement(name="Authorization"))
+    @Operation(summary = "게시글 허위에요", security = @SecurityRequirement(name = "Authorization"))
     @PostMapping("/posts/{postId}/dislike")
     public ResponseEntity<ApiResponse<Void>> toggleDislike(
             @PathVariable("postId") Long postId) {
@@ -219,29 +217,26 @@ public class PostController {
         return ResponseEntity.ok(postService.searchNearbyPostsByDistance(query, nearbyPostRequestDto, page, excludeCompleted));
     }
 
-//    @Operation(summary = "국내 게시글 검색 - 최신순", security = @SecurityRequirement(name = "Authorization"))
-//    @PostMapping("/posts/search/domestic/recent")
-//    public ResponseEntity<ApiResponse<List<DomesticPostDto>>> searchDomesticPostsByRecent(
-//            @RequestParam("query") String query,
-//            @RequestParam(value = "excludeCompleted", required = false, defaultValue = "false") boolean excludeCompleted,
-//            @RequestParam(value = "page", defaultValue = "0") int page,
-//            @RequestParam(value = "size", defaultValue = "10") int size) {
-//
-//        List<DomesticPostDto> result = postService.searchDomesticPostsByRecent(query, excludeCompleted, page, size);
-//        return ResponseEntity.ok(ApiResponse.onGetSuccess(result));
-//    }
-//
-//    @Operation(summary = "국내 게시글 검색 - 확인순", security = @SecurityRequirement(name = "Authorization"))
-//    @PostMapping("/posts/search/domestic/top")
-//    public ResponseEntity<ApiResponse<List<DomesticPostDto>>> searchDomesticPostsByTop(
-//            @RequestParam("query") String query,
-//            @RequestParam(value = "excludeCompleted", required = false, defaultValue = "false") boolean excludeCompleted,
-//            @RequestParam(value = "page", defaultValue = "0") int page,
-//            @RequestParam(value = "size", defaultValue = "10") int size) {
-//
-//        List<DomesticPostDto> result = postService.searchDomesticPostsByTop(query, excludeCompleted, page, size);
-//        return ResponseEntity.ok(ApiResponse.onGetSuccess(result));
-//    }
+    @Operation(summary = "국내 게시글 검색 - 최신순")
+    @PostMapping("/posts/search/domestic/recent")
+    public ResponseEntity<ApiResponse<List<DomesticPostDto>>> searchDomesticPostsByRecent(
+            @RequestParam("query") String query,
+            @RequestParam("excludeCompleted") boolean excludeCompleted) {
+
+        ApiResponse<List<DomesticPostDto>> response = postService.searchDomesticPostsByRecent(query, excludeCompleted);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "국내 게시글 검색 - 확인순")
+    @PostMapping("/posts/search/domestic/top")
+    public ResponseEntity<ApiResponse<List<DomesticPostDto>>> searchDomesticPostsByTop(
+            @RequestParam("query") String query,
+            @RequestParam("excludeCompleted") boolean excludeCompleted) {
+
+        ApiResponse<List<DomesticPostDto>> response = postService.searchDomesticPostsByTop(query, excludeCompleted);
+        return ResponseEntity.ok(response);
+    }
+
 
     @Operation(summary = "게시물 상황종료 처리")
     @PutMapping("/posts/status/{postId}")
@@ -257,30 +252,4 @@ public class PostController {
         return ResponseEntity.ok(ApiResponse.onGetSuccess(notifications));
     }
 
-//    @Operation(summary = "내 근처 게시글 검색", security = @SecurityRequirement(name = "Authorization"))
-//    @PostMapping("/posts/search/nearby")
-//    public ResponseEntity<ApiResponse<List<NearbyPostResponseDto>>> searchNearbyPosts(
-//            @RequestParam("query") String query,
-//            @RequestParam(value = "sortBy", defaultValue = "recent") String sortBy,
-//            @RequestParam("excludeCompleted") boolean excludeCompleted,
-//            @RequestParam(value = "page") int page,
-//            @RequestParam(value = "size") int size,
-//            @RequestBody NearbyPostRequestDto nearbyPostRequestDto) {
-//
-//        List<NearbyPostResponseDto> result = postService.searchNearbyPosts(query, sortBy, excludeCompleted, page, size, nearbyPostRequestDto);
-//        return ResponseEntity.ok(ApiResponse.onGetSuccess(result));
-//    }
-//
-//    @Operation(summary = "국내 게시글 검색", security = @SecurityRequirement(name = "Authorization"))
-//    @PostMapping("/posts/search/domestic")
-//    public ResponseEntity<ApiResponse<List<DomesticPostDto>>> searchDomesticPosts(
-//            @RequestParam("query") String query,
-//            @RequestParam(value = "sortBy", defaultValue = "recent") String sortBy,
-//            @RequestParam(value = "excludeCompleted", defaultValue = "true") boolean excludeCompleted,
-//            @RequestParam(value = "page", defaultValue = "0") int page,
-//            @RequestParam(value = "size", defaultValue = "10") int size) {
-//
-//        List<DomesticPostDto> result = postService.searchDomesticPosts(query, sortBy, excludeCompleted, page, size);
-//        return ResponseEntity.ok(ApiResponse.onGetSuccess(result));
-//    }
 }

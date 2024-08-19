@@ -33,6 +33,9 @@ public interface PostService {
     ApiResponse<NearbyPostResponseDto> searchNearbyPostsByTop(String query, NearbyPostRequestDto nearbyPostRequestDto, int page, boolean excludeCompleted);
     ApiResponse<NearbyPostResponseDto> searchNearbyPostsByDistance(String query, NearbyPostRequestDto nearbyPostRequestDto, int page, boolean excludeCompleted);
 
+    ApiResponse<List<DomesticPostDto>>  searchDomesticPostsByRecent(String query,boolean excludeCompleted);
+    ApiResponse<List<DomesticPostDto>>  searchDomesticPostsByTop(String query,boolean excludeCompleted);
+
 //    List<NearbyPostResponseDto> searchNearbyPosts(String query, String sortBy, boolean excludeCompleted, int page, int size, NearbyPostRequestDto nearbyPostRequestDto);
 //    List<DomesticPostDto> searchDomesticPosts(String query, String sortBy, boolean excludeCompleted, int page, int size);
 //

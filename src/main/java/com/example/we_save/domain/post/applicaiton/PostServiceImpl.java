@@ -277,15 +277,15 @@ public class PostServiceImpl implements PostService {
             post.setHearts(post.getHearts() + 1);
             postRepository.save(post);
 
-            if (post.getHearts() >= 10) {
-                NotificationRequestDto notificationRequest = NotificationRequestDto.builder()
-                        .postId(post.getId())
-                        .title(post.getTitle())
-                        .confirmCount(post.getHearts())
-                        .build();
-
-                notificationService.createPopularNotification(user, notificationRequest);
-            }
+//            if (post.getHearts() >= 10) {
+//                NotificationRequestDto notificationRequest = NotificationRequestDto.builder()
+//                        .postId(post.getId())
+//                        .title(post.getTitle())
+//                        .confirmCount(post.getHearts())
+//                        .build();
+//
+//                notificationService.createPopularNotification(user, notificationRequest);
+//            }
 
             return ApiResponse.onPostSuccess(null, SuccessStatus._POST_OK);
         }
@@ -509,7 +509,38 @@ public class PostServiceImpl implements PostService {
         return ApiResponse.onGetSuccess(responseDto);
     }
 
-//
+    @Override
+    @Transactional
+    public ApiResponse<List<DomesticPostDto>> searchDomesticPostsByRecent(String query, boolean excludeCompleted) {
+        Pageable pageable = PageRequest.of(0, PAGE_SIZE);
+        List<Post> posts = postRepository.searchPostsByKeywordRecentDomestic(query, excludeCompleted, pageable);
+
+        List<DomesticPostDto> postDTOs = posts.stream()
+                .map(post -> {
+                    List<Comment> comments = commentRepository.findByPostId(post.getId());
+                    return DomesticPostDto.of(post, comments);
+                })
+                .collect(Collectors.toList());
+
+        return ApiResponse.onGetSuccess(postDTOs);
+    }
+
+    @Override
+    @Transactional
+    public ApiResponse<List<DomesticPostDto>> searchDomesticPostsByTop(String query, boolean excludeCompleted) {
+        Pageable pageable = PageRequest.of(0, PAGE_SIZE);
+        List<Post> posts = postRepository.searchPostsByKeywordTopDomestic(query, excludeCompleted, pageable);
+
+        List<DomesticPostDto> postDTOs = posts.stream()
+                .map(post -> {
+                    List<Comment> comments = commentRepository.findByPostId(post.getId());
+                    return DomesticPostDto.of(post, comments);
+                })
+                .collect(Collectors.toList());
+
+        return ApiResponse.onGetSuccess(postDTOs);
+    }
+
 //    @Override
 //    @Transactional
 //    public ApiResponse<NearbyPostResponseDto> searchNearbyPosts(String query, String sortBy, NearbyPostRequestDto nearbyPostRequestDto, int page, boolean excludeCompleted) {
