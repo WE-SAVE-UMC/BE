@@ -110,7 +110,6 @@ public class PostServiceImpl implements PostService {
         post.setCategory(postRequestDto.getCategory());
         post.setTitle(postRequestDto.getTitle());
         post.setContent(postRequestDto.getContent());
-        post.setStatus(PostStatus.PROCESSING);
         post.setReport119(postRequestDto.isReport119());
 
         postImageRepository.deleteByPostId(postId); //기존 게시글 이미지 삭제
@@ -156,6 +155,9 @@ public class PostServiceImpl implements PostService {
         }
 
         Post post = optionalPost.get();
+
+        String postAuthorNickname = post.getUser().getNickname();
+
         //게시글의 사진 가져오기
         List<PostImage> postImageList = postImageRepository.findByPostId(postId);
 
@@ -176,6 +178,7 @@ public class PostServiceImpl implements PostService {
             CommentDto dto = new CommentDto();
             dto.setId(comment.getId());
             dto.setUserId(comment.getUser().getId());
+            dto.setNickname(comment.getUser().getNickname());
             dto.setContent(comment.getContent());
             List<String> imageUrls = comment.getImages().stream()
                     .map(CommentImage::getFilePath)
@@ -196,6 +199,7 @@ public class PostServiceImpl implements PostService {
         PostResponseDtoWithComments responseDto = PostResponseDtoWithComments.builder()
                 .id(post.getId())
                 .userId(post.getUser().getId())
+                .nickname(postAuthorNickname)
                 .category(post.getCategory())
                 .title(post.getTitle())
                 .content(post.getContent())

@@ -27,6 +27,7 @@ public class CommentImageServiceImpl implements CommentImageService {
 
     @Override
     public void saveCommentImage(List<MultipartFile> files, Comment comment) throws IOException {
+
         if (files.size() > MAX_IMAGE_COUNT) {
             throw new IllegalArgumentException("최대 10개의 이미지만 첨부할 수 있습니다.");
         }
@@ -35,7 +36,7 @@ public class CommentImageServiceImpl implements CommentImageService {
         String projectPath = "/home/upload/comment/" + comment.getId();
 
         // 로컬 서버 경로
-        //String projectPath = System.getProperty("user.dir") + "/media/comments/" + comment.getId();
+        //String projectPath = System.getProperty("user.dir") + "/media/comment/" + comment.getId();
         Path directoryPath = Paths.get(projectPath);
         if (Files.notExists(directoryPath)) {
             Files.createDirectories(directoryPath);
@@ -50,7 +51,7 @@ public class CommentImageServiceImpl implements CommentImageService {
             CommentImage commentImage = new CommentImage();
             commentImage.setComment(comment);
             commentImage.setName(fileName);
-            commentImage.setFilePath("/files/comments/" + comment.getId() +"/"+ fileName);
+            commentImage.setFilePath("/files/comment/" + comment.getId() +"/"+ fileName);
             commentImageRepository.save(commentImage);
         }
     }
@@ -61,7 +62,7 @@ public class CommentImageServiceImpl implements CommentImageService {
         String projectPath = "/home/upload/comment/" + commentId;
 
         // 로컬 서버 경로
-        //String projectPath = System.getProperty("user.dir") + "/media/comments/" + commentId;
+        //String projectPath = System.getProperty("user.dir") + "/media/comment/" + commentId;
         Path directoryPath = Paths.get(projectPath);
 
         // 디렉토리가 존재하면 폴더 및 하위 파일들 삭제
