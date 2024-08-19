@@ -27,6 +27,7 @@ public class CommentImageServiceImpl implements CommentImageService {
 
     @Override
     public void saveCommentImage(List<MultipartFile> files, Comment comment) throws IOException {
+
         if (files.size() > MAX_IMAGE_COUNT) {
             throw new IllegalArgumentException("최대 10개의 이미지만 첨부할 수 있습니다.");
         }
