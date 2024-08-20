@@ -3,7 +3,6 @@ package com.example.we_save.domain.post.controller;
 import com.example.we_save.apiPayload.ApiResponse;
 import com.example.we_save.apiPayload.code.status.SuccessStatus;
 import com.example.we_save.domain.post.applicaiton.PostImageService;
-import com.example.we_save.domain.post.applicaiton.PostScheduler;
 import com.example.we_save.domain.post.applicaiton.PostService;
 import com.example.we_save.domain.post.controller.request.NearbyPostRequestDto;
 import com.example.we_save.domain.post.controller.request.PostRequestDto;
@@ -40,9 +39,6 @@ public class PostController {
 
     @Autowired
     private UserAuthCommandService userAuthCommandService;
-
-    @Autowired
-    private PostScheduler postScheduler;
 
     @Operation(summary = "게시글 작성", security = @SecurityRequirement(name = "Authorization"))
     @PostMapping("/posts")
@@ -245,11 +241,10 @@ public class PostController {
         return ResponseEntity.ok(postService.changeToPostCompleted(postId));
     }
 
-    @Operation(summary = "최근 24시간 이내에 확인 수가 가장 많은 게시물 5개 가져오기")
-    @GetMapping("/posts/nearby/notifications")
-    public ResponseEntity<ApiResponse<List<NearbyPostResponseDto>>> getTop5RecentPosts() {
-        List<NearbyPostResponseDto> notifications = postScheduler.getCachedTopPosts();
-        return ResponseEntity.ok(ApiResponse.onGetSuccess(notifications));
+    @Operation(summary = "근처 게시판 상위 5개 글", security = @SecurityRequirement(name = "Authorization"))
+    @PostMapping("/posts/nearby/notifications")
+    public ResponseEntity<ApiResponse<NearbyPostResponseDto>> getTop5NearbyPosts(@RequestBody NearbyPostRequestDto nearbyPostRequestDto) {
+        ApiResponse<NearbyPostResponseDto> response = postService.getTop5NearbyPosts(nearbyPostRequestDto);
+        return ResponseEntity.ok(response);
     }
-
 }

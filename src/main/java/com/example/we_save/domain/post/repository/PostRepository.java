@@ -114,8 +114,4 @@ public interface PostRepository extends JpaRepository<Post, Long> {
                                                @Param("excludeCompleted") boolean excludeCompleted,
                                                Pageable pageable);
 
-
-    @Query("SELECT p FROM Post p WHERE p.createAt >= :cutoffTime ORDER BY p.hearts DESC")
-    List<Post> findTop5ByCreatedAtAfterOrderByConfirmCountDesc(@Param("cutoffTime") LocalDateTime cutoffTime);
-
 }

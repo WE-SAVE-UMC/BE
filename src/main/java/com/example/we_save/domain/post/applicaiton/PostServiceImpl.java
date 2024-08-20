@@ -550,21 +550,38 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<NearbyPostResponseDto> getTop5RecentPostsWithin24Hours() {
-        LocalDateTime cutoffTime = LocalDateTime.now().minusDays(1);
-        List<Post> posts = postRepository.findTop5ByCreatedAtAfterOrderByConfirmCountDesc(cutoffTime);
+    @Transactional
+    public ApiResponse<NearbyPostResponseDto> getTop5NearbyPosts(NearbyPostRequestDto nearbyPostRequestDto) {
+        Pageable pageable = PageRequest.of(0, 5); // 상위 5개의 글만 가져옴
 
-        return posts.stream()
-                .limit(5)
+        long regionId;
+        try {
+            // 입력받은 지역 이름을 사용하여 ID 변환
+            regionId = regionUtil.convertRegionNameToRegionId(nearbyPostRequestDto.getRegionName());
+        } catch (EntityNotFoundException e) {
+            return ApiResponse.onFailure("COMMON500", "Region not found: " + nearbyPostRequestDto.getRegionName(), null);
+        }
+
+        LocalDateTime startDate = LocalDateTime.now().minusDays(3);
+
+        // 확인순으로 5개의 게시물 조회
+        List<Post> posts = postRepository.findTopNearPostsExcludingCompleted(startDate, regionId, pageable);
+
+        if (posts.isEmpty()) {
+            return ApiResponse.onFailure("COMMON404", "No posts found in the region", null);
+        }
+
+        // 조회된 게시물들을 DTO로 변환
+        List<PostDto> postDTOs = posts.stream()
                 .map(post -> {
-                    String userRegionName = RegionUtil.extractEupMyeonDong(post.getPostRegionName());
-                    return NearbyPostResponseDto.builder()
-                            .postId(post.getId())
-                            .postTitle(post.getTitle())
-                            .userRegionName(userRegionName)
-                            .build();
+                    double distanceToPost = calculateDistanceToPost(post, nearbyPostRequestDto.getLatitude(), nearbyPostRequestDto.getLongitude());
+                    List<Comment> comments = commentRepository.findByPostId(post.getId());
+                    return PostDto.of(post, distanceToPost, comments);
                 })
                 .collect(Collectors.toList());
+
+        NearbyPostResponseDto responseDto = NearbyPostResponseDto.of(nearbyPostRequestDto.getRegionName(), postDTOs);
+        return ApiResponse.onGetSuccess(responseDto);
     }
 
 }
