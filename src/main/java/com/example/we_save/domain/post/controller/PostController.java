@@ -228,7 +228,7 @@ public class PostController {
     }
 
     @Operation(summary = "국내 게시글 검색 - 확인순")
-    @PostMapping("/posts/search/domestic/top")
+    @PostMapping("/posts/search/domestic/top/aa")
     public ResponseEntity<ApiResponse<List<DomesticPostDto>>> searchDomesticPostsByTop(
             @RequestParam("query") String query,
             @RequestParam("excludeCompleted") boolean excludeCompleted) {
