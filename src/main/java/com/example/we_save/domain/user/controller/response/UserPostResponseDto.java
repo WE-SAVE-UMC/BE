@@ -25,7 +25,7 @@ public class UserPostResponseDto {
         return UserPostResponseDto.builder()
                 .postId(post.getId())
                 .title(post.getTitle())
-                .status(post.getStatus().toString())
+                .status(post.getStatus().getValue())
                 .regionName(RegionUtil.extractRegionAfterSecondSpace(post.getPostRegionName()))
                 .createAt(post.getCreateAt())
                 .imageUrl(imageUrl)
