@@ -68,6 +68,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("SELECT p FROM Post p WHERE p.user.id = :userId ORDER BY p.createAt DESC")
     List<Post> findAllByUser(@Param("userId") Long userId);
 
+    // 게시글 검색
     @Query("SELECT p FROM Post p WHERE (p.title LIKE %:query% OR p.content LIKE %:query%) " +
             "AND p.region.id = :regionId " +
             "AND (:excludeCompleted = false OR p.status != 'COMPLETED') " +
@@ -98,6 +99,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
                                             Pageable pageable);
 
     @Query("SELECT p FROM Post p WHERE (p.title LIKE %:query% OR p.content LIKE %:query%) " +
+            "AND p.hearts >= 10 " +
             "AND (:excludeCompleted = false OR p.status != 'COMPLETED') " +
             "ORDER BY p.createAt DESC")
     List<Post> searchPostsByKeywordRecentDomestic(@Param("query") String query,
@@ -105,28 +107,15 @@ public interface PostRepository extends JpaRepository<Post, Long> {
                                                   Pageable pageable);
 
     @Query("SELECT p FROM Post p WHERE (p.title LIKE %:query% OR p.content LIKE %:query%) " +
+            "AND p.hearts >= 10 " +
             "AND (:excludeCompleted = false OR p.status != 'COMPLETED') " +
             "ORDER BY p.hearts DESC")
     List<Post> searchPostsByKeywordTopDomestic(@Param("query") String query,
                                                @Param("excludeCompleted") boolean excludeCompleted,
                                                Pageable pageable);
 
+
     @Query("SELECT p FROM Post p WHERE p.createAt >= :cutoffTime ORDER BY p.hearts DESC")
-    List<Post> findTop5ByCreatedAtAfterOrderByConfirmCountDesc(@Param("cutoffTime") LocalDateTime cutoffTime);
+    List<Post> findTop5ByCreatedAtAfterOrderByHeartsDesc(@Param("cutoffTime") LocalDateTime cutoffTime, Pageable pageable);
 
-
-    @Query("SELECT p FROM Post p WHERE (p.title LIKE %:query% OR p.content LIKE %:query%) AND p.status = :excludeCompleted ORDER BY p.createAt DESC")
-    List<Post> findDomesticPostsByQueryAndRecent(@Param("query") String query, @Param("excludeCompleted") boolean excludeCompleted, Pageable pageable);
-
-    @Query("SELECT p FROM Post p WHERE (p.title LIKE %:query% OR p.content LIKE %:query%) AND p.status = :excludeCompleted ORDER BY p.hearts DESC")
-    List<Post> findDomesticPostsByQueryAndHearts(@Param("query") String query, @Param("excludeCompleted") boolean excludeCompleted, Pageable pageable);
-
-    @Query("SELECT p FROM Post p WHERE (p.title LIKE %:query% OR p.content LIKE %:query%) AND p.status = :excludeCompleted ORDER BY FUNCTION('ST_Distance', p.latitude, p.longitude, :latitude, :longitude) ASC")
-    List<Post> findNearbyPostsByQueryAndDistance(@Param("query") String query, @Param("excludeCompleted") boolean excludeCompleted, @Param("latitude") double latitude, @Param("longitude") double longitude, Pageable pageable);
-
-    @Query("SELECT p FROM Post p WHERE (p.title LIKE %:query% OR p.content LIKE %:query%) AND p.status = :excludeCompleted ORDER BY p.createAt DESC")
-    List<Post> findNearbyPostsByQueryAndRecent(@Param("query") String query, @Param("excludeCompleted") boolean excludeCompleted, Pageable pageable);
-
-    @Query("SELECT p FROM Post p WHERE (p.title LIKE %:query% OR p.content LIKE %:query%) AND p.status = :excludeCompleted ORDER BY p.hearts DESC")
-    List<Post> findNearbyPostsByQueryAndHearts(@Param("query") String query, @Param("excludeCompleted") boolean excludeCompleted, Pageable pageable);
 }

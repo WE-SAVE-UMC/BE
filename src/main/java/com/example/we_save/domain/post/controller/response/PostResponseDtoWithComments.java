@@ -2,6 +2,7 @@ package com.example.we_save.domain.post.controller.response;
 
 import com.example.we_save.domain.comment.controller.response.CommentDto;
 import com.example.we_save.domain.post.entity.Category;
+import com.example.we_save.domain.post.entity.PostStatus;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -15,6 +16,9 @@ import java.util.List;
 public class PostResponseDtoWithComments {
     private Long id;
     private Long userId;
+    private String nickname;
+    private String profileImage;
+    private PostStatus status;
     private Category category;
     private String title;
     private String content;

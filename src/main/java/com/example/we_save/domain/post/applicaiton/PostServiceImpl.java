@@ -110,7 +110,6 @@ public class PostServiceImpl implements PostService {
         post.setCategory(postRequestDto.getCategory());
         post.setTitle(postRequestDto.getTitle());
         post.setContent(postRequestDto.getContent());
-        post.setStatus(PostStatus.PROCESSING);
         post.setReport119(postRequestDto.isReport119());
 
         postImageRepository.deleteByPostId(postId); //기존 게시글 이미지 삭제
@@ -156,6 +155,11 @@ public class PostServiceImpl implements PostService {
         }
 
         Post post = optionalPost.get();
+
+        String postAuthorNickname = post.getUser().getNickname();
+        String postAuthorProfileImage = post.getUser().getProfileImage() != null ? post.getUser().getProfileImage().getFilePath() : null;
+
+
         //게시글의 사진 가져오기
         List<PostImage> postImageList = postImageRepository.findByPostId(postId);
 
@@ -176,6 +180,8 @@ public class PostServiceImpl implements PostService {
             CommentDto dto = new CommentDto();
             dto.setId(comment.getId());
             dto.setUserId(comment.getUser().getId());
+            dto.setNickname(comment.getUser().getNickname());
+            dto.setProfileImage(comment.getUser().getProfileImage() != null ? comment.getUser().getProfileImage().getFilePath() : null);
             dto.setContent(comment.getContent());
             List<String> imageUrls = comment.getImages().stream()
                     .map(CommentImage::getFilePath)
@@ -196,6 +202,9 @@ public class PostServiceImpl implements PostService {
         PostResponseDtoWithComments responseDto = PostResponseDtoWithComments.builder()
                 .id(post.getId())
                 .userId(post.getUser().getId())
+                .nickname(postAuthorNickname)
+                .profileImage(postAuthorProfileImage)
+                .status(post.getStatus())
                 .category(post.getCategory())
                 .title(post.getTitle())
                 .content(post.getContent())
@@ -277,15 +286,15 @@ public class PostServiceImpl implements PostService {
             post.setHearts(post.getHearts() + 1);
             postRepository.save(post);
 
-            if (post.getHearts() >= 10) {
-                NotificationRequestDto notificationRequest = NotificationRequestDto.builder()
-                        .postId(post.getId())
-                        .title(post.getTitle())
-                        .confirmCount(post.getHearts())
-                        .build();
-
-                notificationService.createPopularNotification(user, notificationRequest);
-            }
+//            if (post.getHearts() >= 10) {
+//                NotificationRequestDto notificationRequest = NotificationRequestDto.builder()
+//                        .postId(post.getId())
+//                        .title(post.getTitle())
+//                        .confirmCount(post.getHearts())
+//                        .build();
+//
+//                notificationService.createPopularNotification(user, notificationRequest);
+//            }
 
             return ApiResponse.onPostSuccess(null, SuccessStatus._POST_OK);
         }
@@ -440,48 +449,58 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<NearbyPostResponseDto> searchNearbyPosts(String query, String sortBy, boolean excludeCompleted, int page, int size, NearbyPostRequestDto nearbyPostRequestDto) {
-        return List.of();
-    }
-
-    @Override
-    public List<DomesticPostDto> searchDomesticPosts(String query, String sortBy, boolean excludeCompleted, int page, int size) {
-        return List.of();
+    @Transactional
+    public ApiResponse<NearbyPostResponseDto> searchNearbyPostsByRecent(String query, NearbyPostRequestDto nearbyPostRequestDto, int page, boolean excludeCompleted) {
+        return getNearbyPosts(nearbyPostRequestDto, page, RECENT, excludeCompleted, query);
     }
 
     @Override
     @Transactional
-    public ApiResponse<NearbyPostResponseDto> searchNearbyPosts(String query, String sortBy, NearbyPostRequestDto nearbyPostRequestDto, int page, boolean excludeCompleted) {
+    public ApiResponse<NearbyPostResponseDto> searchNearbyPostsByTop(String query, NearbyPostRequestDto nearbyPostRequestDto, int page, boolean excludeCompleted) {
+        return getNearbyPosts(nearbyPostRequestDto, page, TOP, excludeCompleted, query);
+    }
+
+    @Override
+    @Transactional
+    public ApiResponse<NearbyPostResponseDto> searchNearbyPostsByDistance(String query, NearbyPostRequestDto nearbyPostRequestDto, int page, boolean excludeCompleted) {
+        return getNearbyPosts(nearbyPostRequestDto, page, DISTANCE, excludeCompleted, query);
+    }
+
+    private ApiResponse<NearbyPostResponseDto> getNearbyPosts(NearbyPostRequestDto nearbyPostRequestDto, int page, int type, boolean excludeCompleted, String query) {
         Pageable pageable = PageRequest.of(page, PAGE_SIZE);
-        List<Post> posts;
 
         long regionId = regionUtil.convertRegionNameToRegionId(nearbyPostRequestDto.getRegionName());
+        LocalDateTime startDate = LocalDateTime.now().minusDays(3);
 
-        if (query.isEmpty()) {
-            if ("recent".equalsIgnoreCase(sortBy)) {
+        List<Post> posts;
+
+        if (query == null || query.isEmpty()) {
+            // query가 없는 경우 기본 검색
+            if (type == RECENT) {
                 posts = excludeCompleted
-                        ? postRepository.findRecentPostsExcludingCompleted(LocalDateTime.now().minusDays(3), regionId, pageable)
-                        : postRepository.findRecentPosts(LocalDateTime.now().minusDays(3), regionId, pageable);
-            } else if ("hearts".equalsIgnoreCase(sortBy)) {
+                        ? postRepository.findRecentPostsExcludingCompleted(startDate, regionId, pageable)
+                        : postRepository.findRecentPosts(startDate, regionId, pageable);
+            } else if (type == TOP) {
                 posts = excludeCompleted
-                        ? postRepository.findTopNearPostsExcludingCompleted(LocalDateTime.now().minusDays(3), regionId, pageable)
-                        : postRepository.findTopNearPosts(LocalDateTime.now().minusDays(3), regionId, pageable);
-            } else if ("distance".equalsIgnoreCase(sortBy)) {
+                        ? postRepository.findTopNearPostsExcludingCompleted(startDate, regionId, pageable)
+                        : postRepository.findTopNearPosts(startDate, regionId, pageable);
+            } else if (type == DISTANCE) {
                 posts = excludeCompleted
                         ? postRepository.findDistanceNearPostsExcludingCompleted(regionId, nearbyPostRequestDto.getLongitude(), nearbyPostRequestDto.getLatitude(), pageable)
                         : postRepository.findDistanceNearPosts(regionId, nearbyPostRequestDto.getLongitude(), nearbyPostRequestDto.getLatitude(), pageable);
             } else {
-                throw new IllegalArgumentException("Invalid sortBy value: " + sortBy);
+                throw new IllegalArgumentException("Invalid post type");
             }
         } else {
-            if ("recent".equalsIgnoreCase(sortBy)) {
+            // query가 있는 경우 검색
+            if (type == RECENT) {
                 posts = postRepository.searchPostsByKeywordRecentNearby(query, regionId, excludeCompleted, pageable);
-            } else if ("hearts".equalsIgnoreCase(sortBy)) {
+            } else if (type == TOP) {
                 posts = postRepository.searchPostsByKeywordTopNearby(query, regionId, excludeCompleted, pageable);
-            } else if ("distance".equalsIgnoreCase(sortBy)) {
+            } else if (type == DISTANCE) {
                 posts = postRepository.searchPostsByKeywordDistance(query, regionId, excludeCompleted, nearbyPostRequestDto.getLongitude(), nearbyPostRequestDto.getLatitude(), pageable);
             } else {
-                throw new IllegalArgumentException("Invalid sortBy value: " + sortBy);
+                throw new IllegalArgumentException("Invalid post type");
             }
         }
 
@@ -496,38 +515,19 @@ public class PostServiceImpl implements PostService {
                 .collect(Collectors.toList());
 
         NearbyPostResponseDto responseDto = NearbyPostResponseDto.of(userRegionName, postDTOs);
+
         return ApiResponse.onGetSuccess(responseDto);
     }
 
     @Override
     @Transactional
-    public ApiResponse<List<DomesticPostDto>> searchDomesticPosts(String query, String sortBy, int page, boolean excludeCompleted) {
-        Pageable pageable = PageRequest.of(page, PAGE_SIZE);
-        List<Post> posts;
-
-        if (query.isEmpty()) {
-            if ("recent".equalsIgnoreCase(sortBy)) {
-                posts = excludeCompleted
-                        ? postRepository.findRecentDomesticPostsExcludingCompleted(pageable)
-                        : postRepository.findRecentDomesticPosts(pageable);
-            } else if ("hearts".equalsIgnoreCase(sortBy)) {
-                posts = excludeCompleted
-                        ? postRepository.findTopDomesticPostsExcludingCompleted(pageable)
-                        : postRepository.findTopDomesticPosts(pageable);
-            } else {
-                throw new IllegalArgumentException("Invalid sortBy value: " + sortBy);
-            }
-        } else {
-            if ("recent".equalsIgnoreCase(sortBy)) {
-                posts = postRepository.searchPostsByKeywordRecentDomestic(query, excludeCompleted, pageable);
-            } else if ("hearts".equalsIgnoreCase(sortBy)) {
-                posts = postRepository.searchPostsByKeywordTopDomestic(query, excludeCompleted, pageable);
-            } else {
-                throw new IllegalArgumentException("Invalid sortBy value: " + sortBy);
-            }
-        }
+    public ApiResponse<List<DomesticPostDto>> searchDomesticPostsByRecent(String query, boolean excludeCompleted) {
+        Pageable pageable = PageRequest.of(0, PAGE_SIZE);
+        List<Post> posts = postRepository.searchPostsByKeywordRecentDomestic(query, excludeCompleted, pageable);
 
         List<DomesticPostDto> postDTOs = posts.stream()
+                .filter(post -> post.getHearts() >= 10)
+
                 .map(post -> {
                     List<Comment> comments = commentRepository.findByPostId(post.getId());
                     return DomesticPostDto.of(post, comments);
@@ -538,12 +538,33 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional
+    public ApiResponse<List<DomesticPostDto>> searchDomesticPostsByTop(String query, boolean excludeCompleted) {
+        Pageable pageable = PageRequest.of(0, PAGE_SIZE);
+        List<Post> posts = postRepository.searchPostsByKeywordTopDomestic(query, excludeCompleted, pageable);
+
+        List<DomesticPostDto> postDTOs = posts.stream()
+                .filter(post -> post.getHearts() >= 10)
+
+                .map(post -> {
+                    List<Comment> comments = commentRepository.findByPostId(post.getId());
+                    return DomesticPostDto.of(post, comments);
+                })
+                .collect(Collectors.toList());
+
+        return ApiResponse.onGetSuccess(postDTOs);
+    }
+
+    @Override
+    @Transactional
     public List<NearbyPostResponseDto> getTop5RecentPostsWithin24Hours() {
         LocalDateTime cutoffTime = LocalDateTime.now().minusDays(1);
-        List<Post> posts = postRepository.findTop5ByCreatedAtAfterOrderByConfirmCountDesc(cutoffTime);
+
+        Pageable pageable = PageRequest.of(0, 5);
+
+        List<Post> posts = postRepository.findTop5ByCreatedAtAfterOrderByHeartsDesc(cutoffTime, pageable);
 
         return posts.stream()
-                .limit(5)
                 .map(post -> {
                     String userRegionName = RegionUtil.extractEupMyeonDong(post.getPostRegionName());
                     return NearbyPostResponseDto.builder()
@@ -554,5 +575,4 @@ public class PostServiceImpl implements PostService {
                 })
                 .collect(Collectors.toList());
     }
-
 }
