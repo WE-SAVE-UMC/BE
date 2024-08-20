@@ -15,7 +15,7 @@ jobs:
     - uses: actions/checkout@v4
     - run: mkdir /root/actions-runner/_work/BE/BE/src/main/resources
     - run: touch /root/actions-runner/_work/BE/BE/src/main/resources/application.properties
-    - run: echo "${{ secrets.APPLICATION }}" > /root/actions-runner/_work/BE/BE/src/main/resources/application.propertise
+    - run: echo "${{ secrets.APPLICATION }}" > /root/actions-runner/_work/BE/BE/src/main/resources/application.properties
     
     - name: Set up JDK 17
       uses: actions/setup-java@v4
