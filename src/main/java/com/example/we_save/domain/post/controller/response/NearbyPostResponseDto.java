@@ -12,8 +12,7 @@ import java.util.List;
 public class NearbyPostResponseDto {
     private String userRegionName;
     private List<PostDto> postDTOs;
-    private Long postId;
-    private String postTitle;
+
 
     public static NearbyPostResponseDto of(String userRegionName, List<PostDto> postDTOs) {
         return NearbyPostResponseDto.builder()
@@ -24,9 +23,6 @@ public class NearbyPostResponseDto {
 
     public static NearbyPostResponseDto of(Long postId, String postTitle, String userRegionName) {
         return NearbyPostResponseDto.builder()
-                .postId(postId)
-                .postTitle(postTitle)
-                .userRegionName(userRegionName)
                 .build();
     }
 

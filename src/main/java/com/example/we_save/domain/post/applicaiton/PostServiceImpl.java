@@ -571,6 +571,8 @@ public class PostServiceImpl implements PostService {
             return ApiResponse.onFailure("COMMON404", "No posts found in the region", null);
         }
 
+        String userRegionName = RegionUtil.extractEupMyeonDong(nearbyPostRequestDto.getRegionName());
+
         // 조회된 게시물들을 DTO로 변환
         List<PostDto> postDTOs = posts.stream()
                 .map(post -> {
@@ -580,7 +582,7 @@ public class PostServiceImpl implements PostService {
                 })
                 .collect(Collectors.toList());
 
-        NearbyPostResponseDto responseDto = NearbyPostResponseDto.of(nearbyPostRequestDto.getRegionName(), postDTOs);
+        NearbyPostResponseDto responseDto = NearbyPostResponseDto.of(userRegionName, postDTOs);
         return ApiResponse.onGetSuccess(responseDto);
     }
 
