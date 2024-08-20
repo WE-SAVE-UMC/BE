@@ -13,10 +13,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - run: cd /root/actions-runner/_work/BE/BE/src/main/
-    - run: mkdir resources
-    - run: cd resources
-    - run: touch application.properties
+    - run: mkdir /root/actions-runner/_work/BE/BE/src/main/resources
+    - run: touch /root/actions-runner/_work/BE/BE/src/main/resources/application.properties
     - run: echo "${{ secrets.APPLICATION }}" > /root/actions-runner/_work/BE/BE/src/main/resources/application.propertise
     
     - name: Set up JDK 17
