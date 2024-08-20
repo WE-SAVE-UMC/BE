@@ -48,7 +48,12 @@ public class UserConverter {
                 .userId(user.getId())
                 .build();
     }
-
+    public static UserAuthResponseDto.findUserStatusResultDto toUserStatusResultDto(User user) {
+        return UserAuthResponseDto.findUserStatusResultDto.builder()
+                .userId(user.getId())
+                .status(user.getStatus())
+                .build();
+    }
 
 
 
