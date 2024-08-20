@@ -246,7 +246,7 @@ public class PostController {
     }
 
     @Operation(summary = "최근 24시간 이내에 확인 수가 가장 많은 게시물 5개 가져오기")
-    @GetMapping("/posts/nearby/notifications")
+    @GetMapping("/api/posts/nearby/notifications")
     public ResponseEntity<ApiResponse<List<NearbyPostResponseDto>>> getTop5RecentPosts() {
         List<NearbyPostResponseDto> notifications = postScheduler.getCachedTopPosts();
         return ResponseEntity.ok(ApiResponse.onGetSuccess(notifications));

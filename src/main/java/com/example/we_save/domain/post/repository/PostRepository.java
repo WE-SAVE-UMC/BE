@@ -116,6 +116,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
 
     @Query("SELECT p FROM Post p WHERE p.createAt >= :cutoffTime ORDER BY p.hearts DESC")
-    List<Post> findTop5ByCreatedAtAfterOrderByConfirmCountDesc(@Param("cutoffTime") LocalDateTime cutoffTime);
+    List<Post> findTop5ByCreatedAtAfterOrderByHeartsDesc(@Param("cutoffTime") LocalDateTime cutoffTime, Pageable pageable);
 
 }

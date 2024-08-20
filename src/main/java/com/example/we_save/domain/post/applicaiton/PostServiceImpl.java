@@ -551,12 +551,15 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional
     public List<NearbyPostResponseDto> getTop5RecentPostsWithin24Hours() {
         LocalDateTime cutoffTime = LocalDateTime.now().minusDays(1);
-        List<Post> posts = postRepository.findTop5ByCreatedAtAfterOrderByConfirmCountDesc(cutoffTime);
+
+        Pageable pageable = PageRequest.of(0, 5);
+
+        List<Post> posts = postRepository.findTop5ByCreatedAtAfterOrderByHeartsDesc(cutoffTime, pageable);
 
         return posts.stream()
-                .limit(5)
                 .map(post -> {
                     String userRegionName = RegionUtil.extractEupMyeonDong(post.getPostRegionName());
                     return NearbyPostResponseDto.builder()
@@ -567,5 +570,4 @@ public class PostServiceImpl implements PostService {
                 })
                 .collect(Collectors.toList());
     }
-
 }

@@ -15,4 +15,6 @@ public class WeSaveApplication {
 		SpringApplication.run(WeSaveApplication.class, args);
 	}
 
+
+
 }
