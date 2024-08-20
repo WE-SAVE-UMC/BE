@@ -19,11 +19,13 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Setup Gradle
+    - name: Grand execute permission for gradlew
       uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
 
     - name: Build with Gradle Wrapper
-      run: ./gradlew build
+      run: |
+        chmod +x ./gradlew
+        ./gradlew build
 
     - name: Execute Jar File
       run: sudo kill -9 `sudo lsof -t -i:8080` & sudo java -jar /home/ubuntu/actions-runner/_work/linode-github-action-test/linode-github-action-test/build/libs/linode-github-action-test-0.0.1-SNAPSHOT.jar &
