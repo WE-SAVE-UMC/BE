@@ -36,5 +36,6 @@ public interface PostService {
     ApiResponse<List<DomesticPostDto>>  searchDomesticPostsByRecent(String query,boolean excludeCompleted);
     ApiResponse<List<DomesticPostDto>>  searchDomesticPostsByTop(String query,boolean excludeCompleted);
 
-    List<NearbyPostResponseDto> getTop5RecentPostsWithin24Hours();
+
+    ApiResponse<NearbyPostResponseDto> getTop5NearbyPosts(NearbyPostRequestDto nearbyPostRequestDto);
 }

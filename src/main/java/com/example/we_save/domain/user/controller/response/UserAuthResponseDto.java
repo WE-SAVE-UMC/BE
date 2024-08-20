@@ -1,7 +1,6 @@
 package com.example.we_save.domain.user.controller.response;
 
 import com.example.we_save.domain.user.entity.UserStatus;
-import com.example.we_save.image.entity.Image;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -13,7 +12,7 @@ public class UserAuthResponseDto {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class JoinResultDto{
+    public static class JoinResultDto {
         Long userId;
         LocalDateTime createAt;
     }
@@ -22,7 +21,7 @@ public class UserAuthResponseDto {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class ValidResultDto{
+    public static class ValidResultDto {
         Boolean isValid;
         String message;
     }
@@ -31,7 +30,7 @@ public class UserAuthResponseDto {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class loginResultDto{
+    public static class loginResultDto {
         Long userId;
         String token;
     }
@@ -40,19 +39,29 @@ public class UserAuthResponseDto {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class findUserResultDto{
+    public static class findUserResultDto {
         Long userId;
         String phoneNum;
         String nickname;
         String imageUrl;
         UserStatus status;
     }
+
     @Builder
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class findUserIdResultDto{
+    public static class findUserIdResultDto {
         Long userId;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class findUserStatusResultDto {
+        Long userId;
+        UserStatus status;
     }
 
 

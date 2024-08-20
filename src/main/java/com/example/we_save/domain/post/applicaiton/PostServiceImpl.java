@@ -157,8 +157,6 @@ public class PostServiceImpl implements PostService {
         Post post = optionalPost.get();
 
         String postAuthorNickname = post.getUser().getNickname();
-        String postAuthorProfileImage = post.getUser().getProfileImage() != null ? post.getUser().getProfileImage().getFilePath() : null;
-
 
         //게시글의 사진 가져오기
         List<PostImage> postImageList = postImageRepository.findByPostId(postId);
@@ -181,7 +179,6 @@ public class PostServiceImpl implements PostService {
             dto.setId(comment.getId());
             dto.setUserId(comment.getUser().getId());
             dto.setNickname(comment.getUser().getNickname());
-            dto.setProfileImage(comment.getUser().getProfileImage() != null ? comment.getUser().getProfileImage().getFilePath() : null);
             dto.setContent(comment.getContent());
             List<String> imageUrls = comment.getImages().stream()
                     .map(CommentImage::getFilePath)
@@ -203,8 +200,6 @@ public class PostServiceImpl implements PostService {
                 .id(post.getId())
                 .userId(post.getUser().getId())
                 .nickname(postAuthorNickname)
-                .profileImage(postAuthorProfileImage)
-                .status(post.getStatus())
                 .category(post.getCategory())
                 .title(post.getTitle())
                 .content(post.getContent())
@@ -515,7 +510,6 @@ public class PostServiceImpl implements PostService {
                 .collect(Collectors.toList());
 
         NearbyPostResponseDto responseDto = NearbyPostResponseDto.of(userRegionName, postDTOs);
-
         return ApiResponse.onGetSuccess(responseDto);
     }
 
@@ -557,22 +551,39 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public List<NearbyPostResponseDto> getTop5RecentPostsWithin24Hours() {
-        LocalDateTime cutoffTime = LocalDateTime.now().minusDays(1);
+    public ApiResponse<NearbyPostResponseDto> getTop5NearbyPosts(NearbyPostRequestDto nearbyPostRequestDto) {
+        Pageable pageable = PageRequest.of(0, 5); // 상위 5개의 글만 가져옴
 
-        Pageable pageable = PageRequest.of(0, 5);
+        long regionId;
+        try {
+            // 입력받은 지역 이름을 사용하여 ID 변환
+            regionId = regionUtil.convertRegionNameToRegionId(nearbyPostRequestDto.getRegionName());
+        } catch (EntityNotFoundException e) {
+            return ApiResponse.onFailure("COMMON500", "Region not found: " + nearbyPostRequestDto.getRegionName(), null);
+        }
 
-        List<Post> posts = postRepository.findTop5ByCreatedAtAfterOrderByHeartsDesc(cutoffTime, pageable);
+        LocalDateTime startDate = LocalDateTime.now().minusDays(3);
 
-        return posts.stream()
+        // 확인순으로 5개의 게시물 조회
+        List<Post> posts = postRepository.findTopNearPostsExcludingCompleted(startDate, regionId, pageable);
+
+        if (posts.isEmpty()) {
+            return ApiResponse.onFailure("COMMON404", "No posts found in the region", null);
+        }
+
+        String userRegionName = RegionUtil.extractEupMyeonDong(nearbyPostRequestDto.getRegionName());
+
+        // 조회된 게시물들을 DTO로 변환
+        List<PostDto> postDTOs = posts.stream()
                 .map(post -> {
-                    String userRegionName = RegionUtil.extractEupMyeonDong(post.getPostRegionName());
-                    return NearbyPostResponseDto.builder()
-                            .postId(post.getId())
-                            .postTitle(post.getTitle())
-                            .userRegionName(userRegionName)
-                            .build();
+                    double distanceToPost = calculateDistanceToPost(post, nearbyPostRequestDto.getLatitude(), nearbyPostRequestDto.getLongitude());
+                    List<Comment> comments = commentRepository.findByPostId(post.getId());
+                    return PostDto.of(post, distanceToPost, comments);
                 })
                 .collect(Collectors.toList());
+
+        NearbyPostResponseDto responseDto = NearbyPostResponseDto.of(userRegionName, postDTOs);
+        return ApiResponse.onGetSuccess(responseDto);
     }
+
 }
