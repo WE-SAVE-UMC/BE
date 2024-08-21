@@ -10,6 +10,7 @@ import lombok.Data;
 public class UserCommentResponseDto {
 
     private long commentId;
+    private long postId;
     private String content;
     private String regionName;
     private String imageUrl;
@@ -20,6 +21,7 @@ public class UserCommentResponseDto {
 
         return UserCommentResponseDto.builder()
                 .commentId(comment.getId())
+                .postId(comment.getPost().getId())
                 .content(comment.getContent())
                 .regionName(RegionUtil.extractRegionAfterSecondSpace(comment.getPost().getPostRegionName()))
                 .imageUrl(imageUrl)
