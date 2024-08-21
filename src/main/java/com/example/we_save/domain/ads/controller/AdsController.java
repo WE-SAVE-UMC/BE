@@ -6,7 +6,6 @@ import com.example.we_save.domain.ads.controller.request.AdsAnswerRequestDto;
 import com.example.we_save.domain.ads.controller.request.AdsRequestDto;
 import com.example.we_save.domain.ads.controller.response.AdsAnswerResponseDto;
 import com.example.we_save.domain.ads.controller.response.AdsResponseDto;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,4 +54,12 @@ public class AdsController {
         ApiResponse<AdsAnswerResponseDto> responseDto = adsService.submitAnswer(adsAnswerRequestDto);
         return ResponseEntity.ok(responseDto);
     } // 광고 응답 제출
+
+    @GetMapping("/quizs")
+    public ResponseEntity<ApiResponse<AdsResponseDto>> getRandomAd(
+            @PathVariable("id") Long id
+    ) {
+        ApiResponse<AdsResponseDto> responseDto = adsService.getAd(id);
+        return ResponseEntity.ok(responseDto);
+    }
 }

@@ -14,5 +14,6 @@ import java.util.List;
 public class HomeResponseDto {
     private List<NearPostHomeResponseDto> postDtos;
     private List<HotPostHomeResponseDto> hostPostDtos;
-    // TODO: 광고 DTO 추가
+    private long quizId;
+    private String quizText;
 }
