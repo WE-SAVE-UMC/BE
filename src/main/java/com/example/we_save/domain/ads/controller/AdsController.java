@@ -55,7 +55,7 @@ public class AdsController {
         return ResponseEntity.ok(responseDto);
     } // 광고 응답 제출
 
-    @GetMapping("/quizs")
+    @GetMapping("/quizs/{id}")
     public ResponseEntity<ApiResponse<AdsResponseDto>> getRandomAd(
             @PathVariable("id") Long id
     ) {
