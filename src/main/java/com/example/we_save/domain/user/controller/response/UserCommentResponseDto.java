@@ -5,14 +5,19 @@ import com.example.we_save.domain.comment.entity.Comment;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 public class UserCommentResponseDto {
 
     private long commentId;
     private long postId;
-    private String content;
+    private String title;
+    private String status;
+    private String category;
     private String regionName;
+    private LocalDateTime createAt;
     private String imageUrl;
 
     public static UserCommentResponseDto of(Comment comment) {
@@ -22,8 +27,11 @@ public class UserCommentResponseDto {
         return UserCommentResponseDto.builder()
                 .commentId(comment.getId())
                 .postId(comment.getPost().getId())
-                .content(comment.getContent())
+                .title(comment.getPost().getTitle())
+                .status(comment.getPost().toString())
+                .category(comment.getPost().getCategory().toString())
                 .regionName(RegionUtil.extractRegionAfterSecondSpace(comment.getPost().getPostRegionName()))
+                .createAt(comment.getCreateAt())
                 .imageUrl(imageUrl)
                 .build();
     }

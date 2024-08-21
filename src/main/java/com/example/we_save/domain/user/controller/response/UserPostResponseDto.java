@@ -14,6 +14,7 @@ public class UserPostResponseDto {
     private long postId;
     private String title;
     private String status;
+    private String category;
     private String regionName;
     private LocalDateTime createAt;
     private String imageUrl;
@@ -26,6 +27,7 @@ public class UserPostResponseDto {
                 .postId(post.getId())
                 .title(post.getTitle())
                 .status(post.getStatus().toString())
+                .category(post.getCategory().toString())
                 .regionName(RegionUtil.extractRegionAfterSecondSpace(post.getPostRegionName()))
                 .createAt(post.getCreateAt())
                 .imageUrl(imageUrl)
