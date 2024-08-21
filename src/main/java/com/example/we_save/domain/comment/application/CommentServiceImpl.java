@@ -31,9 +31,6 @@ public class CommentServiceImpl implements CommentService {
     private CommentReportRepository commentReportRepository;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
     private CommentImageRepository commentImageRepository;
 
     @Autowired

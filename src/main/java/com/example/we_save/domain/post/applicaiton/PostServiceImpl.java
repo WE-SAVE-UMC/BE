@@ -157,6 +157,7 @@ public class PostServiceImpl implements PostService {
         Post post = optionalPost.get();
 
         String postAuthorNickname = post.getUser().getNickname();
+        String postAuthorProfileImage = post.getUser().getProfileImage() != null ? post.getUser().getProfileImage().getFilePath() : null;
 
         //게시글의 사진 가져오기
         List<PostImage> postImageList = postImageRepository.findByPostId(postId);
@@ -179,6 +180,7 @@ public class PostServiceImpl implements PostService {
             dto.setId(comment.getId());
             dto.setUserId(comment.getUser().getId());
             dto.setNickname(comment.getUser().getNickname());
+            dto.setProfileImage(comment.getUser().getProfileImage() != null ? comment.getUser().getProfileImage().getFilePath() : null);
             dto.setContent(comment.getContent());
             List<String> imageUrls = comment.getImages().stream()
                     .map(CommentImage::getFilePath)
@@ -200,6 +202,8 @@ public class PostServiceImpl implements PostService {
                 .id(post.getId())
                 .userId(post.getUser().getId())
                 .nickname(postAuthorNickname)
+                .profileImage(postAuthorProfileImage)
+                .status(post.getStatus())
                 .category(post.getCategory())
                 .title(post.getTitle())
                 .content(post.getContent())
@@ -215,8 +219,6 @@ public class PostServiceImpl implements PostService {
                 .createdAt(post.getCreateAt())
                 .updatedAt(post.getUpdateAt())
                 .commentsList(commentDtos)
-                //.distance(post.getDistance())
-                //.completed(post.isCompleted())
                 .build();
 
         return ApiResponse.onGetSuccess(responseDto);
