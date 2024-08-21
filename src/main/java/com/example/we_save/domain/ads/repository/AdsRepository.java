@@ -8,6 +8,6 @@ import java.util.Optional;
 
 public interface AdsRepository extends JpaRepository<Ads, Long> {
 
-    @Query(value = "SELECT * FROM ads ORDER BY RAND() LIMIT 1", nativeQuery = true)
+    @Query(value = "SELECT * FROM Ads ORDER BY RAND() LIMIT 1", nativeQuery = true)
     Optional<Ads> findRandomAD();
 }
