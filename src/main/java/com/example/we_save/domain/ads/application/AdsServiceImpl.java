@@ -183,4 +183,30 @@ public class AdsServiceImpl implements AdsService {
         return ApiResponse.onPostSuccess(responseDto, SuccessStatus._POST_OK);
     }
 
+    @Override
+    public ApiResponse<AdsResponseDto> getAd(Long quizId) {
+
+        Ads randomAd = adsRepository.findById(quizId)
+                .orElseThrow(() -> new EntityNotFoundException("광고를 찾을 수 없습니다."));
+
+
+        AdsResponseDto responseDto = AdsResponseDto.builder()
+                .adId(randomAd.getId())
+                .question(randomAd.getQuestion())
+                .options(
+                        randomAd.getOptions().stream().map(option ->
+                                AdsResponseDto.AdsOptionResponseDto.builder()
+                                        .optionId(option.getId())
+                                        .text(option.getText())
+                                        .isCorrect(option.isCorrect())
+                                        .responseText(option.getResponseText())
+                                        .imageUrl(option.getImageUrl())
+                                        .redirectUrl(option.getRedirectUrl())
+                                        .build()
+                        ).collect(Collectors.toList())
+                )
+                .build();
+
+        return ApiResponse.onGetSuccess(responseDto);
+    }
 }
