@@ -28,7 +28,7 @@ public class UserCommentResponseDto {
                 .commentId(comment.getId())
                 .postId(comment.getPost().getId())
                 .title(comment.getPost().getTitle())
-                .status(comment.getPost().toString())
+                .status(comment.getPost().getStatus().toString())
                 .category(comment.getPost().getCategory().toString())
                 .regionName(RegionUtil.extractRegionAfterSecondSpace(comment.getPost().getPostRegionName()))
                 .createAt(comment.getCreateAt())
