@@ -15,7 +15,6 @@ import com.example.we_save.domain.post.controller.response.HotPostHomeResponseDt
 import com.example.we_save.domain.post.controller.response.NearPostHomeResponseDto;
 import com.example.we_save.domain.post.entity.Post;
 import com.example.we_save.domain.post.repository.PostRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -45,14 +44,13 @@ public class HomeServiceImpl implements HomeService {
         List<NearPostHomeResponseDto> nearPosts = getNearDisasterPages(locationDto, LIMIT, RECENT);
         List<HotPostHomeResponseDto> hotPosts = getHotDisasterPages(locationDto, LIMIT);
 
-        Ads ads = adsRepository.findRandomAD()
-                .orElseThrow(() -> new EntityNotFoundException("해당하는 광고가 없습니다"));
+        Ads ads = adsRepository.findRandomAD();
 
         HomeResponseDto homeResponseDto = HomeResponseDto.builder()
                 .postDtos(nearPosts)
                 .hostPostDtos(hotPosts)
-                .quizId(ads.getId())
-                .quizText(ads.getQuestion())
+                .quizId(ads == null ? null : ads.getId())
+                .quizText(ads == null ? null : ads.getQuestion())
                 .build();
 
         return ApiResponse.onGetSuccess(homeResponseDto);
