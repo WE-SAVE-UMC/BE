@@ -14,6 +14,6 @@ import java.util.List;
 public class HomeResponseDto {
     private List<NearPostHomeResponseDto> postDtos;
     private List<HotPostHomeResponseDto> hostPostDtos;
-    private long quizId;
+    private Long quizId;
     private String quizText;
 }
