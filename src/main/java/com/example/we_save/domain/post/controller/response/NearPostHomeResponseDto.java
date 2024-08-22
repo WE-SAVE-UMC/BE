@@ -21,6 +21,7 @@ public class NearPostHomeResponseDto {
     private int hearts;
     private String regionName;
     private LocalDateTime createAt;
+    private String title;
 
     private String imageUrl;
 
@@ -37,6 +38,7 @@ public class NearPostHomeResponseDto {
                 .hearts(post.getHearts())
                 .regionName(RegionUtil.extractRegionAfterSecondSpace(post.getPostRegionName()))
                 .createAt(post.getCreateAt())
+                .title(post.getTitle())
                 .imageUrl(imageUrl)
                 .categoryName(post.getCategory().getValue()).build();
     }
