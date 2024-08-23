@@ -108,7 +108,7 @@ public class HomeServiceImpl implements HomeService {
     private List<NearPostHomeResponseDto> getNearDisasterPages(HomeLocationRequestDto locationDto, int limit, int type) {
 
         // 현재 시간 기준으로 최근 3일간의 게시물 조회
-        LocalDateTime startDate = LocalDateTime.now().minusDays(3);
+        LocalDateTime startDate = LocalDateTime.now().minusDays(10);
 
         // 페이지 요청 설정
         Pageable pageable = PageRequest.of(0, limit);
@@ -140,7 +140,7 @@ public class HomeServiceImpl implements HomeService {
 
     private List<HotPostHomeResponseDto> getHotDisasterPages(HomeLocationRequestDto locationDto, int limit) {
 
-        LocalDateTime startDate = LocalDateTime.now().minusDays(1);
+        LocalDateTime startDate = LocalDateTime.now().minusDays(7);
         Pageable pageable = PageRequest.of(0, limit);
 
         double latitude = locationDto.getLatitude();
